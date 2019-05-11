@@ -45,18 +45,18 @@ def _get_builder(type_name, config):
     type_name = type_name.lower()
 
     if type_name == 'mesh':
-        cls = MeshBuilder
+        cls = MeshInputBuilder
     elif type_name == 'freespotlight':
-        cls = FreeSpotLightBuilder
+        cls = FreeSpotLightInputBuilder
     elif type_name == 'stars':
-        cls = StarsBuilder
+        cls = StarsInputBuilder
     else:
         raise ValueError('Unrecognized submodel type: {0}'.format(type_name))
 
     return cls(config)
 
 
-class SubmodelBuilder(abc.ABC):
+class SubmodelInputBuilder(abc.ABC):
     def __init__(self, config):
         self._config = config
 
@@ -89,7 +89,7 @@ class SubmodelBuilder(abc.ABC):
             transform[12:]
         ]
 
-class MeshBuilder(SubmodelBuilder):
+class MeshInputBuilder(SubmodelInputBuilder):
     def __init__(self, config):
         super().__init__(config)
 
@@ -175,7 +175,7 @@ class MeshBuilder(SubmodelBuilder):
         bm.free()
 
 
-class FreeSpotLightBuilder(SubmodelBuilder):
+class FreeSpotLightInputBuilder(SubmodelInputBuilder):
     def create_submodel(self, name: str):
         data = bpy.data.lights.new(name, type='SPOT')
         self._obj = bpy.data.objects.new(name, data)
@@ -206,7 +206,7 @@ class FreeSpotLightBuilder(SubmodelBuilder):
         self._obj.data.spot_size = math.radians(hotspot_angle)
 
 
-class StarsBuilder(SubmodelBuilder):
+class StarsInputBuilder(SubmodelInputBuilder):
     def create_submodel(self, name: str):
         self._obj = bpy.data.objects.new(name, None)
         bpy.context.scene.collection.objects.link(self._obj)

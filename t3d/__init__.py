@@ -13,7 +13,8 @@ sys.path.append("/home/krzysiu/Dokumenty/PYTHON/eu07_tools/")
 from eu07_tools import t3d
 from eu07_tools.utils import AssetSearcher
 
-from .builders import build_object_from_submodel
+from .input_builders import build_object_from_submodel
+from .output_builders import build_submodel_from_object
 
 
 class T3DImport(bpy.types.Operator, ImportHelper):
