@@ -139,6 +139,7 @@ class MeshInputBuilder(SubmodelInputBuilder):
             bsdf.inputs[5].default_value = 0
 
             texture_node = self._mtl.node_tree.nodes.new("ShaderNodeTexImage")
+            texture_node.name = texture_node.label = "texture_diffuse"
             texture_node.image = img
             texture_node.location = (-300, 200)
 
@@ -147,7 +148,8 @@ class MeshInputBuilder(SubmodelInputBuilder):
                 bsdf.inputs[0]
             )
 
-            # TODO: DDS FLIP
+            if full_path.endswith(".dds"):
+                texture_node.texture_mapping.scale[1] = -1
 
 
     def set_geometry(self, geometry):

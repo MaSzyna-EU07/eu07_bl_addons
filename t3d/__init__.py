@@ -79,6 +79,7 @@ class T3DImport(bpy.types.Operator, ImportHelper):
 
         # NOTE: Temporary mat discarding
         config["asset_searcher"].textures_finder.remove_extension(".mat")
+        config["asset_searcher"].textures_finder.set_extension_priority(self.default_ext, 1)
 
         with open(self.filepath) as infile:
             
@@ -115,6 +116,12 @@ class T3DExport(bpy.types.Operator, ExportHelper):
 
     def execute(self, context):
         objects = bpy.context.selected_objects if self.use_selection else bpy.data.objects
+        objects = [
+            o for o in objects 
+            if o.type == 'MESH' or 
+            (o.type == 'LIGHT' and o.data.type == 'SPOT') or
+            (o.type == 'EMPTY')
+        ]
 
         config = {
             "use_modifiers": self.use_modifiers
@@ -125,7 +132,7 @@ class T3DExport(bpy.types.Operator, ExportHelper):
         )
         # TODO: Includes export
 
-        with open(self.filepath) as outfile:
+        with open(self.filepath, "w") as outfile:
             t3d.dump(outfile, submodels)
 
         return {'FINISHED'}
@@ -224,7 +231,7 @@ class T3DSubmodelProperties(bpy.types.PropertyGroup):
     )
 
     replacableskin_id: EnumProperty(
-        name='Replacableskin ID',
+        name='Skin',
         default='None',
         items=[
             ('None', 'None', ''),
@@ -234,7 +241,7 @@ class T3DSubmodelProperties(bpy.types.PropertyGroup):
             ('-4', '-4', '')]
     )
 
-    use_explicit_normals: BoolProperty(
+    use_normals: BoolProperty(
         name="Use explicit normals",
         default=False
     )
@@ -321,9 +328,29 @@ class T3DSubmodelPropertiesPanel(bpy.types.Panel):
             opacity_r.prop(self.obj.t3d_properties, "opacity")
 
             map_b = self.layout.box()
+            replacableskin_r = map_b.row()
+            replacableskin_r.prop(self.obj.t3d_properties, "replacableskin_id")
+
+            use_normals_r = self.layout.row()
+            use_normals_r.prop(self.obj.t3d_properties, "use_normals")
 
         elif (self.obj_is_spot):
-            pass
+            near_atten_box = self.layout.box()
+
+            use_near_atten_r = near_atten_box.row()
+            use_near_atten_r.prop(self.obj.t3d_properties, "use_near_atten")
+
+            near_atten_start_r = near_atten_box.row()
+            near_atten_start_r.prop(self.obj.t3d_properties, "near_atten_start")
+
+            near_atten_end_r = near_atten_box.row()
+            near_atten_end_r.prop(self.obj.t3d_properties, "near_atten_end")
+
+            far_atten_decay_type_r = self.layout.row()
+            far_atten_decay_type_r.prop(self.obj.t3d_properties, "far_atten_decay_type")
+
+            far_decay_radius_r = self.layout.row()
+            far_decay_radius_r.prop(self.obj.data, "distance", text="FarDecayRadius")
 
         maxdistance_r = self.layout.row()
         maxdistance_r.prop(self.obj.t3d_properties, "max_distance")

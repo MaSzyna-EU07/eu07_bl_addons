@@ -1,10 +1,13 @@
-import bpy
+import math
+import abc
 
+import bpy
+import bmesh
 from eu07_tools import t3d
 
 def build_submodel_from_object(obj, config):
     builder = _get_builder(obj, config)
-
+    
     builder.set_parent()
     builder.set_diffuse()
     builder.set_anim()
@@ -31,14 +34,14 @@ def build_submodel_from_object(obj, config):
         builder.set_far_decay_radius()
         builder.set_falloff_angle()
         builder.set_hotspot_angle()
-    elif submodel.type == "Stars":
+    elif submodel_type == "Stars":
         builder.set_geometry()
 
-
+    return builder.submodel
 
 
 def _get_builder(obj, config):
-    if obj.type == 'MESH'
+    if obj.type == 'MESH':
         c = MeshOutputBuilder
     elif obj.type == 'LIGHT' and obj.data.type == 'SPOT':
         c = FreeSpotLightOutputBuilder
@@ -50,10 +53,11 @@ def _get_builder(obj, config):
     return c(obj, config)
         
 
-class SubmodelOutputBuilder:
+class SubmodelOutputBuilder(abc.ABC):
     def __init__(self, obj, config):
         self.obj = obj
         self.config = config
+        self.submodel = None
 
     def set_parent(self):
         self.submodel.parent_name = (
@@ -62,7 +66,7 @@ class SubmodelOutputBuilder:
         )
 
     def set_diffuse(self):
-        self.submodel.diffuse = self.obj.t3d_properties.diffuse
+        self.submodel.diffuse = self.obj.t3d_properties.diffuse_color
 
     def set_anim(self):
         self.submodel.anim = self.obj.t3d_properties.anim
@@ -80,20 +84,20 @@ class SubmodelOutputBuilder:
         mat = self.obj.matrix_local.transposed()
 
         self.submodel.transform = [
-            *mat[0], *mat[1], *mat[2], *mat[4]
+            *mat[0], *mat[1], *mat[2], *mat[3]
         ]
 
     
 class MeshOutputBuilder(SubmodelOutputBuilder):
     def __init__(self, obj, config):
         super().__init__(obj, config)
-        self.submodel = t3d.create_submodel(obj.name, "Mesh")
+        self.submodel = t3d.create_submodel("Mesh", obj.name)
 
     def set_ambient(self):
-        self.submodel.ambient = self.obj.t3d_properties.set_ambient
+        self.submodel.ambient = self.obj.t3d_properties.ambient_color
     
     def set_specular(self):
-        self.submodel.specular = self.obj.t3d_properties.specular
+        self.submodel.specular = self.obj.t3d_properties.specular_color
 
     def set_wire(self):
         self.submodel.wire = self.obj.t3d_properties.wire
@@ -105,33 +109,50 @@ class MeshOutputBuilder(SubmodelOutputBuilder):
         self.submodel.opacity = self.obj.t3d_properties.opacity
 
     def set_map(self):
-        pass
+        mtl = self.obj.active_material
+
+        if self.obj.t3d_properties.replacableskin_id != "None":
+            self.submodel.map = self.obj.t3d_properties.replacableskin_id
+            return
+
+        if not mtl:
+            self.submodel.map = "none"
+            return
+        
+        # TODO: Get texture path
+
+
 
     def set_geometry(self):
-        self.obj.modifiers.new("T3DTriangulation", type='TRIANGULATE')
-        mesh = self.obj.to_mesh(bpy.context.scene, True, 'PREVIEW')
-
-        try:
-            self._set_geometry_from_mesh(mesh)
-        except:
-            pass
-        finally:
-            self.obj.modifiers.remove("T3DTriangulation")
+        mesh = self.obj.data.copy()
+        self._set_geometry_from_mesh(mesh)
 
     def _set_geometry_from_mesh(self, mesh):
-        smooth_groups = mesh.calc_smooth_groups(True)
+        bm = bmesh.new()
+        bm.from_mesh(mesh)
+        bmesh.ops.triangulate(bm, faces=bm.faces)
+        bm.to_mesh(mesh)
+        bm.free()
+
+        smooth_groups = mesh.calc_smooth_groups(use_bitflags=True)[0]
         uv_layer = mesh.uv_layers.active
         use_normals = self.obj.t3d_properties.use_normals
 
         for polygon in mesh.polygons:
-            smooth = -1 if use_normals else smooth_groups[0][polygon.index]
+
+            if use_normals:
+                smooth = -1
+            elif polygon.use_smooth:
+                smooth = smooth_groups[polygon.index]
+            else:
+                smooth = 0
 
             vertices = []
             for local_vert_idx, global_vert_idx in enumerate(polygon.vertices):
                 vertex = mesh.vertices[global_vert_idx]
 
                 xyz = vertex.co
-                ijk = [] if use_normals else vertex.normal
+                ijk = vertex.normal if use_normals else []
 
                 if uv_layer:
                     mesh_loop_idx = polygon.loop_indices[local_vert_idx]
@@ -144,10 +165,11 @@ class MeshOutputBuilder(SubmodelOutputBuilder):
             self.submodel.add_triangle(vertices, smooth)
 
 
+
 class FreeSpotLightOutputBuilder(SubmodelOutputBuilder):
     def __init__(self, obj, config):
         super().__init__(obj, config)
-        self.submodel = t3d.create_submodel(obj.name, "FreeSpotLight")
+        self.submodel = t3d.create_submodel("FreeSpotLight", obj.name)
 
     def set_diffuse(self):
         self.submodel.diffuse = self.obj.data.color
@@ -168,7 +190,7 @@ class FreeSpotLightOutputBuilder(SubmodelOutputBuilder):
         self.submodel.far_decay_radius = self.obj.data.distance
 
     def set_falloff_angle(self):
-        self.submodel.falloff_angle = self.obj.data.spot_size * (self.obj.data.spot_blend + 1))
+        self.submodel.falloff_angle = (self.obj.data.spot_size * (self.obj.data.spot_blend + 1))
 
     def set_hotspot_angle(self):
         self.submodel.hotspot_angle = math.degrees(self.obj.data.spot_size)
@@ -177,7 +199,7 @@ class FreeSpotLightOutputBuilder(SubmodelOutputBuilder):
 class StarsOutputBuilder(SubmodelOutputBuilder):
     def __init__(self, obj, config):
         super().__init__(obj, config)
-        self.submodel = t3d.create_submodel(obj.name, "Stars")
+        self.submodel = t3d.create_submodel("Stars", obj.name)
 
     def set_geometry(self):
         stars = [

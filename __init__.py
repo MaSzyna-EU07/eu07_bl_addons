@@ -12,12 +12,15 @@ from bpy.props import PointerProperty
 
 from .t3d import T3DExport, T3DImport, T3DSubmodelProperties, T3DSubmodelPropertiesPanel
 
+class EU07AddonPreferences(bpy.types.AddonPreferences):
+    pass # TODO: Implement
+
 def menu_func_import(self, context):
     self.layout.operator(T3DImport.bl_idname, text="T3D Text Model (.t3d)")
 
 
-# def menu_func_export(self, context):
-#    self.layout.operator(ExportT3D.bl_idname, text="T3D Text Model (.t3d)")
+def menu_func_export(self, context):
+    self.layout.operator(T3DExport.bl_idname, text="T3D Text Model (.t3d)")
 
 classes = (
         T3DExport,
@@ -33,6 +36,7 @@ def register():
     bpy.types.Object.t3d_properties = PointerProperty(type=T3DSubmodelProperties)
 
     bpy.types.TOPBAR_MT_file_import.append(menu_func_import)
+    bpy.types.TOPBAR_MT_file_export.append(menu_func_export)
 
 
 def unregister():
@@ -40,7 +44,7 @@ def unregister():
         bpy.utils.unregister_class(c)
 
     bpy.types.TOPBAR_MT_file_import.remove(menu_func_import)
-
+    bpy.types.TOPBAR_MT_file_export.remove(menu_func_export)
     
 if __name__ == "__main__":
     register()
