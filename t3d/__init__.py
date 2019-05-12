@@ -114,7 +114,19 @@ class T3DExport(bpy.types.Operator, ExportHelper):
     )
 
     def execute(self, context):
+        objects = bpy.context.selected_objects if self.use_selection else bpy.data.objects
 
+        config = {
+            "use_modifiers": self.use_modifiers
+        }
+
+        submodels = (
+            build_submodel_from_object(obj, config) for obj in objects
+        )
+        # TODO: Includes export
+
+        with open(self.filepath) as outfile:
+            t3d.dump(outfile, submodels)
 
         return {'FINISHED'}
 
