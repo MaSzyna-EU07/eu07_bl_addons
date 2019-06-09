@@ -11,7 +11,7 @@ from bpy_extras.io_utils import ImportHelper, ExportHelper
 import sys
 sys.path.append("/home/krzysiu/Dokumenty/PYTHON/eu07_tools/")
 from eu07_tools import t3d
-from eu07_tools.utils import AssetSearcher
+from eu07_tools.utils import AssetSearcher, find_root
 
 from .input_builders import build_object_from_submodel
 from .output_builders import build_submodel_from_object
@@ -52,19 +52,12 @@ class T3DImport(bpy.types.Operator, ImportHelper):
     )
 
     def execute(self, context):
-        # Find the root
-        filepath = Path(self.filepath)
-        root = Path("")
-        for part in filepath.parts:
-            if part in "models dynamic":
-                break
-            root /= part
+        try:
+            root = find_root(self.filepath)
+        except ValueError:
+            #TODO: Get from script prefs / userprefs
+            raise Warning("NO ROOT FOUND!!")
 
-        root_found = (not root.samefile(filepath))
-
-        if not root_found:
-            pass # TODO: get from script prefs
-            # then from userprefs
 
         config = {
             "skins": {
@@ -74,7 +67,7 @@ class T3DImport(bpy.types.Operator, ImportHelper):
                 "-3": self.skin_3, 
                 "-4": self.skin_4
             },
-            "asset_searcher": AssetSearcher(root, filepath.parent),
+            "asset_searcher": AssetSearcher(root, Path(self.filepath).parent),
         }
 
         # NOTE: Temporary mat discarding
