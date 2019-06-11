@@ -11,22 +11,25 @@ import bpy
 from bpy.props import PointerProperty
 
 from .t3d import T3DExport, T3DImport, T3DSubmodelProperties, T3DSubmodelPropertiesPanel
+from .mat import MATImport
 
 class EU07AddonPreferences(bpy.types.AddonPreferences):
     pass # TODO: Implement
 
 def menu_func_import(self, context):
     self.layout.operator(T3DImport.bl_idname, text="T3D Text Model (.t3d)")
-
+    self.layout.operator(MATImport.bl_idname, text="EU07 Material (.mat)")
 
 def menu_func_export(self, context):
     self.layout.operator(T3DExport.bl_idname, text="T3D Text Model (.t3d)")
+    #self.layout.operator(MATExport.bl_idname, text="EU07 Material (.mat)")
 
 classes = (
         T3DExport,
         T3DImport,
         T3DSubmodelProperties,
-        T3DSubmodelPropertiesPanel
+        T3DSubmodelPropertiesPanel,
+        MATImport
 )
 
 def register():
