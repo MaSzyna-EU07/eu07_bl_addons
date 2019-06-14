@@ -18,7 +18,7 @@ from .output_builders import build_submodel_from_object
 
 
 class T3DImport(bpy.types.Operator, ImportHelper):
-    bl_idname = "import_model.t3d"
+    bl_idname = "import_scene.t3d"
     bl_label = "Import T3D"
     filename_ext = ".t3d"
 
@@ -74,21 +74,35 @@ class T3DImport(bpy.types.Operator, ImportHelper):
         config["asset_searcher"].textures_finder.remove_extension(".mat")
         config["asset_searcher"].textures_finder.set_extension_priority(self.default_ext, 1)
 
-        with open(self.filepath) as infile:
-            
-            for element in t3d.load(infile):
-
-                if element.element_type == "submodel":
-                    build_object_from_submodel(element, config)
-
-                elif element.element_type == "include":
-                    # TODO: Includes
-                    pass
+        with open(self.filepath) as file:
+            self._import_elements(file, config, bpy.data.collections["Collection"])
+        
         return {'FINISHED'}
+
+    def _import_elements(self, file, config, collection):
+        for element in t3d.load(file):
+
+            if element.element_type == "submodel":
+                obj = build_object_from_submodel(element, config)
+                collection.objects.link(obj)
+
+            elif element.element_type == "include":
+                collection_name = f"[INCLUDE] {element.path}"
+                inc_collection = bpy.data.collections.new(collection_name)
+                bpy.context.scene.collection.children.link(inc_collection)
+
+                # NOTE: Should be includes_finder, but there are some issues
+                full_path = config["asset_searcher"].models_finder.find(element.path)
+
+                try:
+                    with open(full_path) as inc_file:
+                        self._import_elements(inc_file, config, inc_collection)
+                except FileNotFoundError:
+                    pass
 
 
 class T3DExport(bpy.types.Operator, ExportHelper):
-    bl_idname = "export_model.t3d"
+    bl_idname = "export_scene.t3d"
     bl_label = "Export T3D"
     filename_ext = ".t3d"
 

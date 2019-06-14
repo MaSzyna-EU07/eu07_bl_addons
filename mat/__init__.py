@@ -29,6 +29,7 @@ class MATImport(bpy.types.Operator, ImportHelper):
 
         return {'FINISHED'}
 
+
     def nodify_mat_mapping(self, mapping, parent=None):
         self.add_texture_node_if_present(mapping, "texture_diffuse", parent)
         self.add_texture_node_if_present(mapping, "texture_normal", parent)
@@ -39,6 +40,7 @@ class MATImport(bpy.types.Operator, ImportHelper):
 
             elif key in mat.NESTED_MAPPING_KEYS:
                 frame = self.nodes.new("NodeFrame")
+                frame.name = key
                 frame.name = self._create_node_name(key, frame)
                 frame.label = key
                 self.nodify_mat_mapping(value, frame)

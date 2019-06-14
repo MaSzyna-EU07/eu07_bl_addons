@@ -39,6 +39,8 @@ def build_object_from_submodel(submodel, config):
 
     elif submodel_type_lower == 'stars':
         pass
+
+    return builder.obj
         
 
 def _get_builder(type_name, config):
@@ -61,28 +63,28 @@ class SubmodelInputBuilder(abc.ABC):
         self._config = config
 
     def create_submodel(self, name):
-        self._obj = None
+        self.obj = None
 
     def set_parent(self, parent_name):
-        self._obj.parent = bpy.data.objects.get(parent_name)
+        self.obj.parent = bpy.data.objects.get(parent_name)
 
     def set_diffuse(self, diffuse):
         pass
 
     def set_selfillum(self, selfillum):
-        self._obj.t3d_properties.selfillum = selfillum
+        self.obj.t3d_properties.selfillum = selfillum
 
     def set_anim(self, anim):
-        self._obj.t3d_properties.anim = anim
+        self.obj.t3d_properties.anim = anim
 
     def set_max_distance(self, max_distance):
-        self._obj.t3d_properties.max_distance = max_distance
+        self.obj.t3d_properties.max_distance = max_distance
 
     def set_min_distance(self, min_distance):
-        self._obj.t3d_properties.min_distance = min_distance
+        self.obj.t3d_properties.min_distance = min_distance
 
     def set_transform(self, transform):
-        self._obj.matrix_basis = [
+        self.obj.matrix_basis = [
             transform[:4],
             transform[4:8],
             transform[8:12],
@@ -95,29 +97,29 @@ class MeshInputBuilder(SubmodelInputBuilder):
 
     def create_submodel(self, name: str):
         mesh = bpy.data.meshes.new(name)
-        self._obj = bpy.data.objects.new(name, mesh)
-        self._mtl = self._obj.active_material = bpy.data.materials.new(name + "_material")
+        self.obj = bpy.data.objects.new(name, mesh)
+        self._mtl = self.obj.active_material = bpy.data.materials.new(name + "_material")
         self._mtl.use_nodes = True
 
-        bpy.context.scene.collection.objects.link(self._obj)
+        bpy.context.scene.collection.objects.link(self.obj)
 
     def set_ambient(self, ambient):
-        self._obj.t3d_properties.ambient = ambient
+        self.obj.t3d_properties.ambient = ambient
 
     def set_diffuse(self, diffuse):
-        self._obj.t3d_properties.diffuse = diffuse
+        self.obj.t3d_properties.diffuse = diffuse
 
     def set_specular(self, specular):
-        self._obj.t3d_properties.specular = specular
+        self.obj.t3d_properties.specular = specular
 
     def set_wire(self, wire):
-        self._obj.t3d_properties.wire = wire
+        self.obj.t3d_properties.wire = wire
 
     def set_wire_size(self, wire_size):
-        self._obj.t3d_properties.wire_size = wire_size
+        self.obj.t3d_properties.wire_size = wire_size
 
     def set_opacity(self, opacity):
-        self._obj.t3d_properties.opacity = opacity
+        self.obj.t3d_properties.opacity = opacity
 
     def set_map(self, map_: str):
         # TODO: Load materials
@@ -173,55 +175,55 @@ class MeshInputBuilder(SubmodelInputBuilder):
                 loop[uv_layer].uv = triangle.vertices[vertex_index].mapping
 
         bmesh.ops.remove_doubles(bm, verts=bm.verts, dist=0.00001)
-        bm.to_mesh(self._obj.data)
+        bm.to_mesh(self.obj.data)
         bm.free()
 
 
 class FreeSpotLightInputBuilder(SubmodelInputBuilder):
     def create_submodel(self, name: str):
         data = bpy.data.lights.new(name, type='SPOT')
-        self._obj = bpy.data.objects.new(name, data)
-        bpy.context.scene.collection.objects.link(self._obj)
+        self.obj = bpy.data.objects.new(name, data)
+        bpy.context.scene.collection.objects.link(self.obj)
 
     def set_diffuse(self, diffuse):
-        self._obj.data.color = _normalize_color(diffuse)
+        self.obj.data.color = _normalize_color(diffuse)
 
     def set_near_atten_start(self, near_atten_start):
-        self._obj.t3d_properties.near_atten_start = near_atten_start
+        self.obj.t3d_properties.near_atten_start = near_atten_start
 
     def set_near_atten_end(self, near_atten_end):
-        self._obj.t3d_properties.near_atten_end = near_atten_end
+        self.obj.t3d_properties.near_atten_end = near_atten_end
 
     def set_use_near_atten(self, use_near_atten):
-        self._obj.t3d_properties.use_near_atten = use_near_atten
+        self.obj.t3d_properties.use_near_atten = use_near_atten
 
     def set_far_atten_decay_type(self, far_atten_decay_type):
-        self._obj.t3d_properties.far_atten_decay_type = far_atten_decay_type
+        self.obj.t3d_properties.far_atten_decay_type = far_atten_decay_type
 
     def set_far_decay_radius(self, far_decay_radius):
-        self._obj.data.distance = far_decay_radius
+        self.obj.data.distance = far_decay_radius
 
     def set_falloff_angle(self, falloff_angle):
         pass  # TODO: Nice way to set spot_blend
 
     def set_hotspot_angle(self, hotspot_angle):
-        self._obj.data.spot_size = math.radians(hotspot_angle)
+        self.obj.data.spot_size = math.radians(hotspot_angle)
 
 
 class StarsInputBuilder(SubmodelInputBuilder):
     def create_submodel(self, name: str):
-        self._obj = bpy.data.objects.new(name, None)
-        bpy.context.scene.collection.objects.link(self._obj)
+        self.obj = bpy.data.objects.new(name, None)
+        bpy.context.scene.collection.objects.link(self.obj)
 
     def set_diffuse(self, diffuse):
-        self._obj.t3d_properties.diffuse_color = diffuse
+        self.obj.t3d_properties.diffuse_color = diffuse
 
     def set_vertex_groups(self, vertex_groups):
         for vertex_group in vertex_groups:
             for star_array in vertex_group[1:]:
 
                 point = bpy.data.lamps.new(
-                    f"{self._obj.name}.star",
+                    f"{self.obj.name}.star",
                     'POINT'
                 )
                 star = bpy.data.objects.new(point.name, point)
@@ -236,7 +238,7 @@ class StarsInputBuilder(SubmodelInputBuilder):
                     ((color >> 16) & 0xff) / 255.0
                 )
 
-                star.parent = self._obj
+                star.parent = self.obj
 
 
 def _normalize_color(color):
