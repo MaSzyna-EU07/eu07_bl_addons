@@ -85,11 +85,13 @@ class T3DImport(bpy.types.Operator, ImportHelper):
             if element.element_type == "submodel":
                 obj = build_object_from_submodel(element, config)
                 collection.objects.link(obj)
+                bpy.context.scene.collection.objects.unlink(obj)
 
             elif element.element_type == "include":
                 collection_name = f"[INCLUDE] {element.path}"
                 inc_collection = bpy.data.collections.new(collection_name)
                 bpy.context.scene.collection.children.link(inc_collection)
+                
 
                 # NOTE: Should be includes_finder, but there are some issues
                 full_path = config["asset_searcher"].models_finder.find(element.path)
