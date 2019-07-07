@@ -13,15 +13,15 @@ def build_object_from_submodel(submodel, config):
     builder.create_submodel(submodel.name)
     builder.set_parent(submodel.parent_name)
     builder.set_anim(submodel.anim)
-    builder.set_diffuse(submodel.diffuse)
+    builder.set_diffuse(submodel.diffuse_color)
     builder.set_selfillum(submodel.selfillum)
     builder.set_max_distance(submodel.max_distance)
     builder.set_min_distance(submodel.min_distance)
     builder.set_transform(submodel.transform)
 
     if submodel_type_lower == 'mesh':
-        builder.set_ambient(submodel.ambient)
-        builder.set_specular(submodel.specular)
+        builder.set_ambient(submodel.ambient_color)
+        builder.set_specular(submodel.specular_color)
         builder.set_wire(submodel.wire)
         builder.set_wire_size(submodel.wire_size)
         builder.set_opacity(submodel.opacity)

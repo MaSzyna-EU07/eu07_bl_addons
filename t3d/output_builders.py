@@ -66,7 +66,7 @@ class SubmodelOutputBuilder(abc.ABC):
         )
 
     def set_diffuse(self):
-        self.submodel.diffuse = self.obj.t3d_properties.diffuse_color
+        self.submodel.diffuse_color = self.obj.t3d_properties.diffuse_color
 
     def set_anim(self):
         self.submodel.anim = self.obj.t3d_properties.anim
@@ -94,10 +94,10 @@ class MeshOutputBuilder(SubmodelOutputBuilder):
         self.submodel = t3d.create_submodel("Mesh", obj.name)
 
     def set_ambient(self):
-        self.submodel.ambient = self.obj.t3d_properties.ambient_color
+        self.submodel.ambient_color = self.obj.t3d_properties.ambient_color
     
     def set_specular(self):
-        self.submodel.specular = self.obj.t3d_properties.specular_color
+        self.submodel.specular_color = self.obj.t3d_properties.specular_color
 
     def set_wire(self):
         self.submodel.wire = self.obj.t3d_properties.wire
@@ -162,7 +162,7 @@ class MeshOutputBuilder(SubmodelOutputBuilder):
 
                 vertices.append((*xyz, *ijk, *uv))
 
-            self.submodel.add_triangle(vertices, smooth)
+            self.submodel.triangles.new(vertices, smooth)
 
 
 
@@ -208,4 +208,4 @@ class StarsOutputBuilder(SubmodelOutputBuilder):
         ]
 
         for star in stars:
-            self.submodel.add_star(star.location, star.data.color)
+            self.submodel.stars.new(star.location, star.data.color)

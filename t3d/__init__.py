@@ -83,6 +83,7 @@ class T3DImport(bpy.types.Operator, ImportHelper):
         for element in t3d.load(file):
 
             if element.element_type == "submodel":
+
                 obj = build_object_from_submodel(element, config)
                 collection.objects.link(obj)
                 bpy.context.scene.collection.objects.unlink(obj)
@@ -141,7 +142,7 @@ class T3DExport(bpy.types.Operator, ExportHelper):
         )
         # TODO: Includes export
 
-        with open(self.filepath, "w") as outfile:
+        with open(self.filepath, "w", encoding="windows-1250", newline="\r\n") as outfile:
             t3d.dump(outfile, submodels)
 
         return {'FINISHED'}
@@ -192,8 +193,8 @@ class T3DSubmodelProperties(bpy.types.PropertyGroup):
     selfillum: FloatProperty(
         name='SelfIllum',
         default=0,
-        min=-1.25,
-        max=1.25,
+        min=0,
+        max=1,
         step=0.01
     )
 
