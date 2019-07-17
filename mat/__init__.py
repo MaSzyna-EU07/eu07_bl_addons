@@ -2,6 +2,7 @@ from pathlib import Path
 
 from bpy_extras.io_utils import ImportHelper
 import bpy
+from bpy.props import StringProperty
 
 from eu07_tools import mat
 from eu07_tools.utils import find_root, AssetSearcher
@@ -11,14 +12,19 @@ class MATImport(bpy.types.Operator, ImportHelper):
     bl_label = "Import MAT"
     filename_ext = ".mat"
 
+    filter_glob: StringProperty(
+        default="*.mat",
+        options={'HIDDEN'}
+    )
+
     def execute(self, context):
         root = find_root(self.filepath)
 
         self.asset_searcher = AssetSearcher(root, Path(self.filepath).parent)
         self.asset_searcher.textures_finder.remove_extension(".mat")
 
-        matpath = str(Path(self.filepath).relative_to(Path(root, "textures")))
-        self.bl_mat = bpy.data.materials.new(matpath)
+        mat_name = "[MAT]" + str(Path(self.filepath).relative_to(Path(root, "textures")))
+        self.bl_mat = bpy.data.materials.new(mat_name)
         self.bl_mat.use_nodes = True
 
         self.nodes = self.bl_mat.node_tree.nodes
@@ -62,6 +68,9 @@ class MATImport(bpy.types.Operator, ImportHelper):
                 image = bpy.data.images.load(tex_path)
 
                 node.image = image
+
+            if key == "texture_normal":
+                normal_map_node = self.nodes.new("ShaderNodeNormalMap")
 
             self.links.new(node.outputs[0], self.nodes.get("Principled BSDF").inputs[0])
 

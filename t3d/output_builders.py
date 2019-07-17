@@ -3,7 +3,7 @@ import abc
 
 import bpy
 import bmesh
-from eu07_tools import t3d
+import eu07_tools.t3d
 
 def build_submodel_from_object(obj, config):
     builder = _get_builder(obj, config)
@@ -91,7 +91,7 @@ class SubmodelOutputBuilder(abc.ABC):
 class MeshOutputBuilder(SubmodelOutputBuilder):
     def __init__(self, obj, config):
         super().__init__(obj, config)
-        self.submodel = t3d.create_submodel("Mesh", obj.name)
+        self.submodel = eu07_tools.t3d.create_submodel("Mesh", obj.name)
 
     def set_ambient(self):
         self.submodel.ambient_color = self.obj.t3d_properties.ambient_color
@@ -115,11 +115,14 @@ class MeshOutputBuilder(SubmodelOutputBuilder):
             self.submodel.map = self.obj.t3d_properties.replacableskin_id
             return
 
-        if not mtl:
-            self.submodel.map = "none"
-            return
-        
-        # TODO: Get texture path
+        if mtl:
+            if mtl.use_nodes:
+                texture_node = mtl.node_tree.nodes.get("texture_diffuse")
+                if texture_node:
+                    self.submodel.map = texture_node.image.filepath
+
+
+        self.submodel.map = "none"
 
 
 
@@ -169,7 +172,7 @@ class MeshOutputBuilder(SubmodelOutputBuilder):
 class FreeSpotLightOutputBuilder(SubmodelOutputBuilder):
     def __init__(self, obj, config):
         super().__init__(obj, config)
-        self.submodel = t3d.create_submodel("FreeSpotLight", obj.name)
+        self.submodel = eu07_tools.t3d.create_submodel("FreeSpotLight", obj.name)
 
     def set_diffuse(self):
         self.submodel.diffuse = self.obj.data.color
@@ -199,7 +202,7 @@ class FreeSpotLightOutputBuilder(SubmodelOutputBuilder):
 class StarsOutputBuilder(SubmodelOutputBuilder):
     def __init__(self, obj, config):
         super().__init__(obj, config)
-        self.submodel = t3d.create_submodel("Stars", obj.name)
+        self.submodel = eu07_tools.t3d.create_submodel("Stars", obj.name)
 
     def set_geometry(self):
         stars = [

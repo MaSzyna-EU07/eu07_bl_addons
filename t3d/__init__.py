@@ -95,13 +95,14 @@ class T3DImport(bpy.types.Operator, ImportHelper):
                 
 
                 # NOTE: Should be includes_finder, but there are some issues
+                print(element.path)
                 full_path = config["asset_searcher"].models_finder.find(element.path)
 
                 try:
                     with open(full_path) as inc_file:
                         self._import_elements(inc_file, config, inc_collection)
                 except FileNotFoundError:
-                    pass
+                    print(full_path, "not exists?")
 
 
 class T3DExport(bpy.types.Operator, ExportHelper):
@@ -125,7 +126,7 @@ class T3DExport(bpy.types.Operator, ExportHelper):
     )
 
     def execute(self, context):
-        objects = bpy.context.selected_objects if self.use_selection else bpy.data.objects
+        objects = bpy.context.selected_objects if self.use_selection else bpy.context.collection.all_objects
         objects = [
             o for o in objects 
             if o.type == 'MESH' or 
@@ -193,7 +194,7 @@ class T3DSubmodelProperties(bpy.types.PropertyGroup):
     selfillum: FloatProperty(
         name='SelfIllum',
         default=0,
-        min=0,
+        min=-1,
         max=1,
         step=0.01
     )

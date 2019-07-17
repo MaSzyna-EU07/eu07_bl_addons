@@ -11,6 +11,7 @@ import bpy
 from bpy.props import PointerProperty
 
 from .t3d import T3DExport, T3DImport, T3DSubmodelProperties, T3DSubmodelPropertiesPanel
+from .scn import SCNImport
 from .mat import MATImport
 
 class EU07AddonPreferences(bpy.types.AddonPreferences):
@@ -18,6 +19,7 @@ class EU07AddonPreferences(bpy.types.AddonPreferences):
 
 def menu_func_import(self, context):
     self.layout.operator(T3DImport.bl_idname, text="T3D Text Model (.t3d)")
+    self.layout.operator(SCNImport.bl_idname, text="EU07 Scenery File (.scn, .scm)")
     self.layout.operator(MATImport.bl_idname, text="EU07 Material (.mat)")
 
 def menu_func_export(self, context):
@@ -29,7 +31,8 @@ classes = (
         T3DImport,
         T3DSubmodelProperties,
         T3DSubmodelPropertiesPanel,
-        MATImport
+        MATImport,
+        SCNImport
 )
 
 def register():
