@@ -72,6 +72,7 @@ class _TerrainBuilder:
     def add_triangle(self, element):
         num_triangles = len(element.vertices) // 3
 
+
         try:
             material_index = self._maps.index(element.map)
         except ValueError:
@@ -99,10 +100,12 @@ class _TerrainBuilder:
         self._terrain_mesh.to_mesh(self._terrain_object.data)
         self._terrain_mesh.free()
 
+
         for map_ in self._maps:
             abspath = self._config["asset_searcher"].textures_finder.find(map_)
             material = create_material_from_path(map_, abspath)
 
+            # This code causes bad material assigns, possibly
             if material is not None:
                 self._terrain_object.data.materials.append(material)
             
