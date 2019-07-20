@@ -5,7 +5,7 @@ from eu07_bl_addons.common import create_material_from_path
 
 # This is spaghetti, written for experimental purposes - needs to be refactored
 
-def to_scn_coords(vector):
+def scn_to_xyz_coords(vector):
     return (-vector.x, vector.z, vector.y)
 
 
@@ -39,24 +39,14 @@ class _TracksBuilder:
             spline.use_smooth = False
 
             spline.bezier_points.add(1)
-            spline.bezier_points[0].co = to_scn_coords(segment.p1)
-            spline.bezier_points[0].handle_left = to_scn_coords(segment.p2)
-            spline.bezier_points[0].handle_right = to_scn_coords(segment.p1 + segment.cv1)
+            spline.bezier_points[0].co = scn_to_xyz_coords(segment.p1)
+            spline.bezier_points[0].handle_left = scn_to_xyz_coords(segment.p2)
+            spline.bezier_points[0].handle_right = scn_to_xyz_coords(segment.p1 + segment.cv1)
     
-            spline.bezier_points[1].co = to_scn_coords(segment.p2) 
-            spline.bezier_points[1].handle_right = to_scn_coords(segment.p2)
-            spline.bezier_points[1].handle_left = to_scn_coords(segment.p2 + segment.cv2)         
+            spline.bezier_points[1].co = scn_to_xyz_coords(segment.p2) 
+            spline.bezier_points[1].handle_right = scn_to_xyz_coords(segment.p2)
+            spline.bezier_points[1].handle_left = scn_to_xyz_coords(segment.p2 + segment.cv2)         
 
-class TrackbedSpec:
-    def __init__(self, map_, map_length, param1, param2, param3):
-        self.map = map_
-        self.map_length = map_length
-        self.param1 = param1
-        self.param2 = param2
-        self.param3 = param3
-
-    def __hash__(self):
-        return hash((self.map, self.map_length, self.param1, self.param2, self.param3))
 
 
 class _TerrainBuilder:
@@ -86,7 +76,7 @@ class _TerrainBuilder:
 
             bm_face_verts = []
             for vertex in vertices:
-                bm_vert = self._terrain_mesh.verts.new(to_scn_coords(vertex.location))
+                bm_vert = self._terrain_mesh.verts.new(scn_to_xyz_coords(vertex.location))
                 bm_face_verts.append(bm_vert)
 
             bm_face = self._terrain_mesh.faces.new(bm_face_verts)

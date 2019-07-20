@@ -7,8 +7,8 @@ import bpy
 
 
 def build_object_from_submodel(submodel, config):
-    builder = _get_builder(submodel.submodel_type, config)
-    submodel_type_lower = submodel.submodel_type.lower() 
+    builder = _get_builder(submodel.type, config)
+    submodel_type_lower = submodel.type.lower() 
 
     builder.create_submodel(submodel.name)
     builder.set_parent(submodel.parent_name)
@@ -38,7 +38,7 @@ def build_object_from_submodel(submodel, config):
         builder.set_hotspot_angle(submodel.hotspot_angle)
 
     elif submodel_type_lower == 'stars':
-        pass
+        builder.set_geometry(submodel.stars)
 
     return builder.obj
         
@@ -186,7 +186,7 @@ class FreeSpotLightInputBuilder(SubmodelInputBuilder):
         bpy.context.scene.collection.objects.link(self.obj)
 
     def set_diffuse(self, diffuse):
-        self.obj.data.color = _normalize_color(diffuse)
+        self.obj.data.color = [value / 255 for value in diffuse]
 
     def set_near_atten_start(self, near_atten_start):
         self.obj.t3d_properties.near_atten_start = near_atten_start
@@ -218,28 +218,15 @@ class StarsInputBuilder(SubmodelInputBuilder):
     def set_diffuse(self, diffuse):
         self.obj.t3d_properties.diffuse_color = diffuse
 
-    def set_vertex_groups(self, vertex_groups):
-        for vertex_group in vertex_groups:
-            for star_array in vertex_group[1:]:
-
+    def set_geometry(self, geometry):
+        for star in geometry:
                 point = bpy.data.lamps.new(
                     f"{self.obj.name}.star",
                     'POINT'
                 )
-                star = bpy.data.objects.new(point.name, point)
+                star_obj = bpy.data.objects.new(point.name, point)
                 bpy.context.scene.objects.link(star)
 
-                star.location = star_array[:3]
+                star_obj.location = star.location
+                star_obj.color = star.rgb_color
 
-                color = int(star_array[3])
-                point.color = (
-                    ((color) & 0xff) / 255.0,
-                    ((color >> 8) & 0xff) / 255.0,
-                    ((color >> 16) & 0xff) / 255.0
-                )
-
-                star.parent = self.obj
-
-
-def _normalize_color(color):
-    return [value / 255 for value in color]

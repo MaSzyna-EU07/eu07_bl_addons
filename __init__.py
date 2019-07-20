@@ -8,25 +8,34 @@ bl_info = {
 }
 
 import bpy
-from bpy.props import PointerProperty
+from bpy.props import PointerProperty, StringProperty
 
 from .t3d import T3DExport, T3DImport, T3DSubmodelProperties, T3DSubmodelPropertiesPanel
 from .scn import SCNImport, LoadBasemapOperator, EU07SceneryProperties, LoadBasemapPanel
 from .mat import MATImport
 
 class EU07AddonPreferences(bpy.types.AddonPreferences):
-    pass # TODO: Implement
+    bl_idname = __name__
+
+    root: StringProperty(
+        name="Root path",
+        subtype='FILE_PATH'
+    )
+
+    def draw(self, context):
+        self.layout.prop(self, "root")
 
 def menu_func_import(self, context):
     self.layout.operator(T3DImport.bl_idname, text="T3D Text Model (.t3d)")
     self.layout.operator(SCNImport.bl_idname, text="EU07 Scenery File (.scn, .scm)")
-    self.layout.operator(MATImport.bl_idname, text="EU07 Material (.mat)")
+    #self.layout.operator(MATImport.bl_idname, text="EU07 Material (.mat)")
 
 def menu_func_export(self, context):
     self.layout.operator(T3DExport.bl_idname, text="T3D Text Model (.t3d)")
     #self.layout.operator(MATExport.bl_idname, text="EU07 Material (.mat)")
 
 classes = (
+        EU07AddonPreferences,
         T3DExport,
         T3DImport,
         T3DSubmodelProperties,

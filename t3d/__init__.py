@@ -10,7 +10,7 @@ from bpy_extras.io_utils import ImportHelper, ExportHelper
 # HACK: egg import failed
 import sys
 sys.path.append("/home/krzysiu/Dokumenty/PYTHON/eu07_tools/")
-from eu07_tools import t3d
+import eu07_tools
 from eu07_tools.utils import AssetSearcher, find_root
 
 from .input_builders import build_object_from_submodel
@@ -52,12 +52,13 @@ class T3DImport(bpy.types.Operator, ImportHelper):
     )
 
     def execute(self, context):
-        try:
-            root = find_root(self.filepath)
-        except ValueError:
-            #TODO: Get from script prefs / userprefs
-            raise Warning("NO ROOT FOUND!!")
+        root = context.preferences.addons['eu07_bl_addons'].preferences.root
 
+        if not root:
+            try:
+                root = find_root(self.filepath)
+            except ValueError:
+                raise ValueError(f"Can't find root path for {self.filepath}")
 
         config = {
             "skins": {
@@ -70,7 +71,6 @@ class T3DImport(bpy.types.Operator, ImportHelper):
             "asset_searcher": AssetSearcher(root, Path(self.filepath).parent),
         }
 
-        # NOTE: Temporary mat discarding
         config["asset_searcher"].textures_finder.remove_extension(".mat")
         config["asset_searcher"].textures_finder.set_extension_priority(self.default_ext, 1)
 
@@ -80,7 +80,7 @@ class T3DImport(bpy.types.Operator, ImportHelper):
         return {'FINISHED'}
 
     def _import_elements(self, file, config, collection):
-        for element in t3d.load(file):
+        for element in eu07_tools.t3d.load(file):
 
             if element.element_type == "submodel":
 
@@ -93,16 +93,13 @@ class T3DImport(bpy.types.Operator, ImportHelper):
                 inc_collection = bpy.data.collections.new(collection_name)
                 bpy.context.scene.collection.children.link(inc_collection)
                 
-
-                # NOTE: Should be includes_finder, but there are some issues
-                print(element.path)
                 full_path = config["asset_searcher"].models_finder.find(element.path)
 
                 try:
                     with open(full_path) as inc_file:
                         self._import_elements(inc_file, config, inc_collection)
                 except FileNotFoundError:
-                    print(full_path, "not exists?")
+                    print(f"Can't find included file: {element.path}")
 
 
 class T3DExport(bpy.types.Operator, ExportHelper):
@@ -144,7 +141,7 @@ class T3DExport(bpy.types.Operator, ExportHelper):
         # TODO: Includes export
 
         with open(self.filepath, "w", encoding="windows-1250", newline="\r\n") as outfile:
-            t3d.dump(outfile, submodels)
+            eu07_tools.t3d.dump(submodels, outfile)
 
         return {'FINISHED'}
 

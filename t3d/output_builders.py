@@ -16,7 +16,7 @@ def build_submodel_from_object(obj, config):
     builder.set_min_distance()
     builder.set_transform()
 
-    submodel_type = builder.submodel.submodel_type
+    submodel_type = builder.submodel.type
 
     if submodel_type == "Mesh":
         builder.set_ambient()

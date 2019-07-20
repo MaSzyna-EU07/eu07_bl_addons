@@ -2,7 +2,7 @@ from pathlib import Path
 import os
 
 import bpy
-from bpy.props import StringProperty, IntProperty, EnumProperty
+from bpy.props import StringProperty, IntProperty, EnumProperty, BoolProperty
 from bpy_extras.io_utils import ImportHelper
 import eu07_tools.scn
 from eu07_tools.utils import AssetSearcher, find_root
@@ -60,6 +60,17 @@ class EU07SceneryProperties(bpy.types.PropertyGroup):
         )
     )
 
+    basemap_use_cursor: BoolProperty(
+        name="Use 3D Cursor",
+        default=False
+    )
+
+    basemap_limit: IntProperty(
+        name="Area limit",
+        default=20,
+        min=1
+    )
+
 
 class LoadBasemapPanel(bpy.types.Panel):
     bl_idname = "SCENE_PT_eu07_load_basemaps"
@@ -76,6 +87,9 @@ class LoadBasemapPanel(bpy.types.Panel):
         row = box.row()
         row.prop(scene.eu07_properties, "basemap_puwg_x", text="X")
         row.prop(scene.eu07_properties, "basemap_puwg_y", text="Y")
+
+        self.layout.prop(scene.eu07_properties, "basemap_use_cursor", text="Load in 3D cursor area")
+        self.layout.prop(scene.eu07_properties, "basemap_limit", text="Loading radius limit")
 
         self.layout.prop(scene.eu07_properties, "basemap_type", text="Map type")
         self.layout.operator("scene.eu07_load_basemaps")
