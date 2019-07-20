@@ -16,9 +16,9 @@ class SceneryBuilder:
 
     def run(self, data):
         for element in data:
-            if element.typename == "node:triangles":
+            if element.type == "node:triangles":
                 self._terrain_builder.add_triangle(element)
-            elif "node:track" in element.typename:
+            elif element.type == "node:track":
                 self._tracks_builder.add_curve(element)
 
         self._terrain_builder.finish()
@@ -30,22 +30,34 @@ class _TracksBuilder:
         self._tracks_object = bpy.data.objects.new("tracks", bpy.data.curves.new("tracks", 'CURVE'))
         bpy.context.scene.collection.objects.link(self._tracks_object)
         self._tracks_object.data.dimensions = '3D'
-
+        
         self._trackbed_specs = set()
 
-    def add_curve(self, element):
-        for segment in element.segments:
+    def add_curve(self, track):
+        spline = self._tracks_object.data.splines.new('BEZIER')
+        spline.use_smooth = False
+        
+        spline.bezier_points.add(1)
+        spline.bezier_points[0].co = scn_to_xyz_coords(track.p1)
+        spline.bezier_points[0].handle_left = scn_to_xyz_coords(track.p2)
+        spline.bezier_points[0].handle_right = scn_to_xyz_coords(track.p1 + track.cv1)
+
+        spline.bezier_points[1].co = scn_to_xyz_coords(track.p2) 
+        spline.bezier_points[1].handle_right = scn_to_xyz_coords(track.p2)
+        spline.bezier_points[1].handle_left = scn_to_xyz_coords(track.p2 + track.cv2)  
+
+        if track.subtype in "switch cross tributary":
             spline = self._tracks_object.data.splines.new('BEZIER')
             spline.use_smooth = False
 
             spline.bezier_points.add(1)
-            spline.bezier_points[0].co = scn_to_xyz_coords(segment.p1)
-            spline.bezier_points[0].handle_left = scn_to_xyz_coords(segment.p2)
-            spline.bezier_points[0].handle_right = scn_to_xyz_coords(segment.p1 + segment.cv1)
-    
-            spline.bezier_points[1].co = scn_to_xyz_coords(segment.p2) 
-            spline.bezier_points[1].handle_right = scn_to_xyz_coords(segment.p2)
-            spline.bezier_points[1].handle_left = scn_to_xyz_coords(segment.p2 + segment.cv2)         
+            spline.bezier_points[0].co = scn_to_xyz_coords(track.p3)
+            spline.bezier_points[0].handle_left = scn_to_xyz_coords(track.p3)
+            spline.bezier_points[0].handle_right = scn_to_xyz_coords(track.p3 + track.cv3)
+
+            spline.bezier_points[1].co = scn_to_xyz_coords(track.p4) 
+            spline.bezier_points[1].handle_right = scn_to_xyz_coords(track.p4)
+            spline.bezier_points[1].handle_left = scn_to_xyz_coords(track.p4 + track.cv4)
 
 
 
@@ -95,9 +107,7 @@ class _TerrainBuilder:
             abspath = self._config["asset_searcher"].textures_finder.find(map_)
             material = create_material_from_path(map_, abspath)
 
-            # This code causes bad material assigns, possibly
-            if material is not None:
-                self._terrain_object.data.materials.append(material)
+            self._terrain_object.data.materials.append(material)
             
 
             
