@@ -27,14 +27,35 @@ class SceneryBuilder:
 class _TracksBuilder:
     def __init__(self, config):
         self._config = config
-        self._tracks_object = bpy.data.objects.new("tracks", bpy.data.curves.new("tracks", 'CURVE'))
-        bpy.context.scene.collection.objects.link(self._tracks_object)
-        self._tracks_object.data.dimensions = '3D'
-        
-        self._trackbed_specs = set()
+        self._last_track_profile = None
+        self._tracks_material = bpy.data.materials.new("track")
+        self._roads_material = bpy.data.materials.new("road")
 
     def add_curve(self, track):
-        spline = self._tracks_object.data.splines.new('BEZIER')
+        # TODO: Collections for trackbeds
+        trackbed_profile = (
+        f"{track.geometry_param1}-{track.geometry_param2}-{track.geometry_param3}"
+        )
+
+        if track.is_junction:
+            trackbed_profile = self._last_track_profile
+        else:
+            self._last_track_profile = trackbed_profile
+        
+        tracks_object = bpy.data.objects.get(f"tracks: {trackbed_profile}")
+
+        if not tracks_object:
+            tracks_object = bpy.data.objects.new(
+                f"tracks: {trackbed_profile}", bpy.data.curves.new(f"tracks: {trackbed_profile}", 'CURVE')
+            )
+            bpy.context.scene.collection.objects.link(tracks_object)
+
+            trackbed_object = create_trackbed(track, trackbed_profile)
+
+        trackbed_object = bpy.data.objects.get(f"trackbed: {trackbed_profile}")
+        tracks_object.data.bevel_object = trackbed_object
+
+        spline = tracks_object.data.splines.new('BEZIER')
         spline.use_smooth = False
         
         spline.bezier_points.add(1)
@@ -46,8 +67,8 @@ class _TracksBuilder:
         spline.bezier_points[1].handle_right = scn_to_xyz_coords(track.p2)
         spline.bezier_points[1].handle_left = scn_to_xyz_coords(track.p2 + track.cv2)  
 
-        if track.subtype in "switch cross tributary":
-            spline = self._tracks_object.data.splines.new('BEZIER')
+        if track.is_junction:
+            spline = tracks_object.data.splines.new('BEZIER')
             spline.use_smooth = False
 
             spline.bezier_points.add(1)
@@ -58,6 +79,27 @@ class _TracksBuilder:
             spline.bezier_points[1].co = scn_to_xyz_coords(track.p4) 
             spline.bezier_points[1].handle_right = scn_to_xyz_coords(track.p4)
             spline.bezier_points[1].handle_left = scn_to_xyz_coords(track.p4 + track.cv4)
+
+
+def create_trackbed(track, profile):
+    bed_height = track.geometry_param1
+    bed_width = track.geometry_param2
+    bed_slope = track.geometry_param3
+    
+    curve = bpy.data.curves.new(f"trackbed: {profile}", 'CURVE')
+    obj = bpy.data.objects.new(f"trackbed: {profile}", curve)
+    
+    obj.location = (0, 0, 0)
+    bpy.context.scene.collection.objects.link(obj)
+    
+    spline = curve.splines.new('BEZIER')
+    spline.bezier_points.add(3)
+    spline.bezier_points[0].co = (track.width - bed_width - bed_slope, 0, -bed_height)
+    spline.bezier_points[1].co = (track.width - bed_width, 0, 0)
+    spline.bezier_points[2].co = spline.bezier_points[1].co * -1
+    spline.bezier_points[3].co = spline.bezier_points[0].co * -1
+
+    return obj
 
 
 
@@ -104,7 +146,7 @@ class _TerrainBuilder:
 
 
         for map_ in self._maps:
-            abspath = self._config["asset_searcher"].textures_finder.find(map_)
+            abspath = self._config["asset_searcher"].textures_finder.find(map_.lstrip("@"))
             material = create_material_from_path(map_, abspath)
 
             self._terrain_object.data.materials.append(material)

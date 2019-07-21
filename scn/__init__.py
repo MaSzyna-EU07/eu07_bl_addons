@@ -3,11 +3,12 @@ import os
 
 import bpy
 from bpy.props import StringProperty, IntProperty, EnumProperty, BoolProperty
-from bpy_extras.io_utils import ImportHelper
-import eu07_tools.scn
+from bpy_extras.io_utils import ImportHelper, ExportHelper
+import eu07_tools
 from eu07_tools.utils import AssetSearcher, find_root
 
 from .input_builders import SceneryBuilder
+from .output_builders import create_node_triangles_from_mesh
 
 class SCNImport(bpy.types.Operator, ImportHelper):
     bl_idname = "import_scene.scn"
@@ -28,13 +29,33 @@ class SCNImport(bpy.types.Operator, ImportHelper):
             "asset_searcher": asset_searcher
         }
 
-        scn_input = eu07_tools.scn.load(open(self.filepath, encoding='latin-1'))
+        with open(self.filepath, encoding='latin-1') as infile:
+            scn_input = eu07_tools.scn.load(infile)
 
-        builder = SceneryBuilder(config)
-        builder.run(scn_input)
+            builder = SceneryBuilder(config)
+            builder.run(scn_input)
 
         del builder
         
+        return {'FINISHED'}
+
+
+class SCNExport(bpy.types.Operator, ExportHelper):
+    bl_idname = "export_scene.scn"
+    bl_label = "Export SCN"
+    filename_ext = ".scm"
+
+    filter_glob: StringProperty(
+        default="*.scn;*.scm;*.inc",
+        options={'HIDDEN'}
+    )
+
+    def execute(self, context):
+        with open(self.filepath, mode="w", encoding="windows-1250", newline="\r\n") as outfile:
+            for o in bpy.data.objects:
+                if o.type == "MESH":
+                    eu07_tools.scn.dump(create_node_triangles_from_mesh(o.data), outfile)
+
         return {'FINISHED'}
 
 

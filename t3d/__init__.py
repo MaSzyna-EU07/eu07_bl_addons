@@ -11,11 +11,11 @@ from bpy_extras.io_utils import ImportHelper, ExportHelper
 import sys
 sys.path.append("/home/krzysiu/Dokumenty/PYTHON/eu07_tools/")
 import eu07_tools
-from eu07_tools.utils import AssetSearcher, find_root
+from eu07_tools.utils import AssetSearcher
 
 from .input_builders import build_object_from_submodel
 from .output_builders import build_submodel_from_object
-
+from eu07_bl_addons.common import get_root
 
 class T3DImport(bpy.types.Operator, ImportHelper):
     bl_idname = "import_scene.t3d"
@@ -52,13 +52,7 @@ class T3DImport(bpy.types.Operator, ImportHelper):
     )
 
     def execute(self, context):
-        root = context.preferences.addons['eu07_bl_addons'].preferences.root
-
-        if not root:
-            try:
-                root = find_root(self.filepath)
-            except ValueError:
-                raise ValueError(f"Can't find root path for {self.filepath}")
+        root = get_root(self.filepath)
 
         config = {
             "skins": {

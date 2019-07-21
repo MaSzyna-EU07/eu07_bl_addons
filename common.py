@@ -1,4 +1,15 @@
 import bpy
+import eu07_tools
+
+def get_root(abspath):
+    try:
+        root = eu07_tools.utils.find_root(abspath)
+    except ValueError:
+        root = bpy.context.preferences.addons['eu07_bl_addons'].preferences.root
+        if not root:
+            raise ValueError(f"Can't find root path for {abspath}")
+
+    return root
 
 def create_material_from_path(name, abspath):
     try:
@@ -13,6 +24,8 @@ def create_material_from_path(name, abspath):
     bsdf.inputs[5].default_value = 0
 
     texture_node = material.node_tree.nodes.new("ShaderNodeTexImage")
+    texture_node.name = "texture_diffuse"
+    texture_node.label = "texture_diffuse"
     texture_node.image = img
 
     material.node_tree.links.new(
