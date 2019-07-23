@@ -3,7 +3,7 @@ import eu07_tools
 
 def get_root(abspath):
     try:
-        root = eu07_tools.utils.find_root(abspath)
+        root = eu07_tools.utils.find_asset_root(abspath)
     except ValueError:
         root = bpy.context.preferences.addons['eu07_bl_addons'].preferences.root
         if not root:
@@ -37,3 +37,9 @@ def create_material_from_path(name, abspath):
         texture_node.texture_mapping.scale[1] = -1
 
     return material
+
+def scn_to_xyz_coords(vector):
+    return (-vector.x, vector.z, vector.y)
+
+def xyz_to_scn_coords(vector):
+    return (-vector.x, vector.z, vector.y)

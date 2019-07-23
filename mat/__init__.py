@@ -4,8 +4,9 @@ from bpy_extras.io_utils import ImportHelper
 import bpy
 from bpy.props import StringProperty
 
-from eu07_tools import mat
-from eu07_tools.utils import find_root, AssetSearcher
+import eu07_tools
+
+from eu07_bl_addons.common import get_root
 
 class MATImport(bpy.types.Operator, ImportHelper):
     bl_idname = "import_material.mat"
@@ -18,9 +19,11 @@ class MATImport(bpy.types.Operator, ImportHelper):
     )
 
     def execute(self, context):
-        root = find_root(self.filepath)
+        root = get_root(self.filepath)
 
-        self.asset_searcher = AssetSearcher(root, Path(self.filepath).parent)
+        self.asset_searcher = eu07_tools.utils.AssetSearcher(
+            root, Path(self.filepath).parent
+        )
         self.asset_searcher.textures_finder.remove_extension(".mat")
 
         mat_name = "[MAT]" + str(Path(self.filepath).relative_to(Path(root, "textures")))
@@ -30,7 +33,7 @@ class MATImport(bpy.types.Operator, ImportHelper):
         self.nodes = self.bl_mat.node_tree.nodes
         self.links = self.bl_mat.node_tree.links
 
-        eu07_mat = mat.load(open(self.filepath))
+        eu07_mat = eu07_tools.mat.load(open(self.filepath))
         self.nodify_mat_mapping(eu07_mat)
 
         return {'FINISHED'}
@@ -44,7 +47,7 @@ class MATImport(bpy.types.Operator, ImportHelper):
             if key.startswith("param_"):
                 self.add_value_node_if_present(mapping, key, parent)
 
-            elif key in mat.NESTED_MAPPING_KEYS:
+            elif key in eu07_tools.mat.NESTED_MAPPING_KEYS:
                 frame = self.nodes.new("NodeFrame")
                 frame.name = key
                 frame.name = self._create_node_name(key, frame)

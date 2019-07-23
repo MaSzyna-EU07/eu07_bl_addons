@@ -5,8 +5,7 @@ from eu07_bl_addons.common import create_material_from_path
 
 # This is spaghetti, written for experimental purposes - needs to be refactored
 
-def scn_to_xyz_coords(vector):
-    return (-vector.x, vector.z, vector.y)
+from eu07_bl_addons.common import scn_to_xyz_coords
 
 
 class SceneryBuilder:
@@ -146,7 +145,8 @@ class _TerrainBuilder:
 
 
         for map_ in self._maps:
-            abspath = self._config["asset_searcher"].textures_finder.find(map_.lstrip("@"))
+            map_ = map_.lstrip("@").split(":")[0]
+            abspath = self._config["asset_searcher"].textures_finder.find(map_)
             material = create_material_from_path(map_, abspath)
 
             self._terrain_object.data.materials.append(material)
