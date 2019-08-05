@@ -3,7 +3,7 @@ from pathlib import Path
 import bmesh
 import bpy
 import eu07_tools
-from eu07_bl_addons.common import get_root, xyz_to_scn_coords
+from eu07_bl_addons.common import get_root
 
 def create_node_triangles_from_mesh(mesh):
     bm = bmesh.new()
@@ -30,8 +30,8 @@ def create_node_triangles_from_mesh(mesh):
         for local_vert_idx, global_vert_idx in enumerate(polygon.vertices):
             vertex = mesh.vertices[global_vert_idx]
 
-            xyz = xyz_to_scn_coords(vertex.co)
-            ijk = xyz_to_scn_coords(vertex.normal)
+            xyz = eu07_tools.utils.switch_coordinate_system(vertex.co)
+            ijk = eu07_tools.utils.switch_coordinate_system(vertex.normal)
 
             if uv_layer:
                 mesh_loop_idx = polygon.loop_indices[local_vert_idx]

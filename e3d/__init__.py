@@ -58,6 +58,9 @@ class E3DImport(bpy.types.Operator, ImportHelper):
             "asset_searcher": eu07_tools.utils.AssetSearcher(root, Path(self.filepath).parent),
         }
 
+        config["asset_searcher"].textures_finder.remove_extension(".mat")
+        config["asset_searcher"].textures_finder.set_extension_priority(self.default_ext, 1)
+
         with open(self.filepath, "rb") as infile:
             e3d = eu07_tools.e3d.load(infile)
             t3d = eu07_tools.utils.e3d_to_t3d(e3d)

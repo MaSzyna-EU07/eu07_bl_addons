@@ -37,9 +37,3 @@ def create_material_from_path(name, abspath):
         texture_node.texture_mapping.scale[1] = -1
 
     return material
-
-def scn_to_xyz_coords(vector):
-    return (-vector.x, vector.z, vector.y)
-
-def xyz_to_scn_coords(vector):
-    return (-vector.x, vector.z, vector.y)

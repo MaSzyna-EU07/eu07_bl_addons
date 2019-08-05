@@ -2,10 +2,8 @@ import bpy
 import bmesh
 
 from eu07_bl_addons.common import create_material_from_path
-
+import eu07_tools
 # This is spaghetti, written for experimental purposes - needs to be refactored
-
-from eu07_bl_addons.common import scn_to_xyz_coords
 
 
 class SceneryBuilder:
@@ -58,26 +56,26 @@ class _TracksBuilder:
         spline.use_smooth = False
         
         spline.bezier_points.add(1)
-        spline.bezier_points[0].co = scn_to_xyz_coords(track.p1)
-        spline.bezier_points[0].handle_left = scn_to_xyz_coords(track.p2)
-        spline.bezier_points[0].handle_right = scn_to_xyz_coords(track.p1 + track.cv1)
+        spline.bezier_points[0].co = eu07_tools.utils.switch_coordinate_system(track.p1)
+        spline.bezier_points[0].handle_left = eu07_tools.utils.switch_coordinate_system(track.p2)
+        spline.bezier_points[0].handle_right = eu07_tools.utils.switch_coordinate_system(track.p1 + track.cv1)
 
-        spline.bezier_points[1].co = scn_to_xyz_coords(track.p2) 
-        spline.bezier_points[1].handle_right = scn_to_xyz_coords(track.p2)
-        spline.bezier_points[1].handle_left = scn_to_xyz_coords(track.p2 + track.cv2)  
+        spline.bezier_points[1].co = eu07_tools.utils.switch_coordinate_system(track.p2) 
+        spline.bezier_points[1].handle_right = eu07_tools.utils.switch_coordinate_system(track.p2)
+        spline.bezier_points[1].handle_left = eu07_tools.utils.switch_coordinate_system(track.p2 + track.cv2)  
 
         if track.is_junction:
             spline = tracks_object.data.splines.new('BEZIER')
             spline.use_smooth = False
 
             spline.bezier_points.add(1)
-            spline.bezier_points[0].co = scn_to_xyz_coords(track.p3)
-            spline.bezier_points[0].handle_left = scn_to_xyz_coords(track.p3)
-            spline.bezier_points[0].handle_right = scn_to_xyz_coords(track.p3 + track.cv3)
+            spline.bezier_points[0].co = eu07_tools.utils.switch_coordinate_system(track.p3)
+            spline.bezier_points[0].handle_left = eu07_tools.utils.switch_coordinate_system(track.p3)
+            spline.bezier_points[0].handle_right = eu07_tools.utils.switch_coordinate_system(track.p3 + track.cv3)
 
-            spline.bezier_points[1].co = scn_to_xyz_coords(track.p4) 
-            spline.bezier_points[1].handle_right = scn_to_xyz_coords(track.p4)
-            spline.bezier_points[1].handle_left = scn_to_xyz_coords(track.p4 + track.cv4)
+            spline.bezier_points[1].co = eu07_tools.utils.switch_coordinate_system(track.p4) 
+            spline.bezier_points[1].handle_right = eu07_tools.utils.switch_coordinate_system(track.p4)
+            spline.bezier_points[1].handle_left = eu07_tools.utils.switch_coordinate_system(track.p4 + track.cv4)
 
 
 def create_trackbed(track, profile):
@@ -131,7 +129,7 @@ class _TerrainBuilder:
 
             bm_face_verts = []
             for vertex in vertices:
-                bm_vert = self._terrain_mesh.verts.new(scn_to_xyz_coords(vertex.location))
+                bm_vert = self._terrain_mesh.verts.new(eu07_tools.utils.switch_coordinate_system(vertex.location))
                 bm_face_verts.append(bm_vert)
 
             bm_face = self._terrain_mesh.faces.new(bm_face_verts)
@@ -152,15 +150,4 @@ class _TerrainBuilder:
             material = create_material_from_path(map_, abspath)
 
             self._terrain_object.data.materials.append(material)
-            
-
-            
-
-
-class HashableMaterial:
-    def __init__(self, map_, ambient, diffuse, specular):
-        self.map = map_
-        self.ambient = ambient
-        self.specular = specular
-        self.diffuse = diffuse
             
