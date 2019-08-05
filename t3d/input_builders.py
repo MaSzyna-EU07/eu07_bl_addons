@@ -123,7 +123,7 @@ class MeshInputBuilder(SubmodelInputBuilder):
 
     def set_map(self, map_: str):
         # TODO: Load materials
-        if map_ in "-1 -2 -3 -4 replacableskin":
+        if map_ in ["-1", "-2", "-3", "-4", "replacableskin"]:
             full_path = self._config["skins"][map_]
         elif map_ == "none":
             full_path = ""

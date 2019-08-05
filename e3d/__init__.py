@@ -63,9 +63,18 @@ class E3DImport(bpy.types.Operator, ImportHelper):
 
         with open(self.filepath, "rb") as infile:
             e3d = eu07_tools.e3d.load(infile)
-            t3d = eu07_tools.utils.e3d_to_t3d(e3d)
+            t3d = list(eu07_tools.utils.e3d_to_t3d(e3d))
 
             for submodel in t3d:
+                mat = submodel.transform
+                mat[1], mat[2] = mat[2], mat[1]
+                mat[4], mat[8] = mat[8], mat[4]
+                
+                mat[13], mat[14] = mat[14], mat[13]
+                
+                mat[5], mat[10] = mat[10], mat[5]
+                mat[9], mat[6] = mat[6], mat[9]
+                
                 eu07_bl_addons.t3d.input_builders.build_object_from_submodel(submodel, config)
 
         return {'FINISHED'}
