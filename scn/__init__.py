@@ -56,7 +56,7 @@ class SCNExport(bpy.types.Operator, ExportHelper):
         with open(self.filepath, mode="w", encoding="windows-1250", newline="\r\n") as outfile:
             for o in bpy.data.objects:
                 if o.type == "MESH":
-                    eu07_tools.scn.dump(create_node_triangles_from_mesh(o.data), outfile)
+                    eu07_tools.scn.dump(create_node_triangles_from_mesh(o.data.copy()), outfile)
 
         return {'FINISHED'}
 

@@ -51,6 +51,11 @@ class T3DImport(bpy.types.Operator, ImportHelper):
         ]
     )
 
+    load_includes: BoolProperty(
+        name="Load included submodels",
+        default=False,
+    )
+
     def execute(self, context):
         root = get_root(self.filepath)
 
@@ -82,14 +87,14 @@ class T3DImport(bpy.types.Operator, ImportHelper):
                 collection.objects.link(obj)
                 bpy.context.scene.collection.objects.unlink(obj)
 
-            elif element.element_type == "include":
-                collection_name = f"[INCLUDE] {element.path}"
-                inc_collection = bpy.data.collections.new(collection_name)
-                bpy.context.scene.collection.children.link(inc_collection)
-                
-                full_path = config["asset_searcher"].models_finder.find(element.path)
-
+            elif element.element_type == "include" and self.load_includes:
                 try:
+                    collection_name = f"[INCLUDE] {element.path}"
+                    inc_collection = bpy.data.collections.new(collection_name)
+                    bpy.context.scene.collection.children.link(inc_collection)
+                
+                    full_path = config["asset_searcher"].models_finder.find(element.path)
+
                     with open(full_path) as inc_file:
                         self._import_elements(inc_file, config, inc_collection)
                 except FileNotFoundError:

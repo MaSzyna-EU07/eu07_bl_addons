@@ -92,11 +92,13 @@ def create_trackbed(track, profile):
     bpy.context.scene.collection.objects.link(obj)
     
     spline = curve.splines.new('BEZIER')
+    spline.resolution_u = 1
+    spline.resolution_v = 1
     spline.bezier_points.add(3)
-    spline.bezier_points[0].co = (track.width - bed_width - bed_slope, 0, -bed_height)
-    spline.bezier_points[1].co = (track.width - bed_width, 0, 0)
-    spline.bezier_points[2].co = spline.bezier_points[1].co * -1
-    spline.bezier_points[3].co = spline.bezier_points[0].co * -1
+    spline.bezier_points[0].co = (track.width/2 + bed_width + bed_slope, 0, 0)
+    spline.bezier_points[1].co = (track.width/2 + bed_width, bed_height, 0)
+    spline.bezier_points[2].co = (-track.width/2 - bed_width, bed_height, 0)
+    spline.bezier_points[3].co = (-track.width/2 - bed_width - bed_slope, 0, 0)
 
     return obj
 

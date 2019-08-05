@@ -3,7 +3,7 @@ import abc
 
 import bpy
 import bmesh
-import eu07_tools.t3d
+import eu07_tools
 
 def build_submodel_from_object(obj, config):
     builder = _get_builder(obj, config)
@@ -119,12 +119,9 @@ class MeshOutputBuilder(SubmodelOutputBuilder):
             if mtl.use_nodes:
                 texture_node = mtl.node_tree.nodes.get("texture_diffuse")
                 if texture_node:
-                    self.submodel.map = texture_node.image.filepath
-
-
-        self.submodel.map = "none"
-
-
+                    self.submodel.map = eu07_tools.utils.shorten_asset_path(
+                        texture_node.image.filepath
+                    )
 
     def set_geometry(self):
         mesh = self.obj.data.copy()
