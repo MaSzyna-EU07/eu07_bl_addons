@@ -11,8 +11,8 @@ import bmesh
 import bpy
 
 
-def import_model(file, collection, config):
-    for element in eu07_tools.t3d.load(file):
+def import_model(elements, collection, config):
+    for element in elements:
 
         if element.element_type == "submodel":
             obj = _build_object(element, config)
@@ -28,7 +28,8 @@ def import_model(file, collection, config):
                 collection.children.link(inc_collection)
             
                 with open(full_path, "r", encoding="latin-1") as inc_file:
-                    import_model(inc_file, inc_collection, config)
+                    inc_elements = eu07_tools.t3d.load(inc_file)
+                    import_model(inc_elements, inc_collection, config)
 
             else:
                 config.report_func({"WARNING"}, f"Can't find included file: {element.path}")
@@ -94,6 +95,7 @@ class SubmodelInputBuilder(abc.ABC):
         self.obj.parent = bpy.data.objects.get(parent_name)
 
     def set_diffuse(self, diffuse):
+        print(diffuse)
         self.obj.t3d_properties.diffuse_color = diffuse
 
     def set_selfillum(self, selfillum):
@@ -170,6 +172,7 @@ class MeshInputBuilder(SubmodelInputBuilder):
             for vertex_index, loop in enumerate(bm_face.loops):
                 loop[uv_layer].uv = triangle.vertices[vertex_index].mapping
 
+        bmesh.ops.remove_doubles(bm, verts=bm.verts, dist=0.00001)
         bm.to_mesh(self.obj.data)
         bm.free()
 

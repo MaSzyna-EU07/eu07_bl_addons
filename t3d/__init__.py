@@ -79,7 +79,8 @@ class T3DImport(bpy.types.Operator, ImportHelper):
             collection = bpy.data.collections.new(Path(self.filepath).stem)
             bpy.context.scene.collection.children.link(collection)
 
-            import_model(file, collection, config)
+            elements = eu07_tools.t3d.load(file)
+            import_model(elements, collection, config)
         
         return {'FINISHED'}
         
