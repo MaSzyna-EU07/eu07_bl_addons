@@ -12,6 +12,7 @@ def get_root(abspath):
     return root
 
 def create_material_from_path(name, abspath):
+    # TODO: Load materials from .mat
     try:
         img = bpy.data.images.load(abspath, check_existing=True)
     except:

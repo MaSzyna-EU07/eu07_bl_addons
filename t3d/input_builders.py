@@ -1,14 +1,41 @@
 import abc
 import math
 import os
+import warnings
+from pathlib import Path
+
+import eu07_tools
+from eu07_bl_addons.common import create_material_from_path
 
 import bmesh
 import bpy
 
 
-def build_object_from_submodel(submodel, config):
+def import_model(file, collection, config):
+    for element in eu07_tools.t3d.load(file):
+
+        if element.element_type == "submodel":
+            obj = _build_object(element, config)
+            collection.objects.link(obj)
+
+        elif element.element_type == "include" and config.load_includes:
+            full_path = config.asset_searcher.models.find(element.path)
+
+            if Path(full_path).exists():
+                inc_collection = bpy.data.collections.new(
+                    f"include {' '.join([element.path, *element.parameters])} end"
+                )
+                collection.children.link(inc_collection)
+            
+                with open(full_path, "r", encoding="latin-1") as inc_file:
+                    import_model(inc_file, inc_collection, config)
+
+            else:
+                config.report_func({"WARNING"}, f"Can't find included file: {element.path}")
+
+
+def _build_object(submodel, config):
     builder = _get_builder(submodel.type, config)
-    submodel_type_lower = submodel.type.lower() 
 
     builder.create_submodel(submodel.name)
     builder.set_parent(submodel.parent_name)
@@ -19,7 +46,7 @@ def build_object_from_submodel(submodel, config):
     builder.set_min_distance(submodel.min_distance)
     builder.set_transform(submodel.transform)
 
-    if submodel_type_lower == 'mesh':
+    if submodel.type == 'Mesh':
         builder.set_ambient(submodel.ambient_color)
         builder.set_specular(submodel.specular_color)
         builder.set_wire(submodel.wire)
@@ -28,7 +55,7 @@ def build_object_from_submodel(submodel, config):
         builder.set_map(submodel.map)
         builder.set_geometry(submodel.triangles)
 
-    elif submodel_type_lower == 'freespotlight':
+    elif submodel.type == 'FreeSpotLight':
         builder.set_near_atten_start(submodel.near_atten_start)
         builder.set_near_atten_end(submodel.near_atten_end)
         builder.set_use_near_atten(submodel.use_near_atten)
@@ -37,23 +64,21 @@ def build_object_from_submodel(submodel, config):
         builder.set_falloff_angle(submodel.falloff_angle)
         builder.set_hotspot_angle(submodel.hotspot_angle)
 
-    elif submodel_type_lower == 'stars':
+    elif submodel.type == 'Stars':
         builder.set_geometry(submodel.stars)
 
     return builder.obj
         
 
-def _get_builder(type_name, config):
-    type_name = type_name.lower()
-
-    if type_name == 'mesh':
+def _get_builder(type_, config):
+    if type_ == 'Mesh':
         cls = MeshInputBuilder
-    elif type_name == 'freespotlight':
+    elif type_ == 'FreeSpotLight':
         cls = FreeSpotLightInputBuilder
-    elif type_name == 'stars':
+    elif type_ == 'Stars':
         cls = StarsInputBuilder
     else:
-        raise ValueError('Unrecognized submodel type: {0}'.format(type_name))
+        raise ValueError('Unrecognized submodel type: {0}'.format(type_))
 
     return cls(config)
 
@@ -69,7 +94,7 @@ class SubmodelInputBuilder(abc.ABC):
         self.obj.parent = bpy.data.objects.get(parent_name)
 
     def set_diffuse(self, diffuse):
-        pass
+        self.obj.t3d_properties.diffuse_color = diffuse
 
     def set_selfillum(self, selfillum):
         self.obj.t3d_properties.selfillum = selfillum
@@ -98,16 +123,9 @@ class MeshInputBuilder(SubmodelInputBuilder):
     def create_submodel(self, name: str):
         mesh = bpy.data.meshes.new(name)
         self.obj = bpy.data.objects.new(name, mesh)
-        self._mtl = self.obj.active_material = bpy.data.materials.new(name + "_material")
-        self._mtl.use_nodes = True
-
-        bpy.context.scene.collection.objects.link(self.obj)
 
     def set_ambient(self, ambient):
         self.obj.t3d_properties.ambient = ambient
-
-    def set_diffuse(self, diffuse):
-        self.obj.t3d_properties.diffuse = diffuse
 
     def set_specular(self, specular):
         self.obj.t3d_properties.specular = specular
@@ -122,37 +140,14 @@ class MeshInputBuilder(SubmodelInputBuilder):
         self.obj.t3d_properties.opacity = opacity
 
     def set_map(self, map_: str):
-        # TODO: Load materials
         if map_ in ["-1", "-2", "-3", "-4", "replacableskin"]:
-            full_path = self._config["skins"][map_]
+            full_path = self._config.skins[map_]
         elif map_ == "none":
             full_path = ""
         else:
-            full_path = self._config["asset_searcher"].textures_finder.find(map_)
+            full_path = self._config.asset_searcher.textures.find(map_)
 
-        if full_path != "":
-            try:
-                img = bpy.data.images.load(full_path, check_existing=True)
-            except:
-                pass
-
-            bsdf = self._mtl.node_tree.nodes.get("Principled BSDF")
-            # TODO: Bind specular to submodel panel?
-            bsdf.inputs[5].default_value = 0
-
-            texture_node = self._mtl.node_tree.nodes.new("ShaderNodeTexImage")
-            texture_node.name = texture_node.label = "texture_diffuse"
-            texture_node.image = img
-            texture_node.location = (-300, 200)
-
-            self._mtl.node_tree.links.new(
-                texture_node.outputs[0],
-                bsdf.inputs[0]
-            )
-
-            if full_path.endswith(".dds"):
-                texture_node.texture_mapping.scale[1] = -1
-
+        self.obj.active_material = create_material_from_path(map_, full_path)
 
     def set_geometry(self, geometry):
         bm = bmesh.new()
@@ -165,6 +160,7 @@ class MeshInputBuilder(SubmodelInputBuilder):
                 bm_vertex = bm.verts.new(vertex.location)
                 if vertex.has_normal:
                     bm_vertex.normal = vertex.normal
+                    self.obj.t3d_properties.use_normals = True
 
                 bm_vertices.append(bm_vertex)
 
@@ -174,7 +170,6 @@ class MeshInputBuilder(SubmodelInputBuilder):
             for vertex_index, loop in enumerate(bm_face.loops):
                 loop[uv_layer].uv = triangle.vertices[vertex_index].mapping
 
-        bmesh.ops.remove_doubles(bm, verts=bm.verts, dist=0.00001)
         bm.to_mesh(self.obj.data)
         bm.free()
 
@@ -183,7 +178,6 @@ class FreeSpotLightInputBuilder(SubmodelInputBuilder):
     def create_submodel(self, name: str):
         data = bpy.data.lights.new(name, type='SPOT')
         self.obj = bpy.data.objects.new(name, data)
-        bpy.context.scene.collection.objects.link(self.obj)
 
     def set_diffuse(self, diffuse):
         self.obj.data.color = [value / 255 for value in diffuse]
@@ -213,10 +207,6 @@ class FreeSpotLightInputBuilder(SubmodelInputBuilder):
 class StarsInputBuilder(SubmodelInputBuilder):
     def create_submodel(self, name: str):
         self.obj = bpy.data.objects.new(name, None)
-        bpy.context.scene.collection.objects.link(self.obj)
-
-    def set_diffuse(self, diffuse):
-        self.obj.t3d_properties.diffuse_color = diffuse
 
     def set_geometry(self, geometry):
         for star in geometry:

@@ -1,4 +1,5 @@
 from pathlib import Path
+import collections
 
 import bpy
 from bpy.props import (
@@ -11,10 +12,9 @@ from bpy_extras.io_utils import ImportHelper, ExportHelper
 import sys
 sys.path.append("/home/krzysiu/Dokumenty/PYTHON/eu07_tools/")
 import eu07_tools
-from eu07_tools.utils import AssetSearcher
 
-from .input_builders import build_object_from_submodel
-from .output_builders import build_submodel_from_object
+from .input_builders import import_model
+from .output_builders import export_model
 from eu07_bl_addons.common import get_root
 
 class T3DImport(bpy.types.Operator, ImportHelper):
@@ -26,7 +26,6 @@ class T3DImport(bpy.types.Operator, ImportHelper):
         default="*.t3d",
         options={'HIDDEN'}
     )
-
     skin_1: StringProperty(
         name="Skin #1",
     )
@@ -39,7 +38,6 @@ class T3DImport(bpy.types.Operator, ImportHelper):
     skin_4: StringProperty(
         name="Skin #4",
     )
-
     default_ext: EnumProperty(
         name="Default texture extension",
         default=".tga",
@@ -50,56 +48,41 @@ class T3DImport(bpy.types.Operator, ImportHelper):
             (".dds", "BMP", "")
         ]
     )
-
     load_includes: BoolProperty(
         name="Load included submodels",
-        default=False,
+        default=True,
     )
 
     def execute(self, context):
-        root = get_root(self.filepath)
+        Config = collections.namedtuple("Config", "report_func root skins asset_searcher load_includes")
 
-        config = {
-            "skins": {
-                "replacableskin": self.skin_1,
-                "-1": self.skin_1, 
-                "-2": self.skin_2, 
-                "-3": self.skin_3, 
-                "-4": self.skin_4
-            },
-            "asset_searcher": AssetSearcher(root, Path(self.filepath).parent),
+        skins = {
+            "replacableskin": self.skin_1,
+            "-1": self.skin_1, 
+            "-2": self.skin_2, 
+            "-3": self.skin_3, 
+            "-4": self.skin_4
         }
 
-        config["asset_searcher"].textures_finder.remove_extension(".mat")
-        config["asset_searcher"].textures_finder.set_extension_priority(self.default_ext, 1)
+        root = get_root(self.filepath)
 
-        with open(self.filepath) as file:
-            self._import_elements(file, config, bpy.data.collections["Collection"])
+        asset_searcher = eu07_tools.utils.AssetSearcher(
+            root, 
+            Path(self.filepath).parent
+        )
+        asset_searcher.textures.remove_extension(".mat")
+        asset_searcher.textures.set_extension_priority(self.default_ext, 1)
+
+        config = Config(self.report, root, skins, asset_searcher, self.load_includes)
+
+        with open(self.filepath, "r", encoding="latin-1") as file:
+            collection = bpy.data.collections.new(Path(self.filepath).stem)
+            bpy.context.scene.collection.children.link(collection)
+
+            import_model(file, collection, config)
         
         return {'FINISHED'}
-
-    def _import_elements(self, file, config, collection):
-        for element in eu07_tools.t3d.load(file):
-
-            if element.element_type == "submodel":
-
-                obj = build_object_from_submodel(element, config)
-                collection.objects.link(obj)
-                bpy.context.scene.collection.objects.unlink(obj)
-
-            elif element.element_type == "include" and self.load_includes:
-                try:
-                    collection_name = f"[INCLUDE] {element.path}"
-                    inc_collection = bpy.data.collections.new(collection_name)
-                    bpy.context.scene.collection.children.link(inc_collection)
-                
-                    full_path = config["asset_searcher"].models_finder.find(element.path)
-
-                    with open(full_path) as inc_file:
-                        self._import_elements(inc_file, config, inc_collection)
-                except FileNotFoundError:
-                    print(f"Can't find included file: {element.path}")
-
+        
 
 class T3DExport(bpy.types.Operator, ExportHelper):
     bl_idname = "export_scene.t3d"
@@ -110,19 +93,37 @@ class T3DExport(bpy.types.Operator, ExportHelper):
         default="*.t3d",
         options={'HIDDEN'}
     )
-
     use_selection: BoolProperty(
         name="Selection Only",
         default=False
     )
-
+    export_include_collections: BoolProperty(
+        name="Export include collections",
+        default = True
+    )
     use_modifiers: BoolProperty(
         name="Apply modifiers",
         default=True
     )
 
     def execute(self, context):
+        Config = collections.namedtuple(
+            "Config",
+            "root use_selection export_include_collections use_modifiers"
+        )
+
+        # TODO: Export non-included by default?
+        
+
+        config = Config(
+            get_root(self.filepath),
+            self.use_selection, 
+            self.export_include_collections, 
+            self.use_modifiers
+        )
+
         objects = bpy.context.selected_objects if self.use_selection else bpy.context.collection.all_objects
+
         objects = [
             o for o in objects 
             if o.type == 'MESH' or 
@@ -130,17 +131,7 @@ class T3DExport(bpy.types.Operator, ExportHelper):
             (o.type == 'EMPTY')
         ]
 
-        config = {
-            "use_modifiers": self.use_modifiers
-        }
-
-        submodels = (
-            build_submodel_from_object(obj, config) for obj in objects
-        )
-        # TODO: Includes export
-
-        with open(self.filepath, "w", encoding="windows-1250", newline="\r\n") as outfile:
-            eu07_tools.t3d.dump(submodels, outfile)
+        self._export_to_filepath(objects, self.filepath, config)
 
         return {'FINISHED'}
 
@@ -171,7 +162,6 @@ class T3DSubmodelProperties(bpy.types.PropertyGroup):
             ('false', 'false', '')
         ]
     )
-
     max_distance: FloatProperty(
         name='Max Distance',
         min=-1,
@@ -179,14 +169,12 @@ class T3DSubmodelProperties(bpy.types.PropertyGroup):
         step=0.1,
         unit='LENGTH'
     )
-
     min_distance: FloatProperty(
         name='Min Distance',
         min=0,
         step=0.1,
         unit='LENGTH'
     )
-
     selfillum: FloatProperty(
         name='SelfIllum',
         default=0,
@@ -194,7 +182,6 @@ class T3DSubmodelProperties(bpy.types.PropertyGroup):
         max=1,
         step=0.01
     )
-
     ambient_color: FloatVectorProperty(
         name='Ambient',
         subtype='COLOR',
@@ -202,7 +189,6 @@ class T3DSubmodelProperties(bpy.types.PropertyGroup):
         min=0,
         max=255,
     )
-
     diffuse_color: FloatVectorProperty(
         name='Diffuse',
         subtype='COLOR',
@@ -210,7 +196,6 @@ class T3DSubmodelProperties(bpy.types.PropertyGroup):
         min=0,
         max=255,
     )
-
     specular_color: FloatVectorProperty(
         name='Specular',
         subtype='COLOR',
@@ -218,25 +203,21 @@ class T3DSubmodelProperties(bpy.types.PropertyGroup):
         min=0,
         max=255,
     )
-
     wire: BoolProperty(
         name='Wire',
         default=False,
     )
-
     wire_size: FloatProperty(
         name="Size",
         min=0,
         default=1
     )
-
     opacity: FloatProperty(
         name='Opacity',
         min=0,
         max=1,
         default=1
     )
-
     replacableskin_id: EnumProperty(
         name='Skin',
         default='None',
@@ -247,31 +228,26 @@ class T3DSubmodelProperties(bpy.types.PropertyGroup):
             ('-3', '-3', ''),
             ('-4', '-4', '')]
     )
-
     use_normals: BoolProperty(
         name="Use explicit normals",
         default=False
     )
-
     use_near_atten: BoolProperty(
         name='UseNearAtten',
         default=False,
     )
-
     near_atten_start: FloatProperty(
         name='NearAttenStart',
         default=40,
         min=0,
         unit='LENGTH'
     )
-
     near_atten_end: FloatProperty(
         name='NearAttenEnd',
         default=0,
         min=0,
         unit='LENGTH'
     )
-
     far_atten_decay_type: IntProperty(
         name='FarAttenDecayType',
         default=1,

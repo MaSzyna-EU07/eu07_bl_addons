@@ -146,7 +146,7 @@ class _TerrainBuilder:
 
         for map_ in self._maps:
             map_ = map_.lstrip("@").split(":")[0]
-            abspath = self._config["asset_searcher"].textures_finder.find(map_)
+            abspath = self._config["asset_searcher"].textures.find(map_)
             material = create_material_from_path(map_, abspath)
 
             self._terrain_object.data.materials.append(material)

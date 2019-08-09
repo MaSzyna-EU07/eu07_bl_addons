@@ -1,11 +1,38 @@
 import math
 import abc
+from pathlib import Path
 
 import bpy
 import bmesh
 import eu07_tools
 
-def build_submodel_from_object(obj, config):
+def export_model(objects, file, config):
+        root = config["root"]
+
+        t3d = [
+            _build_submodel(obj, config) for obj in objects
+        ]
+
+        
+
+        for collection in bpy.data.collections:
+
+            if self.include_export_mode == "EXPORT_TO_FILES":
+                if collection.name.startswith("include"):
+                    outpath = Path(root, collection.name.split(" ")[1])
+                    with open(outpath, "w", encoding="windows-1250", newline="\r\n"):
+                        export_model(collection.all_objects, outpath, config)
+
+            
+        for collection in bpy.data.collections:
+            path, *parameters = collection.name.split(" ")[1:-1]
+            include = eu07_tools.t3d.create_include(path, parameters)
+            t3d.append(include)
+
+        with open(self.filepath, "w", encoding="windows-1250", newline="\r\n") as outfile:
+            eu07_tools.t3d.dump(t3d, outfile)
+
+def _build_submodel(obj, config):
     builder = _get_builder(obj, config)
     
     builder.set_parent()
