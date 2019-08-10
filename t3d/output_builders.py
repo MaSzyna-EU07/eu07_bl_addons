@@ -7,6 +7,7 @@ import bmesh
 import eu07_tools
 
 def export_model(objects, collections, file, config):
+    
     objects = _sort_objects(objects)
 
     if config.use_selection:
@@ -22,9 +23,9 @@ def export_model(objects, collections, file, config):
 
             if config.export_include_collections:
                 outpath = Path(config.root, collection.name.replace("\\", "/").split(" ")[1])
-                with open(outpath, "w+", encoding="windows-1250", newline="\r\n"):
-                    export_model(collection.objects, collection.children, outpath, config)
-
+                with open(outpath, "w+", encoding="windows-1250", newline="\r\n") as inc_file:
+                    export_model(collection.objects, collection.children, inc_file, config)
+                    
     eu07_tools.t3d.dump(t3d, file)
 
 def _sort_objects(objects):
@@ -157,7 +158,6 @@ class MeshOutputBuilder(SubmodelOutputBuilder):
             if mtl.use_nodes:
                 texture_node = mtl.node_tree.nodes.get("texture_diffuse")
                 if texture_node:
-                    print(texture_node.image.filepath)
                     self.submodel.map = eu07_tools.utils.shorten_asset_path(
                         texture_node.image.filepath
                     )
