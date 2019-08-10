@@ -30,10 +30,16 @@ def export_model(collection, file, config):
     eu07_tools.t3d.dump(t3d, file)
 
 def _sort_objects(collection):
+    objects = [
+        o for o in collection.objects 
+        if o.type == 'MESH'
+        or (o.type == 'LAMP' and o.data.type == 'SPOT')
+        or (o.type == 'EMPTY')
+        
+    ]
     output = []
 
-    # WARNING: NOT SURE IF IT'S OK
-    root_level_objects = [o for o in collection.objects if o.parent and (o.parent.name not in collection)]
+    root_level_objects = [o for o in objects if o.parent and (o.parent.name not in collection)]
     for o in root_level_objects:
         output.append(o)
         output.extend(_get_descendants(o))
