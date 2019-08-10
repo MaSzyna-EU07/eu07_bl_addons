@@ -95,7 +95,6 @@ class SubmodelInputBuilder(abc.ABC):
         self.obj.parent = bpy.data.objects.get(parent_name)
 
     def set_diffuse(self, diffuse):
-        print(diffuse)
         self.obj.t3d_properties.diffuse_color = diffuse
 
     def set_selfillum(self, selfillum):

@@ -76,7 +76,7 @@ class T3DImport(bpy.types.Operator, ImportHelper):
         config = Config(self.report, root, skins, asset_searcher, self.load_includes)
 
         with open(self.filepath, "r", encoding="latin-1") as file:
-            collection = bpy.data.collections.new(Path(self.filepath).stem)
+            collection = bpy.data.collections.new("T3D")
             bpy.context.scene.collection.children.link(collection)
 
             elements = eu07_tools.t3d.load(file)
@@ -113,9 +113,6 @@ class T3DExport(bpy.types.Operator, ExportHelper):
             "root use_selection export_include_collections use_modifiers"
         )
 
-        # TODO: Export non-included by default?
-        
-
         config = Config(
             get_root(self.filepath),
             self.use_selection, 
@@ -123,16 +120,14 @@ class T3DExport(bpy.types.Operator, ExportHelper):
             self.use_modifiers
         )
 
-        objects = bpy.context.selected_objects if self.use_selection else bpy.context.collection.all_objects
+        try:
+            collection = bpy.data.collections["T3D"]
+        except KeyError:
+            self.report({'ERROR'}, "Can't export T3D model. No \"T3D\" collection.")
+            return {'CANCELLED'}
 
-        objects = [
-            o for o in objects 
-            if o.type == 'MESH' or 
-            (o.type == 'LIGHT' and o.data.type == 'SPOT') or
-            (o.type == 'EMPTY')
-        ]
-
-        self._export_to_filepath(objects, self.filepath, config)
+        with open(self.filepath, "w+", encoding="windows-1250", newline="\r\n") as file:
+            export_model(collection.objects, collection.children, file, config)
 
         return {'FINISHED'}
 

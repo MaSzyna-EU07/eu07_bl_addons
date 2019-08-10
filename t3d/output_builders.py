@@ -6,31 +6,42 @@ import bpy
 import bmesh
 import eu07_tools
 
-def export_model(objects, file, config):
-        root = config["root"]
+def export_model(objects, collections, file, config):
+    objects = _sort_objects(objects)
 
-        t3d = [
-            _build_submodel(obj, config) for obj in objects
-        ]
+    if config.use_selection:
+        t3d = [_build_submodel(o, config) for o in objects if o.select]
+    else:
+        t3d = [_build_submodel(o, config) for o in objects]
 
-        
-
-        for collection in bpy.data.collections:
-
-            if self.include_export_mode == "EXPORT_TO_FILES":
-                if collection.name.startswith("include"):
-                    outpath = Path(root, collection.name.split(" ")[1])
-                    with open(outpath, "w", encoding="windows-1250", newline="\r\n"):
-                        export_model(collection.all_objects, outpath, config)
-
-            
-        for collection in bpy.data.collections:
+    for collection in collections:
+        if collection.name.startswith("include"):
             path, *parameters = collection.name.split(" ")[1:-1]
             include = eu07_tools.t3d.create_include(path, parameters)
             t3d.append(include)
 
-        with open(self.filepath, "w", encoding="windows-1250", newline="\r\n") as outfile:
-            eu07_tools.t3d.dump(t3d, outfile)
+            if config.export_include_collections:
+                outpath = Path(config.root, collection.name.replace("\\", "/").split(" ")[1])
+                with open(outpath, "w+", encoding="windows-1250", newline="\r\n"):
+                    export_model(collection.objects, collection.children, outpath, config)
+
+    eu07_tools.t3d.dump(t3d, file)
+
+def _sort_objects(objects):
+    output = []
+
+    root_level_objects = [o for o in objects if o.parent is None]
+    for o in root_level_objects:
+        output.append(o)
+        output.extend(_get_descendants(o))
+
+    return output
+
+def _get_descendants(o):
+    for c in o.children:
+        yield c
+        yield from _get_descendants(c)
+        
 
 def _build_submodel(obj, config):
     builder = _get_builder(obj, config)
@@ -146,6 +157,7 @@ class MeshOutputBuilder(SubmodelOutputBuilder):
             if mtl.use_nodes:
                 texture_node = mtl.node_tree.nodes.get("texture_diffuse")
                 if texture_node:
+                    print(texture_node.image.filepath)
                     self.submodel.map = eu07_tools.utils.shorten_asset_path(
                         texture_node.image.filepath
                     )
