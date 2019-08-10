@@ -6,32 +6,33 @@ import bpy
 import bmesh
 import eu07_tools
 
-def export_model(objects, collections, file, config):
+def export_model(collection, file, config):
     
-    objects = _sort_objects(objects)
+    objects = _sort_objects(collection)
 
     if config.use_selection:
         t3d = [_build_submodel(o, config) for o in objects if o.select]
     else:
         t3d = [_build_submodel(o, config) for o in objects]
 
-    for collection in collections:
-        if collection.name.startswith("include"):
-            path, *parameters = collection.name.split(" ")[1:-1]
+    for subcollection in collection.children:
+        if subcollection.name.startswith("include"):
+            path, *parameters = subcollection.name.split(" ")[1:-1]
             include = eu07_tools.t3d.create_include(path, parameters)
             t3d.append(include)
 
             if config.export_include_collections:
-                outpath = Path(config.root, collection.name.replace("\\", "/").split(" ")[1])
+                outpath = Path(config.root, subcollection.name.replace("\\", "/").split(" ")[1])
                 with open(outpath, "w+", encoding="windows-1250", newline="\r\n") as inc_file:
-                    export_model(collection.objects, collection.children, inc_file, config)
-                    
+                    export_model(subcollection, inc_file, config)
+
     eu07_tools.t3d.dump(t3d, file)
 
-def _sort_objects(objects):
+def _sort_objects(collection):
     output = []
 
-    root_level_objects = [o for o in objects if o.parent is None]
+    # WARNING: NOT SURE IF IT'S OK
+    root_level_objects = [o for o in collection.objects if o.parent and (o.parent.name not in collection)]
     for o in root_level_objects:
         output.append(o)
         output.extend(_get_descendants(o))

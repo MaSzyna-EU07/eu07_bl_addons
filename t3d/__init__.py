@@ -127,7 +127,7 @@ class T3DExport(bpy.types.Operator, ExportHelper):
             return {'CANCELLED'}
 
         with open(self.filepath, "w+", encoding="windows-1250", newline="\r\n") as file:
-            export_model(collection.objects, collection.children, file, config)
+            export_model(collection, file, config)
 
         return {'FINISHED'}
 
