@@ -70,7 +70,7 @@ class E3DImport(bpy.types.Operator, ImportHelper):
             e3d = eu07_tools.e3d.load(infile)
             t3d = list(eu07_tools.utils.e3d_to_t3d(e3d))
 
-            collection = bpy.data.collections.new(Path(self.filepath).stem)
+            collection = bpy.data.collections.new("T3D")
             bpy.context.scene.collection.children.link(collection)
             eu07_bl_addons.t3d.input_builders.import_model(t3d, collection, config)
 
