@@ -12,7 +12,7 @@ from bpy.props import PointerProperty, StringProperty
 
 from .t3d import T3DExport, T3DImport, T3DSubmodelProperties, T3DSubmodelPropertiesPanel
 from .scn import SCNImport, SCNExport, LoadBasemapOperator, EU07SceneryProperties, LoadBasemapPanel
-from .mat import MATImport
+#from .mat import MATImport
 from .e3d import E3DImport
 
 class EU07AddonPreferences(bpy.types.AddonPreferences):
@@ -45,7 +45,7 @@ classes = (
         T3DImport,
         T3DSubmodelProperties,
         T3DSubmodelPropertiesPanel,
-        MATImport,
+        #MATImport,
         SCNImport,
         SCNExport,
         LoadBasemapOperator,

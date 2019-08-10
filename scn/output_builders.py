@@ -5,6 +5,7 @@ import bpy
 import eu07_tools
 from eu07_bl_addons.common import get_root
 
+
 def create_node_triangles_from_mesh(mesh):
     bm = bmesh.new()
     bm.from_mesh(mesh)

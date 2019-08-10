@@ -1,8 +1,8 @@
-import bpy
 import bmesh
-
-from eu07_bl_addons.common import create_material_from_path
+import bpy
 import eu07_tools
+from eu07_bl_addons.common import create_material_from_path
+
 # This is spaghetti, written for experimental purposes - needs to be refactored
 
 
@@ -150,4 +150,3 @@ class _TerrainBuilder:
             material = create_material_from_path(map_, abspath)
 
             self._terrain_object.data.materials.append(material)
-            

@@ -1,10 +1,11 @@
-import math
 import abc
+import math
 from pathlib import Path
 
-import bpy
 import bmesh
+import bpy
 import eu07_tools
+
 
 def export_model(collection, file, config):
     

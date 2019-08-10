@@ -4,11 +4,10 @@ import os
 import warnings
 from pathlib import Path
 
-import eu07_tools
-from eu07_bl_addons.common import create_material_from_path
-
 import bmesh
 import bpy
+import eu07_tools
+from eu07_bl_addons.common import create_material_from_path
 
 
 def import_model(elements, collection, config):
@@ -221,4 +220,3 @@ class StarsInputBuilder(SubmodelInputBuilder):
 
                 star_obj.location = star.location
                 star_obj.color = star.rgb_color
-

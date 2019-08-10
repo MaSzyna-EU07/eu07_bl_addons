@@ -1,16 +1,13 @@
 import collections
+from pathlib import Path
 
 import bpy
-from bpy.props import (
-    StringProperty, EnumProperty, BoolProperty, 
-    FloatProperty, IntProperty, FloatVectorProperty
-)
-from bpy_extras.io_utils import ImportHelper, ExportHelper
-
-from pathlib import Path
 import eu07_bl_addons
-
 import eu07_tools
+from bpy.props import (BoolProperty, EnumProperty, FloatProperty,
+                       FloatVectorProperty, IntProperty, StringProperty)
+from bpy_extras.io_utils import ExportHelper, ImportHelper
+
 
 class E3DImport(bpy.types.Operator, ImportHelper):
     bl_idname = "import_scene.e3d"

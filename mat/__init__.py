@@ -24,7 +24,7 @@ class MATImport(bpy.types.Operator, ImportHelper):
         self.asset_searcher = eu07_tools.utils.AssetSearcher(
             root, Path(self.filepath).parent
         )
-        self.asset_searcher.textures_finder.remove_extension(".mat")
+        self.asset_searcher.textures.remove_extension(".mat")
 
         mat_name = "[MAT]" + str(Path(self.filepath).relative_to(Path(root, "textures")))
         self.bl_mat = bpy.data.materials.new(mat_name)
