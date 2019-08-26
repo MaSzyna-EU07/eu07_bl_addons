@@ -75,10 +75,9 @@ class T3DImport(bpy.types.Operator, ImportHelper):
 
         config = Config(self.report, root, skins, asset_searcher, self.load_includes)
 
-        with open(self.filepath, "r", encoding="latin-1") as file:
-            collection = bpy.data.collections.new("T3D")
-            bpy.context.scene.collection.children.link(collection)
+        collection = bpy.context.scene.collection
 
+        with open(self.filepath, "r", encoding="latin-1") as file:
             elements = eu07_tools.t3d.load(file)
             import_model(elements, collection, config)
         
@@ -120,11 +119,7 @@ class T3DExport(bpy.types.Operator, ExportHelper):
             self.use_modifiers
         )
 
-        try:
-            collection = bpy.data.collections["T3D"]
-        except KeyError:
-            self.report({'ERROR'}, "Can't export T3D model. No \"T3D\" collection.")
-            return {'CANCELLED'}
+        collection = bpy.context.scene.collection
 
         with open(self.filepath, "w+", encoding="windows-1250", newline="\r\n") as file:
             export_model(collection, file, config)

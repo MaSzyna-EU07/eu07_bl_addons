@@ -25,7 +25,7 @@ class SCNImport(bpy.types.Operator, ImportHelper):
         asset_searcher = eu07_tools.utils.AssetSearcher(
             root, Path(self.filepath).parent
         )
-        asset_searcher.textures_finder.remove_extension(".mat")
+        asset_searcher.textures.remove_extension(".mat")
 
         config = {
             "asset_searcher": asset_searcher
@@ -50,6 +50,10 @@ class SCNExport(bpy.types.Operator, ExportHelper):
     filter_glob: StringProperty(
         default="*.scn;*.scm;*.inc",
         options={'HIDDEN'}
+    )
+    use_selection: BoolProperty(
+        name="Use selection",
+        default=False
     )
 
     def execute(self, context):

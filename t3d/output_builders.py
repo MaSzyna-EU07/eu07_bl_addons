@@ -11,8 +11,10 @@ def export_model(collection, file, config):
     
     objects = _sort_objects(collection)
 
+    print(objects)
+
     if config.use_selection:
-        t3d = [_build_submodel(o, config) for o in objects if o.select]
+        t3d = [_build_submodel(o, config) for o in objects if o.select_get()]
     else:
         t3d = [_build_submodel(o, config) for o in objects]
 
@@ -35,14 +37,13 @@ def _sort_objects(collection):
         if o.type == 'MESH'
         or (o.type == 'LAMP' and o.data.type == 'SPOT')
         or (o.type == 'EMPTY')
-        
     ]
     output = []
 
-    root_level_objects = [o for o in objects if o.parent and (o.parent.name not in collection)]
-    for o in root_level_objects:
-        output.append(o)
-        output.extend(_get_descendants(o))
+    for o in objects:
+        if (o.parent and o.parent.name not in collection) or not o.parent:
+            output.append(o)
+            output.extend(_get_descendants(o))
 
     return output
 
