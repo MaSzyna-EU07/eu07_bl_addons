@@ -7,6 +7,9 @@ bl_info = {
     "category": "Import/Export"
 }
 
+import sys, os
+sys.path.append(os.path.dirname(__file__))
+
 import bpy
 from bpy.props import PointerProperty, StringProperty
 

@@ -38,6 +38,10 @@ class T3DImport(bpy.types.Operator, ImportHelper):
     skin_4: StringProperty(
         name="Skin #4",
     )
+    allow_duplicated_materials: BoolProperty(
+        name="Duplicate materials",
+        default=False
+    )
     default_ext: EnumProperty(
         name="Default texture extension",
         default=".tga",
@@ -54,14 +58,14 @@ class T3DImport(bpy.types.Operator, ImportHelper):
     )
 
     def execute(self, context):
-        Config = collections.namedtuple("Config", "report_func root skins asset_searcher load_includes")
+        Config = collections.namedtuple("Config", "report_func root skins asset_searcher load_includes allow_duplicated_materials")
 
         skins = {
             "replacableskin": self.skin_1,
             "-1": self.skin_1, 
             "-2": self.skin_2, 
             "-3": self.skin_3, 
-            "-4": self.skin_4
+            "-4": self.skin_4,
         }
 
         root = get_root(self.filepath)
@@ -73,7 +77,7 @@ class T3DImport(bpy.types.Operator, ImportHelper):
         asset_searcher.textures.remove_extension(".mat")
         asset_searcher.textures.set_extension_priority(self.default_ext, 1)
 
-        config = Config(self.report, root, skins, asset_searcher, self.load_includes)
+        config = Config(self.report, root, skins, asset_searcher, self.load_includes, self.allow_duplicated_materials)
 
         collection = bpy.context.scene.collection
 

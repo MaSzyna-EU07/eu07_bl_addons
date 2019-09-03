@@ -8,10 +8,7 @@ import eu07_tools
 
 
 def export_model(collection, file, config):
-    
     objects = _sort_objects(collection)
-
-    print(objects)
 
     if config.use_selection:
         t3d = [_build_submodel(o, config) for o in objects if o.select_get()]
@@ -28,6 +25,8 @@ def export_model(collection, file, config):
                 outpath = Path(config.root, subcollection.name.replace("\\", "/").split(" ")[1])
                 with open(outpath, "w+", encoding="windows-1250", newline="\r\n") as inc_file:
                     export_model(subcollection, inc_file, config)
+
+    
 
     eu07_tools.t3d.dump(t3d, file)
 

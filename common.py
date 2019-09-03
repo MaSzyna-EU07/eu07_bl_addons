@@ -1,3 +1,5 @@
+from pathlib import Path
+
 import bpy
 import eu07_tools
 
@@ -12,7 +14,12 @@ def get_root(abspath):
 
     return root
 
-def create_material_from_path(name, abspath):
+def create_material_from_path(abspath, duplicates_allowed):
+    name = Path(abspath).with_suffix("").name
+
+    if not duplicates_allowed and name in bpy.data.materials:
+        return bpy.data.materials[name]
+
     # TODO: Load materials from .mat
     try:
         img = bpy.data.images.load(abspath, check_existing=True)

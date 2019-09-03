@@ -147,7 +147,9 @@ class MeshInputBuilder(SubmodelInputBuilder):
         else:
             full_path = self._config.asset_searcher.textures.find(map_)
 
-        self.obj.active_material = create_material_from_path(map_, full_path)
+        if full_path:
+            duplicates_allowed = self._config.allow_duplicated_materials
+            self.obj.active_material = create_material_from_path(full_path, duplicates_allowed)
 
     def set_geometry(self, geometry):
         bm = bmesh.new()
