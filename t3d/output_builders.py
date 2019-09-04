@@ -8,9 +8,7 @@ import eu07_tools
 
 
 def export_model(collection, file, config):
-    objects = _sort_objects(collection)
-
-    print(objects)
+    objects = HierarchyMaker(collection).make_hierarchy()
 
     if config.use_selection:
         t3d = [_build_submodel(o, config) for o in objects if o.select_get()]
@@ -30,37 +28,43 @@ def export_model(collection, file, config):
 
     eu07_tools.t3d.dump(t3d, file)
 
-def _sort_objects(collection):
-    objects = _filter_objects(collection.objects)
-    output = []
 
-    for o in objects:
-        if is_orphan(o, collection):
-            print(o)
-            output.append(o)
-            output.extend(_get_descendants(o))
+class HierarchyMaker:
+    def __init__(self, collection):
+        self._collection = collection
 
-    return output
+    def make_hierarchy(self):
+        objects = self._filter_objects(self._collection.objects)
 
-def is_orphan(o, collection):
-    has_parent = o.parent
-    parent_not_in_collection = o.parent and (o.parent.name not in collection.objects)
+        for o in objects:
+            if self._is_orphan(o):
+                yield from self._sort_branch(o)
 
-    return (not has_parent) or (has_parent and parent_not_in_collection)
+    def _sort_branch(self, first):
+        yield first
 
-def _filter_objects(objects):
-    return (
-        o for o in objects 
-        if o.type == 'MESH'
-        or (o.type == 'LAMP' and o.data.type == 'SPOT')
-        or (o.type == 'EMPTY' and any(c.type == "LAMP" and c.data.type == "POINT" for c in o.children))
-    )
+        children = self._filter_objects(first.children)
+        for child in children:
+            yield from self._sort_branch(child)
 
-def _get_descendants(o):
-    for c in _filter_objects(o.children):
-        yield c
-        yield from _get_descendants(c)
-        
+    def _is_orphan(self, o):
+        has_parent = o.parent
+        parent_not_in_collection = o.parent and (o.parent.name not in self._collection.objects)
+
+        return (not has_parent) or (has_parent and parent_not_in_collection)
+
+    def _filter_objects(self, objects):
+        for o in objects:
+            is_mesh = (o.type == 'MESH')
+            is_freespotlight = (o.type == 'LIGHT' and o.data.type == 'SPOT')
+
+            is_stars_container = (o.type == 'EMPTY' and o.empty_display_type == "PLAIN_AXES")
+            has_star_child = (any(c.type == "LIGHT" and c.data.type == "POINT" for c in o.children))
+            is_stars = is_stars_container and has_star_child
+
+            if is_mesh or is_freespotlight or is_stars:
+                yield o
+
 
 def _build_submodel(obj, config):
     builder = _get_builder(obj, config)
