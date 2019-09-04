@@ -10,6 +10,8 @@ import eu07_tools
 def export_model(collection, file, config):
     objects = _sort_objects(collection)
 
+    print(objects)
+
     if config.use_selection:
         t3d = [_build_submodel(o, config) for o in objects if o.select_get()]
     else:
@@ -26,28 +28,36 @@ def export_model(collection, file, config):
                 with open(outpath, "w+", encoding="windows-1250", newline="\r\n") as inc_file:
                     export_model(subcollection, inc_file, config)
 
-    
-
     eu07_tools.t3d.dump(t3d, file)
 
 def _sort_objects(collection):
-    objects = [
-        o for o in collection.objects 
-        if o.type == 'MESH'
-        or (o.type == 'LAMP' and o.data.type == 'SPOT')
-        or (o.type == 'EMPTY')
-    ]
+    objects = _filter_objects(collection.objects)
     output = []
 
     for o in objects:
-        if (o.parent and o.parent.name not in collection) or not o.parent:
+        if is_orphan(o, collection):
+            print(o)
             output.append(o)
             output.extend(_get_descendants(o))
 
     return output
 
+def is_orphan(o, collection):
+    has_parent = o.parent
+    parent_not_in_collection = o.parent and (o.parent.name not in collection.objects)
+
+    return (not has_parent) or (has_parent and parent_not_in_collection)
+
+def _filter_objects(objects):
+    return (
+        o for o in objects 
+        if o.type == 'MESH'
+        or (o.type == 'LAMP' and o.data.type == 'SPOT')
+        or (o.type == 'EMPTY' and any(c.type == "LAMP" and c.data.type == "POINT" for c in o.children))
+    )
+
 def _get_descendants(o):
-    for c in o.children:
+    for c in _filter_objects(o.children):
         yield c
         yield from _get_descendants(c)
         
