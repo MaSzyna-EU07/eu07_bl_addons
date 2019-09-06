@@ -30,6 +30,10 @@ class E3DImport(bpy.types.Operator, ImportHelper):
     skin_4: StringProperty(
         name="Skin #4",
     )
+    allow_duplicated_materials: BoolProperty(
+        name="Duplicate materials",
+        default=False
+    )
     default_ext: EnumProperty(
         name="Default texture extension",
         default=".tga",
@@ -42,7 +46,7 @@ class E3DImport(bpy.types.Operator, ImportHelper):
     )
 
     def execute(self, context):
-        Config = collections.namedtuple("Config", "report_func root skins asset_searcher load_includes")
+        Config = collections.namedtuple("Config", "report_func root skins asset_searcher load_includes allow_duplicated_materials")
 
         skins = {
             "replacableskin": self.skin_1,
@@ -61,14 +65,13 @@ class E3DImport(bpy.types.Operator, ImportHelper):
         asset_searcher.textures.remove_extension(".mat")
         asset_searcher.textures.set_extension_priority(self.default_ext, 1)
 
-        config = Config(self.report, root, skins, asset_searcher, False)
+        config = Config(self.report, root, skins, asset_searcher, False, self.allow_duplicated_materials)
 
         with open(self.filepath, "rb") as infile:
             e3d = eu07_tools.e3d.load(infile)
             t3d = list(eu07_tools.utils.e3d_to_t3d(e3d))
 
-            collection = bpy.data.collections.new("T3D")
-            bpy.context.scene.collection.children.link(collection)
+            collection = bpy.context.scene.collection
             eu07_bl_addons.t3d.input_builders.import_model(t3d, collection, config)
 
         return {'FINISHED'}

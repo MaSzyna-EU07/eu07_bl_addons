@@ -1,3 +1,5 @@
+from pathlib import Path
+
 import bmesh
 import bpy
 import eu07_tools

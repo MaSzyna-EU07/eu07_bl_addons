@@ -106,8 +106,8 @@ def _get_builder(obj, config):
         c = MeshOutputBuilder
     elif obj.type == 'LIGHT' and obj.data.type == 'SPOT':
         c = FreeSpotLightOutputBuilder
-    elif obj.type == 'EMPTY':
-        pass
+    elif obj.type == 'EMPTY' and obj.empty_display_type == "PLAIN_AXES":
+        c = StarsOutputBuilder
     else:
         return None
 
@@ -263,10 +263,13 @@ class StarsOutputBuilder(SubmodelOutputBuilder):
         self.submodel = eu07_tools.t3d.create_submodel("Stars", obj.name)
 
     def set_geometry(self):
-        stars = [
+        points = [
             c for c in self.obj.children 
-            if c.type == 'LAMP' and c.data.type == 'POINT'
+            if c.type == 'LIGHT' and c.data.type == 'POINT'
         ]
 
-        for star in stars:
-            self.submodel.stars.new(star.location, star.data.color)
+        for point in points:
+            self.submodel.stars.new(
+                point.location, 
+                [x * 255 for x in point.data.color[:3]]
+            )

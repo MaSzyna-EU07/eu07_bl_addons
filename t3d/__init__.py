@@ -217,7 +217,7 @@ class T3DSubmodelProperties(bpy.types.PropertyGroup):
         name='Skin',
         default='None',
         items=[
-            ('None', 'None', ''),
+            ('None', 'From Material', ''),
             ('-1', '-1', ''),
             ('-2', '-2', ''),
             ('-3', '-3', ''),

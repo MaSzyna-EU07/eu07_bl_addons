@@ -46,6 +46,7 @@ def _build_object(submodel, config):
     builder.set_min_distance(submodel.min_distance)
     builder.set_transform(submodel.transform)
 
+
     if submodel.type == 'Mesh':
         builder.set_ambient(submodel.ambient_color)
         builder.set_specular(submodel.specular_color)
@@ -142,6 +143,9 @@ class MeshInputBuilder(SubmodelInputBuilder):
     def set_map(self, map_: str):
         if map_ in ["-1", "-2", "-3", "-4", "replacableskin"]:
             full_path = self._config.skins[map_]
+            if map_ == "replacableskin":
+                map_ = "-1"
+            self.obj.t3d_properties.replacableskin_id = map_
         elif map_ == "none":
             full_path = ""
         else:
@@ -208,17 +212,22 @@ class FreeSpotLightInputBuilder(SubmodelInputBuilder):
 
 
 class StarsInputBuilder(SubmodelInputBuilder):
+    def __init__(self, config):
+        super().__init__(config)
+
     def create_submodel(self, name: str):
         self.obj = bpy.data.objects.new(name, None)
 
     def set_geometry(self, geometry):
         for star in geometry:
-                point = bpy.data.lamps.new(
+                point = bpy.data.lights.new(
                     f"{self.obj.name}.star",
                     'POINT'
                 )
                 star_obj = bpy.data.objects.new(point.name, point)
-                bpy.context.scene.objects.link(star)
+                star_obj.parent = self.obj
+                # TODO: Link to parent's collection
+                bpy.context.scene.collection.objects.link(star_obj)
 
                 star_obj.location = star.location
-                star_obj.color = star.rgb_color
+                star_obj.data.color = [a / 255 for a in star.rgb_color]
