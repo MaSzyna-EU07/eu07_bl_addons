@@ -4,7 +4,7 @@ import bpy
 import eu07_tools
 
 
-def get_root(abspath):
+def get_root(abspath=""):
     try:
         root = eu07_tools.utils.find_asset_root(abspath)
     except ValueError:

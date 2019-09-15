@@ -51,9 +51,9 @@ classes = (
         #MATImport,
         SCNImport,
         SCNExport,
-        #LoadBasemapOperator,
-        #LoadBasemapPanel,
-        #EU07SceneryProperties,
+        LoadBasemapOperator,
+        LoadBasemapPanel,
+        EU07SceneryProperties,
         E3DImport
 )
 
@@ -62,7 +62,7 @@ def register():
         bpy.utils.register_class(c)
 
     bpy.types.Object.t3d_properties = PointerProperty(type=T3DSubmodelProperties)
-    #bpy.types.Scene.eu07_properties = PointerProperty(type=EU07SceneryProperties)
+    bpy.types.Scene.eu07_properties = PointerProperty(type=EU07SceneryProperties)
 
     bpy.types.TOPBAR_MT_file_import.append(menu_func_import)
     bpy.types.TOPBAR_MT_file_export.append(menu_func_export)
