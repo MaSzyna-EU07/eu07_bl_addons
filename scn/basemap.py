@@ -67,8 +67,6 @@ class LoadBasemapOperator(bpy.types.Operator):
                 quad.empty_display_type = 'IMAGE'
                 quad.show_empty_image_orthographic = True
                 quad.empty_display_size = 100
-                quad.use_empty_image_alpha = True
-                quad.color[3] = 0.5 # Transparency level
 
                 image = bpy.data.images.load(str(dirpath / filename), check_existing=True)
                 image.name = basemap_name
@@ -77,7 +75,7 @@ class LoadBasemapOperator(bpy.types.Operator):
                 quad.location.x = image_loc.x
                 quad.location.y = image_loc.y
 
-                bpy.context.scene.collection.objects.link(quad)
+                collection.objects.link(quad)
         
         return {'FINISHED'}
 
