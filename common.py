@@ -14,6 +14,7 @@ def get_root(abspath=""):
 
     return root
 
+
 def create_material_from_path(abspath, duplicates_allowed):
     name = Path(abspath).with_suffix("").name
 

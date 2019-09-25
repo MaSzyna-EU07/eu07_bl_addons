@@ -84,6 +84,7 @@ class _TracksBuilder:
             tracks_object = bpy.data.objects.new(
                 f"tracks: {trackbed_profile}", bpy.data.curves.new(f"tracks: {trackbed_profile}", 'CURVE')
             )
+            tracks_object.data.dimensions = "3D"
             bpy.context.scene.collection.objects.link(tracks_object)
 
             trackbed_object = create_trackbed(track, trackbed_profile)
@@ -94,9 +95,10 @@ class _TracksBuilder:
         spline = tracks_object.data.splines.new('BEZIER')
         spline.use_smooth = False
         
+
         spline.bezier_points.add(1)
         spline.bezier_points[0].co = eu07_tools.utils.switch_coordinate_system(track.p1)
-        spline.bezier_points[0].handle_left = eu07_tools.utils.switch_coordinate_system(track.p2)
+        spline.bezier_points[0].handle_left = eu07_tools.utils.switch_coordinate_system(track.p1)
         spline.bezier_points[0].handle_right = eu07_tools.utils.switch_coordinate_system(track.p1 + track.cv1)
 
         spline.bezier_points[1].co = eu07_tools.utils.switch_coordinate_system(track.p2) 
@@ -106,6 +108,7 @@ class _TracksBuilder:
         if track.is_junction:
             spline = tracks_object.data.splines.new('BEZIER')
             spline.use_smooth = False
+
 
             spline.bezier_points.add(1)
             spline.bezier_points[0].co = eu07_tools.utils.switch_coordinate_system(track.p3)
@@ -123,6 +126,7 @@ def create_trackbed(track, profile):
     bed_slope = track.geometry_param3
     
     curve = bpy.data.curves.new(f"trackbed: {profile}", 'CURVE')
+    curve.dimensions = "3D"
     obj = bpy.data.objects.new(f"trackbed: {profile}", curve)
     
     obj.location = (0, 0, 0)
@@ -132,10 +136,11 @@ def create_trackbed(track, profile):
     spline.resolution_u = 1
     spline.resolution_v = 1
     spline.bezier_points.add(3)
-    spline.bezier_points[0].co = (track.width/2 + bed_width + bed_slope, 0, 0)
-    spline.bezier_points[1].co = (track.width/2 + bed_width, bed_height, 0)
-    spline.bezier_points[2].co = (-track.width/2 - bed_width, bed_height, 0)
-    spline.bezier_points[3].co = (-track.width/2 - bed_width - bed_slope, 0, 0)
+
+    spline.bezier_points[0].co = (track.width/2 + bed_width + bed_slope, -bed_height, 0)
+    spline.bezier_points[1].co = (track.width/2 + bed_width, 0, 0)
+    spline.bezier_points[2].co = (-track.width/2 - bed_width, 0, 0)
+    spline.bezier_points[3].co = (-track.width/2 - bed_width - bed_slope, -bed_height, 0)
 
     return obj
 
@@ -186,6 +191,6 @@ class _TerrainBuilder:
         for map_ in self._maps:
             map_ = map_.lstrip("@").split(":")[0]
             abspath = self._config["asset_searcher"].textures.find(map_)
-            material = create_material_from_path(map_, abspath)
+            material = create_material_from_path(abspath, False)
 
             self._terrain_object.data.materials.append(material)
