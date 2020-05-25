@@ -177,12 +177,18 @@ class MeshOutputBuilder(SubmodelOutputBuilder):
             return
 
         if mtl:
-            if mtl.use_nodes:
-                texture_node = mtl.node_tree.nodes.get("texture_diffuse")
-                if texture_node:
-                    self.submodel.map = eu07_tools.utils.shorten_asset_path(
-                        texture_node.image.filepath
-                    )
+          if mtl.use_nodes:
+                dif = mtl.node_tree.nodes['Principled BSDF'] #Or your group's name
+                socket = dif.inputs[0] #It's first input socket
+                try:
+                    #Get the link that input to 'dif' and 'socket'
+                    link = next( link for link in mtl.node_tree.links if link.to_node == dif and link.to_socket == socket )
+                    image_node = link.from_node #The node this link is coming from
+                    if image_node.type == 'TEX_IMAGE': #Check if it is an image texture node
+                        image = image_node.image #Get the image
+                        self.submodel.map = eu07_tools.utils.shorten_asset_path(imageNode.image.filepath)
+                except:
+                    return
 
     def set_geometry(self):
         mesh = self.obj.data.copy()
