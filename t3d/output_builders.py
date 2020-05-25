@@ -177,18 +177,16 @@ class MeshOutputBuilder(SubmodelOutputBuilder):
             return
 
         if mtl:
-          if mtl.use_nodes:
-                dif = mtl.node_tree.nodes['Principled BSDF'] #Or your group's name
-                socket = dif.inputs[0] #It's first input socket
-                try:
-                    #Get the link that input to 'dif' and 'socket'
-                    link = next( link for link in mtl.node_tree.links if link.to_node == dif and link.to_socket == socket )
-                    image_node = link.from_node #The node this link is coming from
-                    if image_node.type == 'TEX_IMAGE': #Check if it is an image texture node
-                        image = image_node.image #Get the image
-                        self.submodel.map = eu07_tools.utils.shorten_asset_path(imageNode.image.filepath)
-                except:
-                    return
+            if mtl.use_nodes:
+                # Get the nodes in the node tree
+                nodes = mtl.node_tree.nodes
+                # Get a principled node
+                principled = next(n for n in nodes if n.type == 'BSDF_PRINCIPLED')
+                # Get the slot for 'base color'
+                base_color = principled.inputs['Base Color'] #Or principled.inputs[0]
+                link = base_color.links[0]
+                link_node = link.from_node
+                self.submodel.map = eu07_tools.utils.shorten_asset_path(link_node.image.filepath)
 
     def set_geometry(self):
         mesh = self.obj.data.copy()
@@ -203,32 +201,31 @@ class MeshOutputBuilder(SubmodelOutputBuilder):
 
         smooth_groups = mesh.calc_smooth_groups(use_bitflags=True)[0]
         uv_layer = mesh.uv_layers.active
+        if uv_layer:
+            uv_data = uv_layer.data[:]
         use_normals = self.obj.t3d_properties.use_normals
 
-        for polygon in mesh.polygons:
+        if use_normals:
+            mesh.calc_normals_split()
 
+        for poly in mesh.polygons:
+            smooth = 0
             if use_normals:
                 smooth = -1
-            elif polygon.use_smooth:
-                smooth = smooth_groups[polygon.index]
-            else:
-                smooth = 0
+            elif poly.use_smooth:
+                smooth = smooth_groups[poly.index]
 
             vertices = []
-            for local_vert_idx, global_vert_idx in enumerate(polygon.vertices):
-                vertex = mesh.vertices[global_vert_idx]
 
-                xyz = vertex.co
-                ijk = vertex.normal if use_normals else []
+            for loop_index in poly.loop_indices:
+                loop = mesh.loops[loop_index]
 
-                if uv_layer:
-                    mesh_loop_idx = polygon.loop_indices[local_vert_idx]
-                    uv = uv_layer.data[mesh_loop_idx].uv
-                else:
-                    uv = [0, 0]
-
-                vertices.append((*xyz, *ijk, *uv))
-
+                pos = mesh.vertices[loop.vertex_index].co
+                normal = loop.normal if use_normals else []
+                uv = uv_data[loop_index].uv if uv_layer else [0, 0]
+                
+                vertices.append((*pos, *normal, *uv))
+            
             self.submodel.triangles.new(vertices, smooth)
 
 
