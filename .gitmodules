@@ -1,0 +1,3 @@
+[submodule "eu07_tools"]
+	path = eu07_tools
+	url = git@gitlab.com:krzysiuup/eu07_tools.git
