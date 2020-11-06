@@ -127,7 +127,7 @@ class SubmodelOutputBuilder(abc.ABC):
         )
 
     def set_diffuse(self):
-        self.submodel.diffuse_color = self.obj.t3d_properties.diffuse_color
+        self.submodel.diffuse_color = self.obj.t3d_properties.diffuse_color * 255
 
     def set_anim(self):
         self.submodel.anim = self.obj.t3d_properties.anim
@@ -155,10 +155,10 @@ class MeshOutputBuilder(SubmodelOutputBuilder):
         self.submodel = eu07_tools.t3d.create_submodel("Mesh", obj.name)
 
     def set_ambient(self):
-        self.submodel.ambient_color = self.obj.t3d_properties.ambient_color
+        self.submodel.ambient_color = self.obj.t3d_properties.ambient_color * 255
     
     def set_specular(self):
-        self.submodel.specular_color = self.obj.t3d_properties.specular_color
+        self.submodel.specular_color = self.obj.t3d_properties.specular_color * 255
 
     def set_wire(self):
         self.submodel.wire = self.obj.t3d_properties.wire
@@ -189,10 +189,17 @@ class MeshOutputBuilder(SubmodelOutputBuilder):
                 self.submodel.map = eu07_tools.utils.shorten_asset_path(link_node.image.filepath)
 
     def set_geometry(self):
-        mesh = self.obj.data.copy()
-        self._set_geometry_from_mesh(mesh)
 
-    def _set_geometry_from_mesh(self, mesh):
+        mesh = None
+
+        if (self.config.use_modifiers):
+            depsgraph = bpy.context.evaluated_depsgraph_get()
+            obj_eval = self.obj.evaluated_get(depsgraph)
+
+            mesh = bpy.data.meshes.new_from_object(obj_eval)
+        else:
+            mesh = self.obj.data.copy()
+
         bm = bmesh.new()
         bm.from_mesh(mesh)
         bmesh.ops.triangulate(bm, faces=bm.faces)
@@ -228,6 +235,8 @@ class MeshOutputBuilder(SubmodelOutputBuilder):
             
             self.submodel.triangles.new(vertices, smooth)
 
+        if (self.config.use_modifiers):
+            bpy.data.meshes.remove(mesh)
 
 
 class FreeSpotLightOutputBuilder(SubmodelOutputBuilder):
@@ -236,7 +245,7 @@ class FreeSpotLightOutputBuilder(SubmodelOutputBuilder):
         self.submodel = eu07_tools.t3d.create_submodel("FreeSpotLight", obj.name)
 
     def set_diffuse(self):
-        self.submodel.diffuse = self.obj.data.color
+        self.submodel.diffuse_color = self.obj.data.color * 255
 
     def set_near_atten_start(self):
         self.submodel.near_atten_start = self.obj.t3d_properties.near_atten_start

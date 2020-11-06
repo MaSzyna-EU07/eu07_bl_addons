@@ -173,30 +173,30 @@ class T3DSubmodelProperties(bpy.types.PropertyGroup):
     selfillum: FloatProperty(
         name='SelfIllum',
         default=0,
-        min=-1,
-        max=1,
+        min=0,
+        max=2,
         step=0.01
     )
     ambient_color: FloatVectorProperty(
         name='Ambient',
         subtype='COLOR',
-        default=(255, 255, 255),
+        default=(1, 1, 1),
         min=0,
-        max=255,
+        max=1,
     )
     diffuse_color: FloatVectorProperty(
         name='Diffuse',
         subtype='COLOR',
-        default=(255, 255, 255),
+        default=(1, 1, 1),
         min=0,
-        max=255,
+        max=1,
     )
     specular_color: FloatVectorProperty(
         name='Specular',
         subtype='COLOR',
-        default=(255, 255, 255),
+        default=(1, 1, 1),
         min=0,
-        max=255,
+        max=1,
     )
     wire: BoolProperty(
         name='Wire',
@@ -284,10 +284,10 @@ class T3DSubmodelPropertiesPanel(bpy.types.Panel):
         selfillum_r = self.layout.row()
         selfillum_r.prop(self.obj.t3d_properties, "selfillum")
 
-        diffuse_r = self.layout.row()
-        diffuse_r.prop(self.obj.t3d_properties, "diffuse_color")
-
         if (self.obj_is_mesh):
+            diffuse_r = self.layout.row()
+            diffuse_r.prop(self.obj.t3d_properties, "diffuse_color")
+
             ambient_r = self.layout.row()
             ambient_r.prop(self.obj.t3d_properties, "ambient_color")
 
@@ -313,6 +313,9 @@ class T3DSubmodelPropertiesPanel(bpy.types.Panel):
             use_normals_r.prop(self.obj.t3d_properties, "use_normals")
 
         elif (self.obj_is_spot):
+            diffuse_r = self.layout.row()
+            diffuse_r.prop(self.obj.data, "color", text="Diffuse")
+
             near_atten_box = self.layout.box()
 
             use_near_atten_r = near_atten_box.row()

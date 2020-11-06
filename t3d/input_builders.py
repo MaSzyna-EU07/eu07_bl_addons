@@ -95,7 +95,7 @@ class SubmodelInputBuilder(abc.ABC):
         self.obj.parent = bpy.data.objects.get(parent_name)
 
     def set_diffuse(self, diffuse):
-        self.obj.t3d_properties.diffuse_color = diffuse
+        self.obj.t3d_properties.diffuse_color = diffuse / 255
 
     def set_selfillum(self, selfillum):
         self.obj.t3d_properties.selfillum = selfillum
@@ -125,11 +125,11 @@ class MeshInputBuilder(SubmodelInputBuilder):
         mesh = bpy.data.meshes.new(name)
         self.obj = bpy.data.objects.new(name, mesh)
 
-    def set_ambient(self, ambient):
-        self.obj.t3d_properties.ambient = ambient
+    def set_ambient(self, ambient_color):
+        self.obj.t3d_properties.ambient_color = ambient_color / 255
 
-    def set_specular(self, specular):
-        self.obj.t3d_properties.specular = specular
+    def set_specular(self, specular_color):
+        self.obj.t3d_properties.specular_color = specular_color / 255
 
     def set_wire(self, wire):
         self.obj.t3d_properties.wire = wire
