@@ -8,14 +8,11 @@ from bpy.props import (
 )
 from bpy_extras.io_utils import ImportHelper, ExportHelper
 
-# HACK: egg import failed
-import sys
-sys.path.append("/home/krzysiu/Dokumenty/PYTHON/eu07_tools/")
 import eu07_tools
 
 from .input_builders import import_model
 from .output_builders import export_model
-from eu07_bl_addons.common import get_root
+from ..common import get_root
 
 class T3DImport(bpy.types.Operator, ImportHelper):
     bl_idname = "import_scene.t3d"

@@ -7,7 +7,7 @@ from bpy.props import StringProperty, IntProperty, EnumProperty, BoolProperty
 from bpy_extras.io_utils import ImportHelper, ExportHelper
 import eu07_tools
 
-from eu07_bl_addons.common import get_root
+from ..common import get_root
 from .input_builders import SceneryBuilder
 from .output_builders import create_node_triangles_from_mesh
 from .basemap import LoadBasemapOperator, LoadBasemapPanel
@@ -19,6 +19,26 @@ class SCNImport(bpy.types.Operator, ImportHelper):
     filter_glob: StringProperty(
         default="*.scn;*.scm;*.inc",
         options={'HIDDEN'}
+    )
+
+    import_terrain: BoolProperty(
+        name="Import Terrain",
+        default="true"
+    )
+
+    import_tracks: BoolProperty(
+        name="Import Tracks",
+        default="true"
+    )
+
+    import_roads: BoolProperty(
+        name="Import Roads",
+        default="true"
+    )
+
+    import_rivers: BoolProperty(
+        name="Import Rivers",
+        default="true"
     )
 
     def execute(self, context):
