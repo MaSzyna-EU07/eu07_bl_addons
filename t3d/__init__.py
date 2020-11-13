@@ -207,8 +207,8 @@ class T3DSubmodelProperties(bpy.types.PropertyGroup):
     opacity: FloatProperty(
         name='Opacity',
         min=0,
-        max=1,
-        default=1
+        max=100,
+        default=100
     )
     replacableskin_id: EnumProperty(
         name='Skin',
