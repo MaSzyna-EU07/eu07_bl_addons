@@ -3,7 +3,7 @@ import os
 import mathutils
 
 import bpy
-import eu07_bl_addons
+from ..common import get_root
 
 class LoadBasemapPanel(bpy.types.Panel):
     bl_idname = "SCENE_PT_eu07_load_basemaps"
@@ -44,7 +44,7 @@ class LoadBasemapOperator(bpy.types.Operator):
         limit = bpy.context.scene.eu07_properties.basemap_limit
         cursor_loc = bpy.context.scene.cursor.location
 
-        root = eu07_bl_addons.common.get_root()
+        root = get_root()
         dirpath = Path(root, "gisdata", type_)
 
         for filename in os.listdir(dirpath):
