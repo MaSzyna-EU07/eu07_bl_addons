@@ -6,7 +6,7 @@ from bpy.props import StringProperty
 
 import eu07_tools
 
-from eu07_bl_addons.common import get_root
+from ..common import get_root
 
 class MATImport(bpy.types.Operator, ImportHelper):
     bl_idname = "import_material.mat"
