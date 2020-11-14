@@ -2,7 +2,7 @@ import collections
 from pathlib import Path
 
 import bpy
-import eu07_bl_addons
+from ..common import get_root
 import eu07_tools
 from bpy.props import (BoolProperty, EnumProperty, FloatProperty,
                        FloatVectorProperty, IntProperty, StringProperty)
@@ -56,7 +56,7 @@ class E3DImport(bpy.types.Operator, ImportHelper):
             "-4": self.skin_4
         }
 
-        root = eu07_bl_addons.common.get_root(self.filepath)
+        root = get_root(self.filepath)
 
         asset_searcher = eu07_tools.utils.AssetSearcher(
             root, 
