@@ -7,7 +7,7 @@ from pathlib import Path
 import bmesh
 import bpy
 import eu07_tools
-from eu07_bl_addons.common import create_material_from_path
+from ..common import create_material_from_path
 
 
 def import_model(elements, collection, config):
