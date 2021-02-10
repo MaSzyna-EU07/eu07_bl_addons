@@ -4,6 +4,7 @@ from pathlib import Path
 import bpy
 from ..common import get_root
 import eu07_tools
+from ..t3d import input_builders as t3d_input_builders
 from bpy.props import (BoolProperty, EnumProperty, FloatProperty,
                        FloatVectorProperty, IntProperty, StringProperty)
 from bpy_extras.io_utils import ExportHelper, ImportHelper
@@ -72,6 +73,6 @@ class E3DImport(bpy.types.Operator, ImportHelper):
             t3d = list(eu07_tools.utils.e3d_to_t3d(e3d))
 
             collection = bpy.context.scene.collection
-            eu07_bl_addons.t3d.input_builders.import_model(t3d, collection, config)
+            t3d_input_builders.import_model(t3d, collection, config)
 
         return {'FINISHED'}
