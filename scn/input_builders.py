@@ -116,7 +116,11 @@ class _TracksBuilder:
         f"{track.geometry_param1}-{track.geometry_param2}-{track.geometry_param3}"
         )
 
-        tprofile = bpy.data.objects.get("TProfile_2-5-13").copy()
+        pname = "TProfile_2-5-13"
+        if (track.subtype == "road"):
+            pname = "RProfile"
+
+        tprofile = bpy.data.objects.get(pname).copy()
         bpy.context.scene.collection.objects.link(tprofile)
         tprofile.parent = track_object
         tprofile.location = (0,0,0)
