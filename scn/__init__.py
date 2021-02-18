@@ -248,6 +248,10 @@ class SCNObjectPropertiesPanel(bpy.types.Panel):
     def draw(self, context):
         self.obj = context.object
 
+        # subtrack, e.g. switch or cross second track
+        if (self.obj.parent.type == 'CURVE'):
+            self.obj = self.obj.parent
+
         type_r = self.layout.row()
         type_r.prop(self.obj.scn_properties, "type_")
 

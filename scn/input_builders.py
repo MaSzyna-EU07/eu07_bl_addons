@@ -5,6 +5,7 @@ import mathutils
 import bpy
 import eu07_tools
 from ..common import create_material_from_path
+from .utils import get_materials_for_trajectory
 
 # This is spaghetti, written for experimental purposes - needs to be refactored
 
@@ -19,7 +20,7 @@ class SceneryBuilder:
             if element.type == "node:triangles":
                 self._terrain_builder.add_triangle(element)
             elif element.type == "node:track":
-                self._tracks_builder.add_curve(element)
+                self._tracks_builder.build_trajectory(element)
             elif element.type == "node:lines":
                 self._lines_builder.add_line(element)
 
@@ -65,7 +66,7 @@ class _TracksBuilder:
     def __init__(self, config):
         self._config = config
 
-    def add_curve(self, track):
+    def build_trajectory(self, track):
         track_object = bpy.data.objects.new(track.name, bpy.data.curves.new(track.name, 'CURVE'))
         track_object.location = eu07_tools.utils.switch_coordinate_system(track.p1)
         track_object.scn_properties.type_ = track.type + ":" + track.subtype
@@ -83,58 +84,24 @@ class _TracksBuilder:
         track_object.scn_properties.trajectory_p1_roll = track.p1_roll
         track_object.scn_properties.trajectory_p2_roll = track.p2_roll
 
-
         track_object.data.dimensions = "3D"
         track_object.data.use_stretch = True
         track_object.data.use_deform_bounds = True
 
-        spline = track_object.data.splines.new('BEZIER')
-        spline.use_smooth = False
-        
-        spline.bezier_points.add(1)
-        spline.bezier_points[0].co = (0,0,0)
-        spline.bezier_points[0].handle_left = (0,0,0)
-        spline.bezier_points[0].handle_right = eu07_tools.utils.switch_coordinate_system(track.cv1)
-        if (track.cv1 == (0,0,0)):
-            spline.bezier_points[0].handle_left_type = 'AUTO' 
-            spline.bezier_points[0].handle_right_type = 'AUTO' 
-
-        p2 = track.p2 - track.p1
-
-        spline.bezier_points[1].co = eu07_tools.utils.switch_coordinate_system(p2) 
-        spline.bezier_points[1].handle_right = eu07_tools.utils.switch_coordinate_system(p2)
-        spline.bezier_points[1].handle_left = eu07_tools.utils.switch_coordinate_system(p2 + track.cv2)  
-        if (track.cv2 == (0,0,0)):
-            spline.bezier_points[1].handle_left_type = 'AUTO' 
-            spline.bezier_points[1].handle_right_type = 'AUTO' 
-
+        self._create_spline(track_object, track.p1, track.cv1, track.p2, track.cv2)
 
         if track.is_junction:
             junction_track = bpy.data.objects.new(track.name, bpy.data.curves.new(track.name, 'CURVE'))
             bpy.context.scene.collection.objects.link(junction_track)
+            junction_track.scn_properties.type_ = track.type + ":" + track.subtype
             junction_track.parent = track_object
             junction_track.location = (0,0,0)
             
-
             junction_track.data.dimensions = "3D"
             junction_track.data.use_stretch = True
             junction_track.data.use_deform_bounds = True
 
-            spline = junction_track.data.splines.new('BEZIER')
-            spline.use_smooth = False
-
-            spline.bezier_points.add(1)
-            spline.bezier_points[0].co = (0,0,0)
-            spline.bezier_points[0].handle_left = (0,0,0)
-            spline.bezier_points[0].handle_right = eu07_tools.utils.switch_coordinate_system(track.cv3)
-            if (track.cv3 == (0,0,0)):
-                spline.bezier_points[0].handle_left_type = 'AUTO' 
-                spline.bezier_points[0].handle_right_type = 'AUTO' 
-
-            p4 = track.p4 - track.p3
-            spline.bezier_points[1].co = eu07_tools.utils.switch_coordinate_system(p4) 
-            spline.bezier_points[1].handle_right = eu07_tools.utils.switch_coordinate_system(p4)
-            spline.bezier_points[1].handle_left = eu07_tools.utils.switch_coordinate_system(p4 + track.cv4)
+            self._create_spline(junction_track, track.p3, track.cv3, track.p4, track.cv4)
 
             tprofile = bpy.data.objects.get("TProfile_2-5-13").copy()
             bpy.context.scene.collection.objects.link(tprofile)
@@ -150,28 +117,42 @@ class _TracksBuilder:
         )
 
         tprofile = bpy.data.objects.get("TProfile_2-5-13").copy()
+        tprofile.data = tprofile.data.copy()
         bpy.context.scene.collection.objects.link(tprofile)
         tprofile.parent = track_object
         tprofile.location = (0,0,0)
         tprofile.hide_select = True
+
+        materials = get_materials_for_trajectory([track.map1, track.map2], self._config["asset_searcher"])
+
+        tprofile.material_slots[0].material = materials[0]
+        tprofile.material_slots[1].material = materials[1]
         
         tprofile.modifiers["Array"].curve = track_object
         tprofile.modifiers["Curve"].object = track_object
 
-        # rail = bpy.data.objects.get("TRail").copy()
-        # bpy.context.scene.collection.objects.link(rail)
-        # rail.parent = track_object
-        # rail.location = (0,0,0)
+
+    def _create_spline(self, obj, p1, cv1, p2, cv2):
+        spline = obj.data.splines.new('BEZIER')
+        spline.use_smooth = False
         
-        # rail.modifiers["Array"].curve = track_object
-        # rail.modifiers["Curve"].object = track_object
+        spline.bezier_points.add(1)
+        spline.bezier_points[0].co = (0,0,0)
+        spline.bezier_points[0].handle_left = (0,0,0)
+        spline.bezier_points[0].handle_right = eu07_tools.utils.switch_coordinate_system(cv1)
+        if (cv1 == (0,0,0)):
+            spline.bezier_points[0].handle_left_type = 'AUTO' 
+            spline.bezier_points[0].handle_right_type = 'AUTO' 
 
-        # if track.is_junction:
-        #     trackbed_profile = self._last_track_profile
-        # else:
-        #     self._last_track_profile = trackbed_profile
+        p2 = p2 - p1
+        spline.bezier_points[1].co = eu07_tools.utils.switch_coordinate_system(p2) 
+        spline.bezier_points[1].handle_right = eu07_tools.utils.switch_coordinate_system(p2)
+        spline.bezier_points[1].handle_left = eu07_tools.utils.switch_coordinate_system(p2 + cv2)  
+        if (cv2 == (0,0,0)):
+            spline.bezier_points[1].handle_left_type = 'AUTO' 
+            spline.bezier_points[1].handle_right_type = 'AUTO' 
 
-
+        return spline
 
 class _TerrainBuilder:
     def __init__(self, config):

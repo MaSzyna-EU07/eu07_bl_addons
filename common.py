@@ -15,7 +15,7 @@ def get_root(abspath=""):
     return root
 
 
-def create_material_from_path(abspath, duplicates_allowed):
+def create_material_from_path(abspath, duplicates_allowed=False):
     if abspath == "": 
         return None
         
