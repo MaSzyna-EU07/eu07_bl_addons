@@ -81,28 +81,54 @@ class _TracksBuilder:
         spline.bezier_points[0].co = (0,0,0)
         spline.bezier_points[0].handle_left = (0,0,0)
         spline.bezier_points[0].handle_right = eu07_tools.utils.switch_coordinate_system(track.cv1)
+        if (track.cv1 == (0,0,0)):
+            spline.bezier_points[0].handle_left_type = 'AUTO' 
+            spline.bezier_points[0].handle_right_type = 'AUTO' 
 
         p2 = track.p2 - track.p1
 
         spline.bezier_points[1].co = eu07_tools.utils.switch_coordinate_system(p2) 
         spline.bezier_points[1].handle_right = eu07_tools.utils.switch_coordinate_system(p2)
         spline.bezier_points[1].handle_left = eu07_tools.utils.switch_coordinate_system(p2 + track.cv2)  
+        if (track.cv2 == (0,0,0)):
+            spline.bezier_points[1].handle_left_type = 'AUTO' 
+            spline.bezier_points[1].handle_right_type = 'AUTO' 
 
 
-        # TODO: Ten tor podpiąc jako dziecko toru p1-p2
-        # if track.is_junction:
-        #     spline = tracks_object.data.splines.new('BEZIER')
-        #     spline.use_smooth = False
+        if track.is_junction:
+            junction_track = bpy.data.objects.new(track.name, bpy.data.curves.new(track.name, 'CURVE'))
+            bpy.context.scene.collection.objects.link(junction_track)
+            junction_track.parent = track_object
+            junction_track.location = (0,0,0)
+            
 
+            junction_track.data.dimensions = "3D"
+            junction_track.data.use_stretch = True
+            junction_track.data.use_deform_bounds = True
 
-        #     spline.bezier_points.add(1)
-        #     spline.bezier_points[0].co = eu07_tools.utils.switch_coordinate_system(track.p3)
-        #     spline.bezier_points[0].handle_left = eu07_tools.utils.switch_coordinate_system(track.p3)
-        #     spline.bezier_points[0].handle_right = eu07_tools.utils.switch_coordinate_system(track.p3 + track.cv3)
+            spline = junction_track.data.splines.new('BEZIER')
+            spline.use_smooth = False
 
-        #     spline.bezier_points[1].co = eu07_tools.utils.switch_coordinate_system(track.p4) 
-        #     spline.bezier_points[1].handle_right = eu07_tools.utils.switch_coordinate_system(track.p4)
-        #     spline.bezier_points[1].handle_left = eu07_tools.utils.switch_coordinate_system(track.p4 + track.cv4)
+            spline.bezier_points.add(1)
+            spline.bezier_points[0].co = (0,0,0)
+            spline.bezier_points[0].handle_left = (0,0,0)
+            spline.bezier_points[0].handle_right = eu07_tools.utils.switch_coordinate_system(track.cv3)
+            if (track.cv3 == (0,0,0)):
+                spline.bezier_points[0].handle_left_type = 'AUTO' 
+                spline.bezier_points[0].handle_right_type = 'AUTO' 
+
+            p4 = track.p4 - track.p3
+            spline.bezier_points[1].co = eu07_tools.utils.switch_coordinate_system(p4) 
+            spline.bezier_points[1].handle_right = eu07_tools.utils.switch_coordinate_system(p4)
+            spline.bezier_points[1].handle_left = eu07_tools.utils.switch_coordinate_system(p4 + track.cv4)
+
+            tprofile = bpy.data.objects.get("TProfile_2-5-13").copy()
+            bpy.context.scene.collection.objects.link(tprofile)
+            tprofile.parent = junction_track
+            tprofile.location = (0,0,0)
+            
+            tprofile.modifiers["Array"].curve = junction_track
+            tprofile.modifiers["Curve"].object = junction_track
 
         trackbed_profile = (
         f"{track.geometry_param1}-{track.geometry_param2}-{track.geometry_param3}"
@@ -116,13 +142,13 @@ class _TracksBuilder:
         tprofile.modifiers["Array"].curve = track_object
         tprofile.modifiers["Curve"].object = track_object
 
-        rail = bpy.data.objects.get("TRail").copy()
-        bpy.context.scene.collection.objects.link(rail)
-        rail.parent = track_object
-        rail.location = (0,0,0)
+        # rail = bpy.data.objects.get("TRail").copy()
+        # bpy.context.scene.collection.objects.link(rail)
+        # rail.parent = track_object
+        # rail.location = (0,0,0)
         
-        rail.modifiers["Array"].curve = track_object
-        rail.modifiers["Curve"].object = track_object
+        # rail.modifiers["Array"].curve = track_object
+        # rail.modifiers["Curve"].object = track_object
 
         # if track.is_junction:
         #     trackbed_profile = self._last_track_profile
