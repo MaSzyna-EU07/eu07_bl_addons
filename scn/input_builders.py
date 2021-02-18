@@ -117,7 +117,6 @@ class _TracksBuilder:
         )
 
         tprofile = bpy.data.objects.get("TProfile_2-5-13").copy()
-        tprofile.data = tprofile.data.copy()
         bpy.context.scene.collection.objects.link(tprofile)
         tprofile.parent = track_object
         tprofile.location = (0,0,0)
@@ -125,7 +124,9 @@ class _TracksBuilder:
 
         materials = get_materials_for_trajectory([track.map1, track.map2], self._config["asset_searcher"])
 
+        tprofile.material_slots[0].link = 'OBJECT'
         tprofile.material_slots[0].material = materials[0]
+        tprofile.material_slots[1].link = 'OBJECT'
         tprofile.material_slots[1].material = materials[1]
         
         tprofile.modifiers["Array"].curve = track_object
