@@ -134,8 +134,12 @@ class SCNObjectProperties(bpy.types.PropertyGroup):
             ("other", "Other", ""),
             ("node:track:normal", "Railroad Track", ""),
             ("node:track:switch", "Railroad Switch", ""),
+            ("node:track:turn", "Railroad Turn", ""),
+            ("node:track:table", "Railroad Table", ""),
             ("node:track:road", "Road", ""),
+            ("node:track:cross", "Road Cross", ""),
             ("node:track:river", "River", ""),
+            ("node:track:tributary", "River Tributary", ""),
             ("node:sound", "Sound Source", ""),
             ("node:triangles", "Terrain", ""),
             ("node:lines", "Lines", ""),
@@ -158,11 +162,6 @@ class SCNObjectProperties(bpy.types.PropertyGroup):
         min=0,
         step=0.1,
         unit='LENGTH'
-    )
-
-    node_name: StringProperty(
-        name="Name",
-        default="none"
     )
 
     trajectory_width: FloatProperty(
@@ -254,7 +253,7 @@ class SCNObjectPropertiesPanel(bpy.types.Panel):
 
         if ("node:" in self.obj.scn_properties.type_):
             name_r = self.layout.row()
-            name_r.prop(self.obj.scn_properties, "node_name")
+            name_r.prop(self.obj, "name")
 
             maxdistance_r = self.layout.row()
             maxdistance_r.prop(self.obj.scn_properties, "node_max_distance")
@@ -263,7 +262,7 @@ class SCNObjectPropertiesPanel(bpy.types.Panel):
             mindistance_r.prop(self.obj.scn_properties, "node_min_distance")
 
         if ("node:track" in self.obj.scn_properties.type_):
-            if (self.obj.data.type != 'CURVE'):
+            if (self.obj.type != 'CURVE'):
                 self.layout.label(text="Trajectory must be a Curve!")
             else:
                 width_r = self.layout.row()

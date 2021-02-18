@@ -68,7 +68,21 @@ class _TracksBuilder:
     def add_curve(self, track):
         track_object = bpy.data.objects.new(track.name, bpy.data.curves.new(track.name, 'CURVE'))
         track_object.location = eu07_tools.utils.switch_coordinate_system(track.p1)
+        track_object.scn_properties.type_ = track.type + ":" + track.subtype
         bpy.context.scene.collection.objects.link(track_object)
+
+        track_object.scn_properties.node_max_distance = track.max_distance
+        track_object.scn_properties.node_max_distance = track.min_distance
+        track_object.scn_properties.trajectory_width = track.width
+        track_object.scn_properties.trajectory_friction = track.friction
+        track_object.scn_properties.sound_distance = track.sound_distance
+        track_object.scn_properties.trajectory_quality = track.quality_flag
+        track_object.scn_properties.trajectory_damage = track.damage_flag
+        track_object.scn_properties.trajectory_environment = track.environment
+        track_object.scn_properties.visible = track.is_visible
+        track_object.scn_properties.trajectory_p1_roll = track.p1_roll
+        track_object.scn_properties.trajectory_p2_roll = track.p2_roll
+
 
         track_object.data.dimensions = "3D"
         track_object.data.use_stretch = True
@@ -126,6 +140,7 @@ class _TracksBuilder:
             bpy.context.scene.collection.objects.link(tprofile)
             tprofile.parent = junction_track
             tprofile.location = (0,0,0)
+            tprofile.hide_select = True
             
             tprofile.modifiers["Array"].curve = junction_track
             tprofile.modifiers["Curve"].object = junction_track
@@ -138,6 +153,7 @@ class _TracksBuilder:
         bpy.context.scene.collection.objects.link(tprofile)
         tprofile.parent = track_object
         tprofile.location = (0,0,0)
+        tprofile.hide_select = True
         
         tprofile.modifiers["Array"].curve = track_object
         tprofile.modifiers["Curve"].object = track_object
