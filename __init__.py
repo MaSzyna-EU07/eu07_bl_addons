@@ -14,7 +14,7 @@ import bpy
 from bpy.props import PointerProperty, StringProperty
 
 from .t3d import T3DExport, T3DImport, T3DSubmodelProperties, T3DSubmodelPropertiesPanel
-from .scn import SCNImport, SCNExport, LoadBasemapOperator, EU07SceneryProperties, LoadBasemapPanel
+from .scn import SCNImport, SCNExport, SCNObjectProperties, SCNObjectPropertiesPanel, LoadBasemapOperator, EU07SceneryProperties, LoadBasemapPanel
 #from .mat import MATImport
 from .e3d import E3DImport
 
@@ -51,6 +51,8 @@ classes = (
         #MATImport,
         SCNImport,
         SCNExport,
+        SCNObjectProperties,
+        SCNObjectPropertiesPanel,
         LoadBasemapOperator,
         LoadBasemapPanel,
         EU07SceneryProperties,
@@ -62,6 +64,7 @@ def register():
         bpy.utils.register_class(c)
 
     bpy.types.Object.t3d_properties = PointerProperty(type=T3DSubmodelProperties)
+    bpy.types.Object.scn_properties = PointerProperty(type=SCNObjectProperties)
     bpy.types.Scene.eu07_properties = PointerProperty(type=EU07SceneryProperties)
 
     bpy.types.TOPBAR_MT_file_import.append(menu_func_import)

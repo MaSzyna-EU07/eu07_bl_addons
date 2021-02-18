@@ -16,6 +16,9 @@ def get_root(abspath=""):
 
 
 def create_material_from_path(abspath, duplicates_allowed):
+    if abspath == "": 
+        return None
+        
     name = Path(abspath).with_suffix("").name
 
     if not duplicates_allowed and name in bpy.data.materials:

@@ -266,7 +266,7 @@ class T3DSubmodelPropertiesPanel(bpy.types.Panel):
         if obj_is_exportable:
             self.draw_panel()
         else:
-            self.layout.label("This object is not supported by T3D format.")
+            self.layout.label(text="This object is not supported by T3D format.")
 
     def draw_panel(self):
         name_r = self.layout.row()

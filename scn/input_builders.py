@@ -1,6 +1,7 @@
 from pathlib import Path
 
 import bmesh
+import mathutils
 import bpy
 import eu07_tools
 from ..common import create_material_from_path
@@ -63,86 +64,70 @@ class _LinesBuilder:
 class _TracksBuilder:
     def __init__(self, config):
         self._config = config
-        self._last_track_profile = None
-        self._tracks_material = bpy.data.materials.new("track")
-        self._roads_material = bpy.data.materials.new("road")
 
     def add_curve(self, track):
-        # TODO: Collections for trackbeds
+        track_object = bpy.data.objects.new(track.name, bpy.data.curves.new(track.name, 'CURVE'))
+        track_object.location = eu07_tools.utils.switch_coordinate_system(track.p1)
+        bpy.context.scene.collection.objects.link(track_object)
+
+        track_object.data.dimensions = "3D"
+        track_object.data.use_stretch = True
+        track_object.data.use_deform_bounds = True
+
+        spline = track_object.data.splines.new('BEZIER')
+        spline.use_smooth = False
+        
+        spline.bezier_points.add(1)
+        spline.bezier_points[0].co = (0,0,0)
+        spline.bezier_points[0].handle_left = (0,0,0)
+        spline.bezier_points[0].handle_right = eu07_tools.utils.switch_coordinate_system(track.cv1)
+
+        p2 = track.p2 - track.p1
+
+        spline.bezier_points[1].co = eu07_tools.utils.switch_coordinate_system(p2) 
+        spline.bezier_points[1].handle_right = eu07_tools.utils.switch_coordinate_system(p2)
+        spline.bezier_points[1].handle_left = eu07_tools.utils.switch_coordinate_system(p2 + track.cv2)  
+
+
+        # TODO: Ten tor podpiąc jako dziecko toru p1-p2
+        # if track.is_junction:
+        #     spline = tracks_object.data.splines.new('BEZIER')
+        #     spline.use_smooth = False
+
+
+        #     spline.bezier_points.add(1)
+        #     spline.bezier_points[0].co = eu07_tools.utils.switch_coordinate_system(track.p3)
+        #     spline.bezier_points[0].handle_left = eu07_tools.utils.switch_coordinate_system(track.p3)
+        #     spline.bezier_points[0].handle_right = eu07_tools.utils.switch_coordinate_system(track.p3 + track.cv3)
+
+        #     spline.bezier_points[1].co = eu07_tools.utils.switch_coordinate_system(track.p4) 
+        #     spline.bezier_points[1].handle_right = eu07_tools.utils.switch_coordinate_system(track.p4)
+        #     spline.bezier_points[1].handle_left = eu07_tools.utils.switch_coordinate_system(track.p4 + track.cv4)
+
         trackbed_profile = (
         f"{track.geometry_param1}-{track.geometry_param2}-{track.geometry_param3}"
         )
 
-        if track.is_junction:
-            trackbed_profile = self._last_track_profile
-        else:
-            self._last_track_profile = trackbed_profile
+        tprofile = bpy.data.objects.get("TProfile_2-5-13").copy()
+        bpy.context.scene.collection.objects.link(tprofile)
+        tprofile.parent = track_object
+        tprofile.location = (0,0,0)
         
-        tracks_object = bpy.data.objects.get(f"tracks: {trackbed_profile}")
+        tprofile.modifiers["Array"].curve = track_object
+        tprofile.modifiers["Curve"].object = track_object
 
-        if not tracks_object:
-            tracks_object = bpy.data.objects.new(
-                f"tracks: {trackbed_profile}", bpy.data.curves.new(f"tracks: {trackbed_profile}", 'CURVE')
-            )
-            tracks_object.data.dimensions = "3D"
-            bpy.context.scene.collection.objects.link(tracks_object)
-
-            trackbed_object = create_trackbed(track, trackbed_profile)
-
-        trackbed_object = bpy.data.objects.get(f"trackbed: {trackbed_profile}")
-        tracks_object.data.bevel_object = trackbed_object
-
-        spline = tracks_object.data.splines.new('BEZIER')
-        spline.use_smooth = False
+        rail = bpy.data.objects.get("TRail").copy()
+        bpy.context.scene.collection.objects.link(rail)
+        rail.parent = track_object
+        rail.location = (0,0,0)
         
+        rail.modifiers["Array"].curve = track_object
+        rail.modifiers["Curve"].object = track_object
 
-        spline.bezier_points.add(1)
-        spline.bezier_points[0].co = eu07_tools.utils.switch_coordinate_system(track.p1)
-        spline.bezier_points[0].handle_left = eu07_tools.utils.switch_coordinate_system(track.p1)
-        spline.bezier_points[0].handle_right = eu07_tools.utils.switch_coordinate_system(track.p1 + track.cv1)
-
-        spline.bezier_points[1].co = eu07_tools.utils.switch_coordinate_system(track.p2) 
-        spline.bezier_points[1].handle_right = eu07_tools.utils.switch_coordinate_system(track.p2)
-        spline.bezier_points[1].handle_left = eu07_tools.utils.switch_coordinate_system(track.p2 + track.cv2)  
-
-        if track.is_junction:
-            spline = tracks_object.data.splines.new('BEZIER')
-            spline.use_smooth = False
-
-
-            spline.bezier_points.add(1)
-            spline.bezier_points[0].co = eu07_tools.utils.switch_coordinate_system(track.p3)
-            spline.bezier_points[0].handle_left = eu07_tools.utils.switch_coordinate_system(track.p3)
-            spline.bezier_points[0].handle_right = eu07_tools.utils.switch_coordinate_system(track.p3 + track.cv3)
-
-            spline.bezier_points[1].co = eu07_tools.utils.switch_coordinate_system(track.p4) 
-            spline.bezier_points[1].handle_right = eu07_tools.utils.switch_coordinate_system(track.p4)
-            spline.bezier_points[1].handle_left = eu07_tools.utils.switch_coordinate_system(track.p4 + track.cv4)
-
-
-def create_trackbed(track, profile):
-    bed_height = track.geometry_param1
-    bed_width = track.geometry_param2
-    bed_slope = track.geometry_param3
-    
-    curve = bpy.data.curves.new(f"trackbed: {profile}", 'CURVE')
-    curve.dimensions = "3D"
-    obj = bpy.data.objects.new(f"trackbed: {profile}", curve)
-    
-    obj.location = (0, 0, 0)
-    bpy.context.scene.collection.objects.link(obj)
-    
-    spline = curve.splines.new('BEZIER')
-    spline.resolution_u = 1
-    spline.resolution_v = 1
-    spline.bezier_points.add(3)
-
-    spline.bezier_points[0].co = (track.width/2 + bed_width + bed_slope, -bed_height, 0)
-    spline.bezier_points[1].co = (track.width/2 + bed_width, 0, 0)
-    spline.bezier_points[2].co = (-track.width/2 - bed_width, 0, 0)
-    spline.bezier_points[3].co = (-track.width/2 - bed_width - bed_slope, -bed_height, 0)
-
-    return obj
+        # if track.is_junction:
+        #     trackbed_profile = self._last_track_profile
+        # else:
+        #     self._last_track_profile = trackbed_profile
 
 
 
