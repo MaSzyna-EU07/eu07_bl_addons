@@ -9,7 +9,7 @@ import eu07_tools
 
 from ..common import get_root
 from .input_builders import SceneryBuilder
-from .output_builders import create_node_triangles_from_mesh
+from .output_builders import create_node_triangles_from_mesh, create_node_track
 from .basemap import LoadBasemapOperator, LoadBasemapPanel
 
 class SCNImport(bpy.types.Operator, ImportHelper):
@@ -84,13 +84,24 @@ class SCNExport(bpy.types.Operator, ExportHelper):
                 objects = [o for o in bpy.data.objects if o.select_get()]
             else:
                 objects = bpy.data.objects
-                
+            
+            tracks = []
             for o in objects:
-                if o.type == "MESH":
+                if 'node:triangles' in o.scn_properties.type_:
                     eu07_tools.scn.dump(create_node_triangles_from_mesh(o.data.copy()), outfile)
+                if 'node:track' in o.scn_properties.type_:
+                    tracks.append(create_node_track(o))
+
+            eu07_tools.scn.dump(tracks, outfile)
 
         return {'FINISHED'}
 
+def update_material_list(self, context):
+    items = []
+    for mat in bpy.data.materials:
+        items.append((mat.name, mat.name, ""))
+
+    return items
 
 class EU07SceneryProperties(bpy.types.PropertyGroup):
     basemap_puwg_x: IntProperty(
@@ -124,7 +135,6 @@ class EU07SceneryProperties(bpy.types.PropertyGroup):
         default=2000,
         min=100
     )
-
 
 class SCNObjectProperties(bpy.types.PropertyGroup):
     type_: EnumProperty(
@@ -236,6 +246,24 @@ class SCNObjectProperties(bpy.types.PropertyGroup):
         step=0.001,
         unit='ROTATION'
     )
+
+    trajectory_map1: EnumProperty(
+        name="Materials",
+        items=update_material_list 
+    )
+
+    trajectory_map2: EnumProperty(
+        name="Materials",
+        items=update_material_list 
+    )
+
+    trajectory_mapping_length: FloatProperty(
+        name='Mapping length',
+        default=0,
+        min=0,
+        step=0.001,
+        unit='LENGTH'
+    )
     
 
 class SCNObjectPropertiesPanel(bpy.types.Panel):
@@ -247,10 +275,6 @@ class SCNObjectPropertiesPanel(bpy.types.Panel):
 
     def draw(self, context):
         self.obj = context.object
-
-        # subtrack, e.g. switch or cross second track
-        if (self.obj.parent.type == 'CURVE'):
-            self.obj = self.obj.parent
 
         type_r = self.layout.row()
         type_r.prop(self.obj.scn_properties, "type_")
@@ -295,6 +319,27 @@ class SCNObjectPropertiesPanel(bpy.types.Panel):
 
                 p2_roll_r = self.layout.row()
                 p2_roll_r.prop(self.obj.scn_properties, "trajectory_p2_roll")
+
+                track_subtype = self.obj.scn_properties.type_.split(":")[-1]
+
+                if (track_subtype in "normal turn table"):
+                    map1_label = "Rails Material"
+                    map2_label = "Ballast Material"
+                elif (track_subtype in "road cross"):
+                    map1_label = "Road Material"
+                    map2_label = "Side Material"
+                elif (track_subtype in "river tributary"):
+                    map1_label = "Water Material"
+                    map2_label = "Bank Material"
+                elif (track_subtype in "switch"):
+                    map1_label = "Rails Material Straight"
+                    map2_label = "Rails Material Sideway"
+
+
+
+
+
+
 
 
 

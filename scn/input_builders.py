@@ -23,7 +23,9 @@ class SceneryBuilder:
                 self._tracks_builder.build_trajectory(element)
             elif element.type == "node:lines":
                 self._lines_builder.add_line(element)
-
+            elif element.type == "include":
+                if (element.path.endswith(".inc")):
+                    pass
         self._terrain_builder.finish()
         self._lines_builder.finish()
 

@@ -42,3 +42,34 @@ def create_node_triangles_from_mesh(mesh):
 
             node.vertices.new((*xyz, *ijk, *uv))
         yield node
+
+def create_node_track(track_object):
+    properties = track_object.scn_properties
+
+    node = eu07_tools.scn.create_element("node:track")
+    node.subtype = properties.type_.split(":")[-1]
+    node.name = track_object.name
+    node.max_distance = properties.node_max_distance
+    node.min_distance = properties.node_min_distance
+    node.width = properties.trajectory_width
+    node.friction = properties.trajectory_friction
+    node.sound_distance = properties.trajectory_sound_distance
+    node.quality_flag = properties.trajectory_quality
+    node.damage_flag = properties.trajectory_damage
+    node.environment = properties.trajectory_environment
+    node.is_visible = properties.trajectory_visible
+    node.mapping_length = properties.trajectory_mapping_length
+
+    return node
+
+def get_material_paths(obj):
+    paths = []
+
+    for ms in obj.material_slots:
+        if (ms.material is None):
+            paths.append("none")
+        else:
+            paths.append(ms.material.name)
+
+    return paths
+
