@@ -6,6 +6,7 @@ import bmesh
 import bpy
 import eu07_tools
 
+from ..common import get_path_from_material
 
 def export_model(collection, file, config):
     objects = HierarchyMaker(collection).make_hierarchy()
@@ -176,17 +177,7 @@ class MeshOutputBuilder(SubmodelOutputBuilder):
             self.submodel.map = self.obj.t3d_properties.replacableskin_id
             return
 
-        if mtl:
-            if mtl.use_nodes:
-                # Get the nodes in the node tree
-                nodes = mtl.node_tree.nodes
-                # Get a principled node
-                principled = next(n for n in nodes if n.type == 'BSDF_PRINCIPLED')
-                # Get the slot for 'base color'
-                base_color = principled.inputs['Base Color'] #Or principled.inputs[0]
-                link = base_color.links[0]
-                link_node = link.from_node
-                self.submodel.map = eu07_tools.utils.shorten_asset_path(link_node.image.filepath)
+        self.submodel.map = get_path_from_material(mtl)
 
     def set_geometry(self):
 

@@ -50,3 +50,18 @@ def create_material_from_path(abspath, duplicates_allowed=False):
         texture_node.texture_mapping.scale[1] = -1
 
     return material
+
+def get_path_from_material(material):
+    if material:
+        if material.use_nodes:
+            # Get the nodes in the node tree
+            nodes = material.node_tree.nodes
+            # Get a principled node
+            principled = next(n for n in nodes if n.type == 'BSDF_PRINCIPLED')
+            # Get the slot for 'base color'
+            base_color = principled.inputs['Base Color'] #Or principled.inputs[0]
+            link = base_color.links[0]
+            link_node = link.from_node
+            return eu07_tools.utils.shorten_asset_path(link_node.image.filepath)
+
+    return "none"
