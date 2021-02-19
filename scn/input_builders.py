@@ -75,14 +75,14 @@ class _TracksBuilder:
         bpy.context.scene.collection.objects.link(track_object)
 
         track_object.scn_properties.node_max_distance = track.max_distance
-        track_object.scn_properties.node_max_distance = track.min_distance
+        track_object.scn_properties.node_min_distance = track.min_distance
         track_object.scn_properties.trajectory_width = track.width
         track_object.scn_properties.trajectory_friction = track.friction
-        track_object.scn_properties.sound_distance = track.sound_distance
+        track_object.scn_properties.trajectory_sound_distance = track.sound_distance
         track_object.scn_properties.trajectory_quality = track.quality_flag
         track_object.scn_properties.trajectory_damage = track.damage_flag
         track_object.scn_properties.trajectory_environment = track.environment
-        track_object.scn_properties.visible = track.is_visible
+        track_object.scn_properties.trajectory_visible = track.is_visible
         track_object.scn_properties.trajectory_mapping_length = track.mapping_length
         track_object.scn_properties.trajectory_p1_roll = track.p1_roll
         track_object.scn_properties.trajectory_p2_roll = track.p2_roll

@@ -335,7 +335,7 @@ class SCNObjectProperties(bpy.types.PropertyGroup):
         default=""
     )
 
-    trajectory_friction_memcell: StringProperty(
+    trajectory_friction_memcell_name: StringProperty(
         name="Friction Memcell",
         default=""
     )

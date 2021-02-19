@@ -62,11 +62,24 @@ def create_node_track(track_object):
     node.damage_flag = properties.trajectory_damage
     node.environment = properties.trajectory_environment
     node.is_visible = properties.trajectory_visible
-
     node.map1 = get_path_from_material(mesh.material_slots[0].material)
     node.map2 = get_path_from_material(mesh.material_slots[1].material)
-
     node.mapping_length = properties.trajectory_mapping_length
+    node.event0 = properties.trajectory_event0
+    node.event1 = properties.trajectory_event1
+    node.event2 = properties.trajectory_event2
+    node.eventall0 = properties.trajectory_eventall0
+    node.eventall1 = properties.trajectory_eventall1
+    node.eventall2 = properties.trajectory_eventall2
+    node.isolated = properties.trajectory_isolated
+    node.overhead = properties.trajectory_overhead
+    node.angle1 = properties.trajectory_angle1
+    node.angle2 = properties.trajectory_angle2
+    node.fouling1 = properties.trajectory_fouling1
+    node.fouling2 = properties.trajectory_fouling2
+    node.vradius = properties.trajectory_vradius
+    node.railprofile = properties.trajectory_railprofile
+    node.friction_memcell_name = properties.trajectory_friction_memcell_name
 
     curve_data = extract_curve_data_for_scn(track_object)
     node.p1 = curve_data[0]
