@@ -86,6 +86,21 @@ class _TracksBuilder:
         track_object.scn_properties.trajectory_mapping_length = track.mapping_length
         track_object.scn_properties.trajectory_p1_roll = track.p1_roll
         track_object.scn_properties.trajectory_p2_roll = track.p2_roll
+        track_object.scn_properties.trajectory_event0 = track.event0
+        track_object.scn_properties.trajectory_event1 = track.event1
+        track_object.scn_properties.trajectory_event2 = track.event2
+        track_object.scn_properties.trajectory_eventall0 = track.eventall0
+        track_object.scn_properties.trajectory_eventall1 = track.eventall1
+        track_object.scn_properties.trajectory_eventall2 = track.eventall2
+        track_object.scn_properties.trajectory_isolated = track.isolated
+        track_object.scn_properties.trajectory_overhead = track.overhead
+        track_object.scn_properties.trajectory_angle1 = track.angle1
+        track_object.scn_properties.trajectory_angle2 = track.angle2
+        track_object.scn_properties.trajectory_fouling1 = track.fouling1
+        track_object.scn_properties.trajectory_fouling2 = track.fouling2
+        track_object.scn_properties.trajectory_vradius = track.vradius
+        track_object.scn_properties.trajectory_railprofile = track.railprofile
+        track_object.scn_properties.trajectory_friction_memcell_name = track.friction_memcell_name
 
         track_object.data.dimensions = "3D"
         track_object.data.use_stretch = True

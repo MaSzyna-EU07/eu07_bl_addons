@@ -257,7 +257,7 @@ class SCNObjectProperties(bpy.types.PropertyGroup):
         unit='LENGTH'
     )
 
-    trajectory_velocity: IntProperty(
+    trajectory_velocity: FloatProperty(
         name='Velocity',
         default=0,
         min=0,
@@ -356,9 +356,6 @@ class SCNObjectPropertiesPanel(bpy.types.Panel):
         type_r.prop(self.obj.scn_properties, "type_")
 
         if ("node:" in self.obj.scn_properties.type_):
-            name_r = self.layout.row()
-            name_r.prop(self.obj, "name")
-
             maxdistance_r = self.layout.row()
             maxdistance_r.prop(self.obj.scn_properties, "node_max_distance")
 
@@ -396,21 +393,50 @@ class SCNObjectPropertiesPanel(bpy.types.Panel):
                 p2_roll_r = self.layout.row()
                 p2_roll_r.prop(self.obj.scn_properties, "trajectory_p2_roll")
 
-                track_subtype = self.obj.scn_properties.type_.split(":")[-1]
+                event0_r = self.layout.row()
+                event0_r.prop(self.obj.scn_properties, "trajectory_event0")
 
-                if (track_subtype in "normal turn table"):
-                    map1_label = "Rails Material"
-                    map2_label = "Ballast Material"
-                elif (track_subtype in "road cross"):
-                    map1_label = "Road Material"
-                    map2_label = "Side Material"
-                elif (track_subtype in "river tributary"):
-                    map1_label = "Water Material"
-                    map2_label = "Bank Material"
-                elif (track_subtype in "switch"):
-                    map1_label = "Rails Material Straight"
-                    map2_label = "Rails Material Sideway"
+                event1_r = self.layout.row()
+                event1_r.prop(self.obj.scn_properties, "trajectory_event1")
 
+                event2_r = self.layout.row()
+                event2_r.prop(self.obj.scn_properties, "trajectory_event2")
+
+                eventall0_r = self.layout.row()
+                eventall0_r.prop(self.obj.scn_properties, "trajectory_eventall0")
+
+                eventall1_r = self.layout.row()
+                eventall1_r.prop(self.obj.scn_properties, "trajectory_eventall1")
+
+                eventall2_r = self.layout.row()
+                eventall2_r.prop(self.obj.scn_properties, "trajectory_eventall2")
+
+                isolated_r = self.layout.row()
+                isolated_r.prop(self.obj.scn_properties, "trajectory_isolated")
+
+                overhead_r = self.layout.row()
+                overhead_r.prop(self.obj.scn_properties, "trajectory_overhead")
+
+                angle1_r = self.layout.row()
+                angle1_r.prop(self.obj.scn_properties, "trajectory_angle1")
+
+                angle2_r = self.layout.row()
+                angle2_r.prop(self.obj.scn_properties, "trajectory_angle2")
+
+                fouling1_r = self.layout.row()
+                fouling1_r.prop(self.obj.scn_properties, "trajectory_fouling1")
+
+                fouling2_r = self.layout.row()
+                fouling2_r.prop(self.obj.scn_properties, "trajectory_fouling2")
+
+                vradius_r = self.layout.row()
+                vradius_r.prop(self.obj.scn_properties, "trajectory_vradius")
+
+                railprofile_r = self.layout.row()
+                railprofile_r.prop(self.obj.scn_properties, "trajectory_railprofile")
+
+                friction_memcell_name_r = self.layout.row()
+                friction_memcell_name_r.prop(self.obj.scn_properties, "trajectory_friction_memcell_name")
 
 
 
