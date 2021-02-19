@@ -5,6 +5,8 @@ import bpy
 import eu07_tools
 from ..common import get_root
 
+import mathutils
+
 
 def create_node_triangles_from_mesh(mesh):
     bm = bmesh.new()
@@ -60,16 +62,39 @@ def create_node_track(track_object):
     node.is_visible = properties.trajectory_visible
     node.mapping_length = properties.trajectory_mapping_length
 
+    curve_data = extract_curve_data_for_scn(track_object)
+    node.p1 = curve_data[0]
+    node.cv1 = curve_data[1]
+    node.cv2 = curve_data[2]
+    node.p2 = curve_data[3]
+
+    if (node.is_junction):
+        junction_track_object = [c for c in track_object.children if c.type == 'CURVE']
+
+        curve_data = extract_curve_data_for_scn(track_object)
+        node.p3 = curve_data[0]
+        node.cv3 = curve_data[1]
+        node.cv4 = curve_data[2]
+        node.p4 = curve_data[3]
+
     return node
 
-def get_material_paths(obj):
-    paths = []
+def extract_curve_data_for_scn(track_object):
+    spline = track_object.data.splines[0]
 
-    for ms in obj.material_slots:
-        if (ms.material is None):
-            paths.append("none")
-        else:
-            paths.append(ms.material.name)
+    values = []
 
-    return paths
+    p1 = eu07_tools.utils.switch_coordinate_system(track_object.location + spline.bezier_points[0].co)
+
+    p2 = eu07_tools.utils.switch_coordinate_system(track_object.location + spline.bezier_points[1].co)
+
+    # AUTO type because curve modifier works bad when we set both handles at the same position as vertex, so little cheat there
+    cv1 = spline.bezier_points[0].handle_right if spline.bezier_points[0].handle_right_type != 'AUTO' else mathutils.Vector((0, 0, 0))
+    cv2 = spline.bezier_points[1].handle_left if spline.bezier_points[1].handle_left_type != 'AUTO' else mathutils.Vector((0, 0, 0))
+
+    cv1 = eu07_tools.utils.switch_coordinate_system(cv1)
+    cv2 = eu07_tools.utils.switch_coordinate_system(cv2 - spline.bezier_points[1].co)
+
+    return [p1, cv1, cv2, p2]
+    
 

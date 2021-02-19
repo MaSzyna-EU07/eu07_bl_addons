@@ -90,7 +90,9 @@ class SCNExport(bpy.types.Operator, ExportHelper):
                 if 'node:triangles' in o.scn_properties.type_:
                     eu07_tools.scn.dump(create_node_triangles_from_mesh(o.data.copy()), outfile)
                 if 'node:track' in o.scn_properties.type_:
-                    tracks.append(create_node_track(o))
+                    is_junction_track = (o.parent is not None)
+                    if not is_junction_track:
+                        tracks.append(create_node_track(o))
 
             eu07_tools.scn.dump(tracks, outfile)
 
