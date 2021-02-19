@@ -83,6 +83,7 @@ class _TracksBuilder:
         track_object.scn_properties.trajectory_damage = track.damage_flag
         track_object.scn_properties.trajectory_environment = track.environment
         track_object.scn_properties.visible = track.is_visible
+        track_object.scn_properties.trajectory_mapping_length = track.mapping_length
         track_object.scn_properties.trajectory_p1_roll = track.p1_roll
         track_object.scn_properties.trajectory_p2_roll = track.p2_roll
 

@@ -249,16 +249,6 @@ class SCNObjectProperties(bpy.types.PropertyGroup):
         unit='ROTATION'
     )
 
-    trajectory_map1: EnumProperty(
-        name="Materials",
-        items=update_material_list 
-    )
-
-    trajectory_map2: EnumProperty(
-        name="Materials",
-        items=update_material_list 
-    )
-
     trajectory_mapping_length: FloatProperty(
         name='Mapping length',
         default=0,
@@ -266,6 +256,90 @@ class SCNObjectProperties(bpy.types.PropertyGroup):
         step=0.001,
         unit='LENGTH'
     )
+
+    trajectory_velocity: IntProperty(
+        name='Velocity',
+        default=0,
+        min=0,
+        step=1,
+        unit='VELOCITY'
+    )
+
+    trajectory_event0: StringProperty(
+        name='Event 0',
+        default=""
+    )
+
+    trajectory_event1: StringProperty(
+        name='Event 1',
+        default=""
+    )
+
+    trajectory_event2: StringProperty(
+        name='Event 2',
+        default=""
+    )
+
+    trajectory_eventall0: StringProperty(
+        name='EventAll 0',
+        default=""
+    )
+
+    trajectory_eventall1: StringProperty(
+        name='EventAll 1',
+        default=""
+    )
+
+    trajectory_eventall2: StringProperty(
+        name='EventAll 2',
+        default=""
+    )
+
+    trajectory_isolated: StringProperty(
+        name='Isolated',
+        default=""
+    )
+
+    trajectory_overhead: IntProperty(
+        name='Overhead',
+        default=0
+    )
+
+    trajectory_angle1: FloatProperty(
+        name='Angle 1',
+        default=0
+    )
+
+    trajectory_angle2: FloatProperty(
+        name='Angle 2',
+        default=0
+    )
+
+    trajectory_fouling1: StringProperty(
+        name='Fouling 1',
+        default=""
+    )
+
+    trajectory_fouling2: StringProperty(
+        name='Fouling 2',
+        default=""
+    )
+
+    trajectory_vradius: FloatProperty(
+        name='Vertical Radius',
+        default=0
+    )
+
+    trajectory_railprofile: StringProperty(
+        name='Rail Profile',
+        default=""
+    )
+
+    trajectory_friction_memcell: StringProperty(
+        name="Friction Memcell",
+        default=""
+    )
+    
     
 
 class SCNObjectPropertiesPanel(bpy.types.Panel):
