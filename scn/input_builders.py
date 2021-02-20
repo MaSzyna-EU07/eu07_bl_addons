@@ -177,23 +177,27 @@ class _TracksBuilder:
                 mesh = bmesh.new()
                 uv_layer =  mesh.loops.layers.uv.new()
                 profile = bpy.data.objects.new(name, bpy.data.meshes.new(name))
-                bpy.context.scene.collection.objects.link(profile)
                 bpy.data.collections["Profiles"].objects.link(profile)
 
+                array_mod = profile.modifiers.new('Array', type='ARRAY')
+                array_mod.fit_type = 'FIT_CURVE'
+
+                curve_mod = profile.modifiers.new('Curve', type='CURVE')
+
                 max_z = profile_params[0]
-                med_x = trajectory_width + profile_params[1]
-                max_x = med_x + profile_params[2]
+                med_y = trajectory_width + profile_params[1]
+                max_y = med_y + profile_params[2]
                 segment_length = 5
 
                 verts_co = [
-                    mesh.verts.new((max_x, segment_length/2, 0)),
-                    mesh.verts.new((max_x, -segment_length/2, 0)),
-                    mesh.verts.new((med_x, segment_length/2, max_z)),
-                    mesh.verts.new((med_x, -segment_length/2, max_z)),
-                    mesh.verts.new((-med_x, segment_length/2, max_z)),
-                    mesh.verts.new((-med_x, -segment_length/2, max_z)),
-                    mesh.verts.new((-max_x, segment_length/2, 0)),
-                    mesh.verts.new((-max_x, -segment_length/2, 0)),
+                    mesh.verts.new((segment_length/2, max_y, 0)),
+                    mesh.verts.new((-segment_length/2, max_y, 0)),
+                    mesh.verts.new((-segment_length/2, med_y, max_z)),
+                    mesh.verts.new((segment_length/2, med_y, max_z)),
+                    mesh.verts.new((segment_length/2, -med_y, max_z)),
+                    mesh.verts.new((-segment_length/2, -med_y, max_z)),
+                    mesh.verts.new((-segment_length/2, -max_y, 0)),
+                    mesh.verts.new((segment_length/2, -max_y, 0)),
                 ]
 
                 for i in range(3):
