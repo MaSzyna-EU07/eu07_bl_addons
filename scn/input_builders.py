@@ -1,4 +1,5 @@
 from pathlib import Path
+import math
 
 import bmesh
 import mathutils
@@ -200,15 +201,21 @@ class _TracksBuilder:
                     mesh.verts.new((segment_length/2, -max_y, 0)),
                 ]
 
+                slope_uv_length = math.sqrt(profile_params[2] ** 2 + max_z ** 2)/mapping_length
+                med_u = med_y/mapping_length
+                max_u = slope_uv_length + med_u
+
+                print(max_u)
+
                 verts_uvs = [
-                    (1, 0),
-                    (1, 1),
-                    (med_y/mapping_length + 0.5, 1),
-                    (med_y/mapping_length + 0.5, 0),
-                    (0.5 - med_y/mapping_length, 0),
-                    (0.5 - med_y/mapping_length, 1),
-                    (0, 1),
-                    (0, 0)
+                    (0.5 + max_u, 0),
+                    (0.5 + max_u, 1),
+                    (med_u + 0.5, 1),
+                    (med_u + 0.5, 0),
+                    (0.5 - med_u, 0),
+                    (0.5 - med_u, 1),
+                    (0.5 - max_u, 1),
+                    (0.5 - max_u, 0)
                 ]
 
                 for i in range(3):

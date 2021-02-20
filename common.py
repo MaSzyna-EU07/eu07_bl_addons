@@ -46,6 +46,16 @@ def create_material_from_path(abspath, duplicates_allowed=False):
         bsdf.inputs[0]
     )
 
+    alpha_input = next(inp for inp in bsdf.inputs if inp.name == "Alpha")
+
+    material.node_tree.links.new(
+        texture_node.outputs[1],
+        alpha_input
+    )
+
+    material.blend_method = 'CLIP'
+    material.use_backface_culling = True
+
     if abspath.endswith(".dds"):
         texture_node.texture_mapping.scale[1] = -1
 
