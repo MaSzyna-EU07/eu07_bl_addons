@@ -130,8 +130,7 @@ class _TracksBuilder:
             tprofile.modifiers["Array"].curve = junction_track
             tprofile.modifiers["Curve"].object = junction_track
 
-        print(track.geometry_params)
-        tprofile = self.instantiate_trajectory_profile(track.subtype, track.geometry_params, track.width)
+        tprofile = self.instantiate_trajectory_profile(track.subtype, track.geometry_params, track.width, track.mapping_length)
 
         tprofile.parent = track_object
         tprofile.location = (0,0,0)
@@ -168,10 +167,11 @@ class _TracksBuilder:
 
         return spline
 
-    def instantiate_trajectory_profile(self, track_subtype, profile_params, trajectory_width):
+    def instantiate_trajectory_profile(self, track_subtype, profile_params, trajectory_width, mapping_length):
         profile = None
         if (track_subtype in "normal switch"):
-            name = f"BallastProfile_{'-'.join(str(x) for x in profile_params)}_{trajectory_width*1000}mm"
+            mapping_length = 6
+            name = f"BallastProfile_{'-'.join(str(x) for x in profile_params)}_ML{mapping_length}_{trajectory_width*1000}mm"
             profile = bpy.data.objects.get(name)
             if (profile is None):
                 mesh = bmesh.new()
@@ -185,9 +185,9 @@ class _TracksBuilder:
                 curve_mod = profile.modifiers.new('Curve', type='CURVE')
 
                 max_z = profile_params[0]
-                med_y = trajectory_width + profile_params[1]
+                med_y = trajectory_width/2 + profile_params[1]
                 max_y = med_y + profile_params[2]
-                segment_length = 5
+                segment_length = mapping_length
 
                 verts_co = [
                     mesh.verts.new((segment_length/2, max_y, 0)),
@@ -200,8 +200,40 @@ class _TracksBuilder:
                     mesh.verts.new((segment_length/2, -max_y, 0)),
                 ]
 
+                verts_uvs = [
+                    (1, 0),
+                    (1, 1),
+                    (med_y/mapping_length + 0.5, 1),
+                    (med_y/mapping_length + 0.5, 0),
+                    (0.5 - med_y/mapping_length, 0),
+                    (0.5 - med_y/mapping_length, 1),
+                    (0, 1),
+                    (0, 0)
+                ]
+
                 for i in range(3):
-                    face = mesh.faces.new(verts_co[i*2:i*2+4])
+                    vindex_start, vindex_end = i*2, i*2+4
+                    vertices = verts_co[vindex_start:vindex_end]
+                    uvs = verts_uvs[vindex_start:vindex_end]
+                    
+                    if (i == 1):
+                        vertices.reverse()
+
+                    face = mesh.faces.new(vertices)
+                    face.material_index = 1
+
+                    for vertex_index, loop in enumerate(face.loops):
+                        loop[uv_layer].uv = uvs[vertex_index]
+                    
+
+                # generowanie mesha szyny
+                # czytamy se profil z plika
+                # sortujemy vertexy tak zeby facy w dobra strone byly
+                # robimy to samo po drugioej stonie osi
+                # rozpinamy facy
+                # dodajemy polowe rozstawu
+                #powatzramy to samo
+                # dodajemy -polowe rostawu
 
                 mesh.to_mesh(profile.data)
                 mesh.free()
