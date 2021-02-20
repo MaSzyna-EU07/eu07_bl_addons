@@ -130,25 +130,16 @@ class _TracksBuilder:
             tprofile.modifiers["Array"].curve = junction_track
             tprofile.modifiers["Curve"].object = junction_track
 
-        trackbed_profile = (
-        f"{track.geometry_param1}-{track.geometry_param2}-{track.geometry_param3}"
-        )
+        print(track.geometry_params)
+        tprofile = self.instantiate_trajectory_profile(track.subtype, track.geometry_params, track.width)
 
-        pname = "TProfile_2-5-13"
-        if (track.subtype == "road"):
-            pname = "RProfile"
-
-        tprofile = bpy.data.objects.get(pname).copy()
-        bpy.context.scene.collection.objects.link(tprofile)
         tprofile.parent = track_object
         tprofile.location = (0,0,0)
         tprofile.hide_select = True
 
         materials = get_materials_for_trajectory([track.map1, track.map2], self._config["asset_searcher"])
 
-        tprofile.material_slots[0].link = 'OBJECT'
         tprofile.material_slots[0].material = materials[0]
-        tprofile.material_slots[1].link = 'OBJECT'
         tprofile.material_slots[1].material = materials[1]
         
         tprofile.modifiers["Array"].curve = track_object
@@ -176,6 +167,51 @@ class _TracksBuilder:
             spline.bezier_points[1].handle_right_type = 'AUTO' 
 
         return spline
+
+    def instantiate_trajectory_profile(self, track_subtype, profile_params, trajectory_width):
+        profile = None
+        if (track_subtype in "normal switch"):
+            name = f"BallastProfile_{'-'.join(str(x) for x in profile_params)}_{trajectory_width*1000}mm"
+            profile = bpy.data.objects.get(name)
+            if (profile is None):
+                mesh = bmesh.new()
+                uv_layer =  mesh.loops.layers.uv.new()
+                profile = bpy.data.objects.new(name, bpy.data.meshes.new(name))
+                bpy.context.scene.collection.objects.link(profile)
+                bpy.data.collections["Profiles"].objects.link(profile)
+
+                max_z = profile_params[0]
+                med_x = trajectory_width + profile_params[1]
+                max_x = med_x + profile_params[2]
+                segment_length = 5
+
+                verts_co = [
+                    mesh.verts.new((max_x, segment_length/2, 0)),
+                    mesh.verts.new((max_x, -segment_length/2, 0)),
+                    mesh.verts.new((med_x, segment_length/2, max_z)),
+                    mesh.verts.new((med_x, -segment_length/2, max_z)),
+                    mesh.verts.new((-med_x, segment_length/2, max_z)),
+                    mesh.verts.new((-med_x, -segment_length/2, max_z)),
+                    mesh.verts.new((-max_x, segment_length/2, 0)),
+                    mesh.verts.new((-max_x, -segment_length/2, 0)),
+                ]
+
+                for i in range(3):
+                    face = mesh.faces.new(verts_co[i*2:i*2+4])
+
+                mesh.to_mesh(profile.data)
+                mesh.free()
+
+                for i in range(2):
+                    profile.data.materials.append(None)
+                    profile.material_slots[i].link = 'OBJECT'
+
+            profile = profile.copy()
+            bpy.context.scene.collection.objects.link(profile)
+
+        return profile
+
+
 
 class _TerrainBuilder:
     def __init__(self, config):

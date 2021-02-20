@@ -57,7 +57,7 @@ def create_node_track(track_object):
     node.min_distance = properties.node_min_distance
     node.width = properties.trajectory_width 
     node.friction = properties.trajectory_friction
-    node.sound_distance = properties.trajectory_sound_distance #TODO: WAI DIS IS OLWEYS TWENTY
+    node.sound_distance = properties.trajectory_sound_distance
     node.quality_flag = properties.trajectory_quality
     node.damage_flag = properties.trajectory_damage
     node.environment = properties.trajectory_environment
