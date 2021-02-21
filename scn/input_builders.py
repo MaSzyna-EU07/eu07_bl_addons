@@ -188,7 +188,7 @@ class _TracksBuilder:
 
                 curve_mod = profile.modifiers.new('Curve', type='CURVE')
 
-                self.generate_rails(mesh, mapping_length, trajectory_width)
+                self.generate_rails(mesh, uv_layer, mapping_length, trajectory_width)
 
                 max_z = profile_params[0]
                 med_y = trajectory_width/2 + profile_params[1]
@@ -248,7 +248,7 @@ class _TracksBuilder:
 
         return profile
 
-    def generate_rails(self, mesh, mapping_length, spacing):
+    def generate_rails(self, mesh, uv_layer, mapping_length, spacing):
         height = 0.15
         width = 0.067
 
@@ -273,22 +273,30 @@ class _TracksBuilder:
             sideX = 1 if i == 0 else -1
 
             faceverts = []
+            faceus = []
 
-            for pv in profile:
+            for vindex, pv in enumerate(profile):
                 v = mathutils.Vector(pv)
                 v = v + mathutils.Vector((0, sideX * spacing/2, 0))
                 faceverts.append(mesh.verts.new(v - mathutils.Vector((-mapping_length/2, 0, 0))))
                 faceverts.append(mesh.verts.new(v + mathutils.Vector((-mapping_length/2, 0, 0))))
+                faceus.append(u_co[vindex]),
+                faceus.append(u_co[vindex])
         
             for i in range(3):
 
                 vindex_start, vindex_end = i*2, i*2+4
                 vertices = faceverts[vindex_start:vindex_end]
+                us = faceus[vindex_start:vindex_end]
 
                 vertices[:2] = reversed(vertices[:2])
+                us[:2] = reversed(us[:2])
 
                 face = mesh.faces.new(vertices)
                 face.material_index = 0
+
+                for vertex_index, loop in enumerate(face.loops):
+                    loop[uv_layer].uv = (us[vertex_index], 0.5)
 
 
 
