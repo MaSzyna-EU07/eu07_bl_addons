@@ -262,8 +262,8 @@ class _TracksBuilder:
         # u coordinates 
         u_co = [
             0,
-            0.4,
-            0.6,
+            0.25,
+            0.65,
             1 
         ]
 
@@ -296,7 +296,11 @@ class _TracksBuilder:
                 face.material_index = 0
 
                 for vertex_index, loop in enumerate(face.loops):
-                    loop[uv_layer].uv = (us[vertex_index], 0.5)
+                    v = mapping_length / 2
+                    if face.verts[vertex_index].co.x < 0:
+                        v *= -1
+
+                    loop[uv_layer].uv = (us[vertex_index], v)
 
 
 
