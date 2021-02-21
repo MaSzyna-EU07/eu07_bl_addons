@@ -70,6 +70,8 @@ class _TracksBuilder:
         self._config = config
 
     def build_trajectory(self, track):
+        if (track.subtype != "normal"):
+            return
         track_object = bpy.data.objects.new(track.name, bpy.data.curves.new(track.name, 'CURVE'))
         track_object.location = eu07_tools.utils.switch_coordinate_system(track.p1)
         track_object.scn_properties.type_ = track.type + ":" + track.subtype
@@ -171,6 +173,7 @@ class _TracksBuilder:
     def instantiate_trajectory_profile(self, track_subtype, profile_params, trajectory_width, mapping_length):
         profile = None
         if (track_subtype in "normal switch"):
+            rail_height = 0.15
             mapping_length = 6
             name = f"BallastProfile_{'-'.join(str(x) for x in profile_params)}_ML{mapping_length}_{trajectory_width*1000}mm"
             profile = bpy.data.objects.get(name)
@@ -185,27 +188,27 @@ class _TracksBuilder:
 
                 curve_mod = profile.modifiers.new('Curve', type='CURVE')
 
+                self.generate_rails(mesh, mapping_length, trajectory_width)
+
                 max_z = profile_params[0]
                 med_y = trajectory_width/2 + profile_params[1]
                 max_y = med_y + profile_params[2]
                 segment_length = mapping_length
 
                 verts_co = [
-                    mesh.verts.new((segment_length/2, max_y, 0)),
-                    mesh.verts.new((-segment_length/2, max_y, 0)),
-                    mesh.verts.new((-segment_length/2, med_y, max_z)),
-                    mesh.verts.new((segment_length/2, med_y, max_z)),
-                    mesh.verts.new((segment_length/2, -med_y, max_z)),
-                    mesh.verts.new((-segment_length/2, -med_y, max_z)),
-                    mesh.verts.new((-segment_length/2, -max_y, 0)),
-                    mesh.verts.new((segment_length/2, -max_y, 0)),
+                    mesh.verts.new((segment_length/2, max_y, -max_z)),
+                    mesh.verts.new((-segment_length/2, max_y, -max_z)),
+                    mesh.verts.new((-segment_length/2, med_y, 0)),
+                    mesh.verts.new((segment_length/2, med_y, 0)),
+                    mesh.verts.new((segment_length/2, -med_y, 0)),
+                    mesh.verts.new((-segment_length/2, -med_y, 0)),
+                    mesh.verts.new((-segment_length/2, -max_y, -max_z)),
+                    mesh.verts.new((segment_length/2, -max_y, -max_z)),
                 ]
 
                 slope_uv_length = math.sqrt(profile_params[2] ** 2 + max_z ** 2)/mapping_length
                 med_u = med_y/mapping_length
                 max_u = slope_uv_length + med_u
-
-                print(max_u)
 
                 verts_uvs = [
                     (0.5 + max_u, 0),
@@ -233,15 +236,6 @@ class _TracksBuilder:
                         loop[uv_layer].uv = uvs[vertex_index]
                     
 
-                # generowanie mesha szyny
-                # czytamy se profil z plika
-                # sortujemy vertexy tak zeby facy w dobra strone byly
-                # robimy to samo po drugioej stonie osi
-                # rozpinamy facy
-                # dodajemy polowe rozstawu
-                #powatzramy to samo
-                # dodajemy -polowe rostawu
-
                 mesh.to_mesh(profile.data)
                 mesh.free()
 
@@ -253,6 +247,50 @@ class _TracksBuilder:
             bpy.context.scene.collection.objects.link(profile)
 
         return profile
+
+    def generate_rails(self, mesh, mapping_length, spacing):
+        height = 0.15
+        width = 0.067
+
+        profile = [
+            (0, 0, 0),
+            (0, 0, height),
+            (0, width, height),
+            (0, width, 0),
+        ]
+
+        # u coordinates 
+        u_co = [
+            0,
+            0.4,
+            0.6,
+            1 
+        ]
+
+        vertices = []
+
+        for i in range(2):
+            sideX = 1 if i == 0 else -1
+
+            faceverts = []
+
+            for pv in profile:
+                v = mathutils.Vector(pv)
+                v = v + mathutils.Vector((0, sideX * spacing/2, 0))
+                faceverts.append(mesh.verts.new(v - mathutils.Vector((-mapping_length/2, 0, 0))))
+                faceverts.append(mesh.verts.new(v + mathutils.Vector((-mapping_length/2, 0, 0))))
+        
+            for i in range(3):
+
+                vindex_start, vindex_end = i*2, i*2+4
+                vertices = faceverts[vindex_start:vindex_end]
+
+                vertices[:2] = reversed(vertices[:2])
+
+                face = mesh.faces.new(vertices)
+                face.material_index = 0
+
+
 
 
 
