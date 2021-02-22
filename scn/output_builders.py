@@ -48,13 +48,14 @@ def create_node_triangles_from_mesh(mesh):
 def create_node_track(track_object):
     properties = track_object.scn_properties
 
-    mesh = next(c for c in track_object.children if c.name.startswith("TProfile"))
+    mesh = next(c for c in track_object.children if c.name.startswith("BallastProfile"))
 
     node = eu07_tools.scn.create_element("node:track")
     node.subtype = properties.type_.split(":")[-1]
     node.name = track_object.name
     node.max_distance = properties.node_max_distance
     node.min_distance = properties.node_min_distance
+    node.length = spline = track_object.data.splines[0].calc_length()
     node.width = properties.trajectory_width 
     node.friction = properties.trajectory_friction
     node.sound_distance = properties.trajectory_sound_distance
