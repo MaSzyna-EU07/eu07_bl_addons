@@ -14,7 +14,8 @@ def set_trajectory_profile(trajectory, new_profile_object):
     new_profile_object.parent = trajectory
     new_profile_object.location = (0, 0, 0)
     new_profile_object.hide_select = True
-    # trajectory.users_collection[0].objects.link(new_profile_object)
+    if len(trajectory.users_collection) != 0:
+        trajectory.users_collection[0].objects.link(new_profile_object)
     new_profile_object.modifiers["Array"].curve = trajectory
     new_profile_object.modifiers["Curve"].object = trajectory
 
