@@ -4,8 +4,10 @@ import bmesh
 import bpy
 import eu07_tools
 
+from . import trajectory_utils
 
-def generate_trajectory_profile(trajectory_type, profile_params, trajectory_width, mapping_length):
+
+def get_trajectory_generator(trajectory_type):
     generator = None
 
     if trajectory_type == "normal":
@@ -15,23 +17,7 @@ def generate_trajectory_profile(trajectory_type, profile_params, trajectory_widt
     elif trajectory_type == "river":
         generator = RiverProfileGenerator()
 
-    return generator.generate_profile(trajectory_type, profile_params, trajectory_width, mapping_length)
-
-
-def instantiate_trajectory_profile(track_subtype, profile_params, trajectory_width, mapping_length):
-    mapping_length = 6
-    name = get_profile_name(track_subtype, profile_params, trajectory_width, mapping_length)
-    profile = bpy.data.objects.get(name)
-    if profile is None:
-        profile = generate_trajectory_profile(track_subtype, profile_params, trajectory_width, mapping_length)
-
-    profile = profile.copy()
-
-    return profile
-
-
-def get_profile_name(track_subtype, profile_params, trajectory_width, mapping_length):
-    return f"TProfile_{track_subtype}_{'-'.join(str(x) for x in profile_params)}_ML{mapping_length}_{trajectory_width}"
+    return generator
 
 
 class TrajectoryBuilder:
@@ -110,10 +96,8 @@ class TrajectoryProfileGenerator:
         self.uv_layer = None
         self.typename = ""
 
-
-
     def generate_profile(self, track_subtype, profile_params, trajectory_width, mapping_length):
-        name = get_profile_name(track_subtype, profile_params, trajectory_width, mapping_length)
+        name = trajectory_utils.profile_name(track_subtype, profile_params, trajectory_width, mapping_length)
         self.object = bpy.data.objects.new(name, bpy.data.meshes.new(name))
         bpy.data.collections["Profiles"].objects.link(self.object)
 

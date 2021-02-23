@@ -8,7 +8,7 @@ def specify_id(location):
     ids = [0, 0]
     for i in range(2):
         coord = abs(location[i])
-        if (coord != 0):
+        if coord != 0:
             coord_sign = coord / location[i]
 
         if coord >= SIZE:

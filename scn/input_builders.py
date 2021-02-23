@@ -1,9 +1,9 @@
 import bpy
 
-from .trajectory_builder import TrajectoryBuilder, instantiate_trajectory_profile
+from .trajectory_builder import TrajectoryBuilder
+from . import trajectory_utils
 
 from . import sector_utils
-from .utils import  set_trajectory_profile, set_trajectory_material, load_trajectory_materials
 import eu07_tools
 
 
@@ -17,7 +17,7 @@ class SceneryBuilder:
             if element.type == "node:track":
                 if element.subtype in "normal road river":
                     trajectory = self._trajectory_builder.build_trajectory(element)
-                    profile = instantiate_trajectory_profile(
+                    profile = trajectory_utils.create_profile_instance(
                         element.subtype, element.geometry_params, element.width, element.mapping_length
                     )
 
@@ -26,12 +26,12 @@ class SceneryBuilder:
                     sector_utils.insert_into_sector(trajectory, sector)
                     sector_utils.insert_into_sector(profile, sector)
 
-                    set_trajectory_profile(trajectory, profile)
+                    trajectory_utils.set_profile_instance(trajectory, profile)
 
-                    mats = load_trajectory_materials([element.map1, element.map2], self._config["asset_searcher"])
+                    # mats = load_trajectory_materials([element.map1, element.map2], self._config["asset_searcher"])
 
-                    set_trajectory_material(trajectory, mats[0], 0)
-                    set_trajectory_material(trajectory, mats[1], 1)
+                    # set_trajectory_material(trajectory, mats[0], 0)
+                    # set_trajectory_material(trajectory, mats[1], 1)
 
             elif element.type == "include" and element.path.endswith(".inc"):
                 inc = bpy.data.objects.new("include", None)
@@ -39,7 +39,3 @@ class SceneryBuilder:
                 sector = sector_utils.get_sector_by_location(inc.location)
 
                 sector_utils.insert_into_sector(inc, sector)
-
-
-
-
