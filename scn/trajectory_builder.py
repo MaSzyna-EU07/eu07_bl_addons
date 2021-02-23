@@ -1,12 +1,8 @@
-from pathlib import Path
 import math
 
 import bmesh
-import mathutils
 import bpy
 import eu07_tools
-from ..common import create_material_from_path
-from .utils import load_trajectory_materials, set_trajectory_material, set_trajectory_profile
 
 
 def generate_trajectory_profile(trajectory_type, profile_params, trajectory_width, mapping_length):
@@ -16,7 +12,7 @@ def generate_trajectory_profile(trajectory_type, profile_params, trajectory_widt
         generator = TrackProfileGenerator()
     elif trajectory_type == "road":
         generator = RoadProfileGenerator()
-    elif (trajectory_type == "river"):
+    elif trajectory_type == "river":
         generator = RiverProfileGenerator()
 
     return generator.generate_profile(trajectory_type, profile_params, trajectory_width, mapping_length)
@@ -30,7 +26,6 @@ def instantiate_trajectory_profile(track_subtype, profile_params, trajectory_wid
         profile = generate_trajectory_profile(track_subtype, profile_params, trajectory_width, mapping_length)
 
     profile = profile.copy()
-    bpy.context.scene.collection.objects.link(profile)
 
     return profile
 
@@ -80,14 +75,6 @@ class TrajectoryBuilder:
         trajectory.scn_properties.trajectory_railprofile = node_track.railprofile
         trajectory.scn_properties.trajectory_friction_memcell_name = node_track.friction_memcell_name
 
-        if node_track.subtype == "normal":
-            profile = instantiate_trajectory_profile(node_track.subtype, node_track.geometry_params, node_track.width, node_track.mapping_length)
-            set_trajectory_profile(trajectory, profile)
-
-            materials = load_trajectory_materials([node_track.map1, node_track.map2], self._config["asset_searcher"])
-            set_trajectory_material(trajectory, materials[0], 0)
-            set_trajectory_material(trajectory, materials[1], 1)
-
         self._create_spline(trajectory, node_track.p1, node_track.cv1, node_track.p2, node_track.cv2)
 
         return trajectory
@@ -115,12 +102,15 @@ class TrajectoryBuilder:
         return spline
 
 
+
 class TrajectoryProfileGenerator:
     def __init__(self):
         self.object = None
         self.mesh = None
         self.uv_layer = None
         self.typename = ""
+
+
 
     def generate_profile(self, track_subtype, profile_params, trajectory_width, mapping_length):
         name = get_profile_name(track_subtype, profile_params, trajectory_width, mapping_length)

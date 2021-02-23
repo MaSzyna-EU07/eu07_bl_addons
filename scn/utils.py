@@ -8,14 +8,12 @@ from ..common import create_material_from_path
 def set_trajectory_profile(trajectory, new_profile_object):
     old_profile = get_trajectory_profile(trajectory)
 
-    if (old_profile is not None):
+    if old_profile is not None:
         bpy.data.objects.remove(old_profile)
 
     new_profile_object.parent = trajectory
     new_profile_object.location = (0, 0, 0)
     new_profile_object.hide_select = True
-    if len(trajectory.users_collection) != 0:
-        trajectory.users_collection[0].objects.link(new_profile_object)
     new_profile_object.modifiers["Array"].curve = trajectory
     new_profile_object.modifiers["Curve"].object = trajectory
 
@@ -28,6 +26,7 @@ def get_trajectory_profile(trajectory):
 
 
 def set_trajectory_material(trajectory, material, index):
+    if material is None: return
     profile_object = get_trajectory_profile(trajectory)
     profile_object.material_slots[index].material = material
 
