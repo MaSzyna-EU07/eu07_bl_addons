@@ -7,6 +7,8 @@ from ..common import get_root, get_path_from_material
 
 import mathutils
 
+from . import trajectory_utils
+
 
 def create_node_triangles_from_mesh(mesh):
     bm = bmesh.new()
@@ -48,7 +50,7 @@ def create_node_triangles_from_mesh(mesh):
 def create_node_track(track_object):
     properties = track_object.scn_properties
 
-    mesh = next(c for c in track_object.children if c.name.startswith("BallastProfile"))
+    mesh = next(c for c in track_object.children if c.name.startswith("TProfile"))
 
     node = eu07_tools.scn.create_element("node:track")
     node.subtype = properties.type_.split(":")[-1]
@@ -82,6 +84,8 @@ def create_node_track(track_object):
     node.railprofile = properties.trajectory_railprofile
     node.friction_memcell_name = properties.trajectory_friction_memcell_name
 
+    profile_instance = trajectory_utils.get_profile_instance(track_object)
+
     curve_data = extract_curve_data_for_scn(track_object)
     node.p1 = curve_data[0]
     node.cv1 = curve_data[1]
@@ -89,11 +93,11 @@ def create_node_track(track_object):
     node.p2 = curve_data[3]
 
     if (node.is_junction):
-        junction_track_object = [c for c in track_object.children if c.type == 'CURVE']
+        junction_track_object = next((c for c in track_object.children if c.type == 'CURVE'))
 
         junction_mesh = next(c for c in track_object.children if c.name.startswith("TProfile"))
 
-        curve_data = extract_curve_data_for_scn(track_object)
+        curve_data = extract_curve_data_for_scn(junction_track_object)
         node.p3 = curve_data[0]
         node.cv3 = curve_data[1]
         node.cv4 = curve_data[2]
@@ -103,6 +107,8 @@ def create_node_track(track_object):
         node.map2 = get_path_from_material(junction_mesh.material_slots[0].material)
 
         node.trackbed = get_path_from_material(mesh.material_slots[1].material)
+    else:
+        node.geometry_params = trajectory_utils.get_profile_params(profile_instance)
 
 
     return node
@@ -112,16 +118,17 @@ def extract_curve_data_for_scn(track_object):
 
     values = []
 
-    p1 = eu07_tools.utils.switch_coordinate_system(track_object.location + spline.bezier_points[0].co)
+    p1 = eu07_tools.utils.switch_coordinate_system(track_object.matrix_world.translation + spline.bezier_points[0].co)
 
-    p2 = eu07_tools.utils.switch_coordinate_system(track_object.location + spline.bezier_points[1].co)
+    p2 = eu07_tools.utils.switch_coordinate_system(track_object.matrix_world.translation + spline.bezier_points[1].co)
 
     # AUTO type because curve modifier works bad when we set both handles at the same position as vertex, so little cheat there
-    cv1 = spline.bezier_points[0].handle_right if spline.bezier_points[0].handle_right_type != 'AUTO' else mathutils.Vector((0, 0, 0))
-    cv2 = spline.bezier_points[1].handle_left if spline.bezier_points[1].handle_left_type != 'AUTO' else mathutils.Vector((0, 0, 0))
+    cv1 = spline.bezier_points[0].handle_right if spline.bezier_points[0].handle_right_type != 'AUTO' else (0, 0, 0)
+    cv2 = spline.bezier_points[1].handle_left if spline.bezier_points[1].handle_left_type != 'AUTO' else (0, 0, 0)
 
     cv1 = eu07_tools.utils.switch_coordinate_system(cv1)
-    cv2 = eu07_tools.utils.switch_coordinate_system(cv2 - spline.bezier_points[1].co)
+    if spline.bezier_points[1].handle_left_type != 'AUTO':
+        cv2 = eu07_tools.utils.switch_coordinate_system(cv2 - spline.bezier_points[1].co)
 
     return [p1, cv1, cv2, p2]
     

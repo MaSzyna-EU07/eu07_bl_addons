@@ -39,6 +39,12 @@ def get_switch_side(trajectory):
         return None
 
 
+def get_profile_params(profile_instance):
+    name_parts = profile_instance.name.split("_")
+    params_strings = name_parts[2].split("-")
+    return [float(p) for p in params_strings]
+
+
 def create_profile_instance(track_subtype, profile_params, trajectory_width, mapping_length=6):
     name = profile_name(track_subtype, profile_params, trajectory_width, mapping_length)
     profile = bpy.data.objects.get(name)
