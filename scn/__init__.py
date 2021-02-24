@@ -12,6 +12,9 @@ from .input_builders import SceneryBuilder
 from .output_builders import create_node_triangles_from_mesh, create_node_track
 from .basemap import LoadBasemapOperator, LoadBasemapPanel
 
+from . import trajectory_utils
+
+
 class SCNImport(bpy.types.Operator, ImportHelper):
     bl_idname = "import_scene.scn"
     bl_label = "Import SCN"
@@ -48,7 +51,6 @@ class SCNImport(bpy.types.Operator, ImportHelper):
             root, Path(self.filepath).parent
         )
         asset_searcher.textures.remove_extension(".mat")
-
 
         with open(self.filepath, encoding='latin-1') as infile:
             scn_input = eu07_tools.scn.load(infile)
@@ -341,10 +343,14 @@ class SCNObjectProperties(bpy.types.PropertyGroup):
 
 class SCNObjectPropertiesPanel(bpy.types.Panel):
     bl_idname = "OBJECT_PT_scn"
-    bl_label = "[EU07] SCN Object Properties"
-    bl_space_type = 'PROPERTIES'
-    bl_region_type = 'WINDOW'
-    bl_context = 'object'
+    bl_label = "[EU07] SCN Editor"
+    bl_space_type = "VIEW_3D"
+    bl_region_type = "UI"
+    bl_category = "[EU07] SCN Editor"
+
+    @classmethod
+    def poll(self, context):
+        return context.object is not None
 
     def draw(self, context):
         self.obj = context.object
@@ -435,6 +441,8 @@ class SCNObjectPropertiesPanel(bpy.types.Panel):
                 friction_memcell_name_r = self.layout.row()
                 friction_memcell_name_r.prop(self.obj.scn_properties, "trajectory_friction_memcell_name")
 
+                self.layout.row().prop(trajectory_utils.get_profile_instance(self.obj).material_slots[0], "material")
+                self.layout.row().prop(trajectory_utils.get_profile_instance(self.obj).material_slots[1], "material")
 
 
 

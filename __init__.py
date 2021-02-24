@@ -43,20 +43,20 @@ def menu_func_export(self, context):
     #self.layout.operator(MATExport.bl_idname, text="EU07 Material (.mat)")
 
 classes = (
-        EU07AddonPreferences,
-        T3DExport,
-        T3DImport,
-        T3DSubmodelProperties,
-        T3DSubmodelPropertiesPanel,
-        #MATImport,
-        SCNImport,
-        SCNExport,
-        SCNObjectProperties,
-        SCNObjectPropertiesPanel,
-        LoadBasemapOperator,
-        LoadBasemapPanel,
-        EU07SceneryProperties,
-        E3DImport
+    EU07AddonPreferences,
+    T3DExport,
+    T3DImport,
+    T3DSubmodelProperties,
+    T3DSubmodelPropertiesPanel,
+    #MATImport,
+    SCNImport,
+    SCNExport,
+    SCNObjectProperties,
+    SCNObjectPropertiesPanel,
+    LoadBasemapOperator,
+    LoadBasemapPanel,
+    EU07SceneryProperties,
+    E3DImport,
 )
 
 def register():
