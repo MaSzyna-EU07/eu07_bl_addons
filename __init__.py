@@ -14,7 +14,7 @@ import bpy
 from bpy.props import PointerProperty, StringProperty
 
 from .t3d import T3DExport, T3DImport, T3DSubmodelProperties, T3DSubmodelPropertiesPanel
-from .scn import SCNImport, SCNExport, SCNObjectProperties, SCNObjectPropertiesPanel, LoadBasemapOperator, EU07SceneryProperties, LoadBasemapPanel
+from .scn import SCNImport, SCNExport, SCNObjectProperties, SCNObjectPropertiesPanel, LoadBasemapOperator, EU07SceneryProperties, LoadBasemapPanel, CopyMaterialsToSelectedOperator
 #from .mat import MATImport
 from .e3d import E3DImport
 
@@ -42,6 +42,9 @@ def menu_func_export(self, context):
     self.layout.operator(SCNExport.bl_idname, text="[EU07] Scenery File (.scn, .scm)")
     #self.layout.operator(MATExport.bl_idname, text="EU07 Material (.mat)")
 
+def menu_materialslot(self, context):
+    self.layout.operator(CopyMaterialsToSelectedOperator.bl_idname, text="Copy To Selected")
+
 classes = (
     EU07AddonPreferences,
     T3DExport,
@@ -57,6 +60,7 @@ classes = (
     LoadBasemapPanel,
     EU07SceneryProperties,
     E3DImport,
+    CopyMaterialsToSelectedOperator
 )
 
 def register():

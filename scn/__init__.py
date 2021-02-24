@@ -137,6 +137,14 @@ class EU07SceneryProperties(bpy.types.PropertyGroup):
         min=100
     )
 
+
+def update_visibility(self, context):
+    obj = context.active_object
+
+    if obj.scn_properties.type_.startswith("node:track"):
+        profile_instance = trajectory_utils.get_profile_instance(obj)
+        profile_instance.hide_set(not context.active_object.scn_properties.trajectory_visible)
+
 class SCNObjectProperties(bpy.types.PropertyGroup):
     type_: EnumProperty(
         name="Type",
@@ -229,7 +237,8 @@ class SCNObjectProperties(bpy.types.PropertyGroup):
 
     trajectory_visible: BoolProperty(
         name="Is Visible",
-        default=True
+        default=True,
+        update=update_visibility
     )
 
     trajectory_p1_roll: FloatProperty(
@@ -369,6 +378,8 @@ class SCNObjectPropertiesPanel(bpy.types.Panel):
             if (self.obj.type != 'CURVE'):
                 self.layout.label(text="Trajectory must be a Curve!")
             else:
+                profile_instance = trajectory_utils.get_profile_instance(self.obj)
+
                 width_r = self.layout.row()
                 width_r.prop(self.obj.scn_properties, "trajectory_width")
 
@@ -441,13 +452,30 @@ class SCNObjectPropertiesPanel(bpy.types.Panel):
                 friction_memcell_name_r = self.layout.row()
                 friction_memcell_name_r.prop(self.obj.scn_properties, "trajectory_friction_memcell_name")
 
-                self.layout.row().prop(trajectory_utils.get_profile_instance(self.obj).material_slots[0], "material")
-                self.layout.row().prop(trajectory_utils.get_profile_instance(self.obj).material_slots[1], "material")
+                for i in range(2):
+                    mrow = self.layout.row()
+                    mrow.prop(profile_instance.material_slots[i], "material")
+                    op = mrow.operator('scn.copy_materials_to_selected', text="Copy To Selected")
+                    op.index = i
 
 
 
+class CopyMaterialsToSelectedOperator(bpy.types.Operator):
+    bl_idname = "scn.copy_materials_to_selected"
+    bl_label = "Copy Materials To Selected"
 
+    index: IntProperty()
 
+    def execute(self, context):
+        active = context.active_object
+
+        if ("node:track" in active.scn_properties.type_):
+
+            for o in context.selected_objects:
+                if ("node:track" in o.scn_properties.type_):
+                    trajectory_utils.set_material(o, trajectory_utils.get_material(active, self.index), self.index)
+
+        return {'FINISHED'}
 
 
 
