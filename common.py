@@ -2,6 +2,7 @@ from pathlib import Path
 
 import bpy
 import eu07_tools
+from eu07_tools.utils import AssetSearcher
 
 
 def get_root(abspath=""):
@@ -15,10 +16,18 @@ def get_root(abspath=""):
     return root
 
 
-def create_material_from_path(abspath, duplicates_allowed=False):
-    if abspath == "": 
+def create_material_from_relpath(relpath, duplicated_allowed=False):
+    asset_searcher = AssetSearcher(get_root())
+    asset_searcher.textures.remove_extension(".mat")
+
+    abspath = asset_searcher.textures.find(relpath)
+    return create_material_from_abspath(abspath, duplicated_allowed)
+
+
+def create_material_from_abspath(abspath, duplicates_allowed=False):
+    if abspath == "":
         return None
-        
+
     name = Path(abspath).relative_to(get_root()).with_suffix("").name
 
     if not duplicates_allowed and name in bpy.data.materials:
@@ -61,6 +70,7 @@ def create_material_from_path(abspath, duplicates_allowed=False):
 
     return material
 
+
 def get_path_from_material(material):
     if material:
         if material.use_nodes:
@@ -69,7 +79,7 @@ def get_path_from_material(material):
             # Get a principled node
             principled = next(n for n in nodes if n.type == 'BSDF_PRINCIPLED')
             # Get the slot for 'base color'
-            base_color = principled.inputs['Base Color'] #Or principled.inputs[0]
+            base_color = principled.inputs['Base Color']  # Or principled.inputs[0]
             link = base_color.links[0]
             link_node = link.from_node
             return eu07_tools.utils.shorten_asset_path(link_node.image.filepath)

@@ -7,7 +7,7 @@ from pathlib import Path
 import bmesh
 import bpy
 import eu07_tools
-from ..common import create_material_from_path
+from ..common import create_material_from_abspath
 
 
 def import_model(elements, collection, config):
@@ -153,7 +153,7 @@ class MeshInputBuilder(SubmodelInputBuilder):
 
         if full_path:
             duplicates_allowed = self._config.allow_duplicated_materials
-            self.obj.active_material = create_material_from_path(full_path, duplicates_allowed)
+            self.obj.active_material = create_material_from_abspath(full_path, duplicates_allowed)
 
     def set_geometry(self, geometry):
         bm = bmesh.new()

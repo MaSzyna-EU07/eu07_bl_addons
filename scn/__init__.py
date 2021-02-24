@@ -49,14 +49,11 @@ class SCNImport(bpy.types.Operator, ImportHelper):
         )
         asset_searcher.textures.remove_extension(".mat")
 
-        config = {
-            "asset_searcher": asset_searcher
-        }
 
         with open(self.filepath, encoding='latin-1') as infile:
             scn_input = eu07_tools.scn.load(infile)
 
-            builder = SceneryBuilder(config)
+            builder = SceneryBuilder()
             builder.run(scn_input)
 
         del builder

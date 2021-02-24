@@ -3,6 +3,41 @@ import bpy
 
 from . import trajectory_builder
 
+from . import sector_utils
+
+
+def get_neighbour(trajectory, point_index):
+    neighbour = trajectory.get(f"neighbour{point_index}")
+
+    if neighbour is None:
+        point_pos = trajectory.data.splines[0].bezier_points[point_index-1].co
+
+        for curve in bpy.data.curves:
+            candidate_obj = bpy.data.objects.get(curve.name)
+
+            if candidate_obj.name == trajectory.name or \
+                    (candidate_obj.parent is not None):
+                continue
+
+            for i in range(2):
+                candidate_pos = curve.splines[0].bezier_points[i].co
+
+                if point_pos + trajectory.location == candidate_pos + candidate_obj.location:
+                    candidate_obj[f"neighbour{i+1}"] = trajectory
+                    trajectory[f"neighbour{point_index}"] = candidate_obj
+                    return candidate_obj
+
+        return None
+
+    return neighbour
+
+
+def get_switch_side(trajectory):
+    try:
+        return next((c for c in trajectory.children if c.type == 'CURVE'))
+    except StopIteration:
+        return None
+
 
 def create_profile_instance(track_subtype, profile_params, trajectory_width, mapping_length=6):
     name = profile_name(track_subtype, profile_params, trajectory_width, mapping_length)
@@ -23,8 +58,16 @@ def get_profile_instance(trajectory):
         return None
 
 
+def copy_profile_instance(source, dest):
+    profile = get_profile_instance(source)
+    set_profile_instance(dest, profile.copy())
+
+
 def set_profile_instance(trajectory, new_profile_instance):
     unset_profile_instance(trajectory)
+
+    sector = sector_utils.get_sector_by_location(trajectory.location)
+    sector_utils.insert_into_sector(new_profile_instance, sector)
 
     new_profile_instance.parent = trajectory
     new_profile_instance.location = (0, 0, 0)
@@ -38,7 +81,7 @@ def unset_profile_instance(trajectory):
 
     if old_profile_instance is not None:
 
-        is_last_user = len(old_profile_instance.data.users == 2)
+        is_last_user = old_profile_instance.data.users == 2
         if is_last_user:
             original_instance = bpy.data.objects.get(old_profile_instance.data.name)
             bpy.data.objects.remove(original_instance)
@@ -47,10 +90,10 @@ def unset_profile_instance(trajectory):
 
 
 def set_material(trajectory, material, index):
-    if material is None:
-        return
-    profile_instance = get_profile_instance(trajectory)
-    profile_instance.material_slots[index].material = material
+    if material is not None:
+        profile_instance = get_profile_instance(trajectory)
+        if profile_instance is not None:
+            profile_instance.material_slots[index].material = material
 
 
 def get_material(trajectory, index):

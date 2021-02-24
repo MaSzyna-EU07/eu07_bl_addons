@@ -21,8 +21,7 @@ def get_trajectory_generator(trajectory_type):
 
 
 class TrajectoryBuilder:
-    def __init__(self, config):
-        self._config = config
+    def __init__(self):
         self.default_node_track = eu07_tools.scn.create_element("node:track")
 
     def build_trajectory(self, node_track):
@@ -30,7 +29,7 @@ class TrajectoryBuilder:
         trajectory.data.dimensions = "3D"
         trajectory.data.use_stretch = True
         trajectory.data.use_deform_bounds = True
-        trajectory.location = eu07_tools.utils.switch_coordinate_system(node_track.p1)
+        trajectory.location = node_track.p1.swizzled()
 
         trajectory.scn_properties.type_ = node_track.type + ":" + node_track.subtype
         trajectory.scn_properties.node_max_distance = node_track.max_distance
@@ -61,26 +60,24 @@ class TrajectoryBuilder:
         trajectory.scn_properties.trajectory_railprofile = node_track.railprofile
         trajectory.scn_properties.trajectory_friction_memcell_name = node_track.friction_memcell_name
 
-        self._create_spline(trajectory, node_track.p1, node_track.cv1, node_track.p2, node_track.cv2)
-
         return trajectory
 
-    def _create_spline(self, obj, p1, cv1, p2, cv2):
+    def create_spline(self, obj, p1, cv1, p2, cv2):
         spline = obj.data.splines.new('BEZIER')
         spline.use_smooth = False
 
         spline.bezier_points.add(1)
         spline.bezier_points[0].co = (0, 0, 0)
         spline.bezier_points[0].handle_left = (0, 0, 0)
-        spline.bezier_points[0].handle_right = eu07_tools.utils.switch_coordinate_system(cv1)
+        spline.bezier_points[0].handle_right = cv1.swizzled()
         if cv1 == (0, 0, 0):
             spline.bezier_points[0].handle_left_type = 'AUTO'
             spline.bezier_points[0].handle_right_type = 'AUTO'
 
         p2 = p2 - p1
-        spline.bezier_points[1].co = eu07_tools.utils.switch_coordinate_system(p2)
-        spline.bezier_points[1].handle_right = eu07_tools.utils.switch_coordinate_system(p2)
-        spline.bezier_points[1].handle_left = eu07_tools.utils.switch_coordinate_system(p2 + cv2)
+        spline.bezier_points[1].co = p2.swizzled()
+        spline.bezier_points[1].handle_right = p2.swizzled()
+        spline.bezier_points[1].handle_left = (p2 + cv2).swizzled()
         if cv2 == (0, 0, 0):
             spline.bezier_points[1].handle_left_type = 'AUTO'
             spline.bezier_points[1].handle_right_type = 'AUTO'
@@ -96,10 +93,11 @@ class TrajectoryProfileGenerator:
         self.uv_layer = None
         self.typename = ""
 
-    def generate_profile(self, track_subtype, profile_params, trajectory_width, mapping_length):
+    def generate_profile(self, track_subtype, profile_params, trajectory_width, mapping_length=6):
         name = trajectory_utils.profile_name(track_subtype, profile_params, trajectory_width, mapping_length)
         self.object = bpy.data.objects.new(name, bpy.data.meshes.new(name))
-        bpy.data.collections["Profiles"].objects.link(self.object)
+        collection = bpy.data.collections.get("Profiles") or bpy.data.collections.new("Profiles")
+        collection.objects.link(self.object)
 
         for i in range(2):
             self.object.data.materials.append(None)
@@ -135,7 +133,6 @@ class TrajectoryProfileGenerator:
             face.material_index = material_index
 
             for vertex_index, loop in enumerate(face.loops):
-                print(face_uvs[vertex_index])
                 loop[self.uv_layer].uv = face_uvs[vertex_index]
 
 
@@ -143,7 +140,7 @@ class TrackProfileGenerator(TrajectoryProfileGenerator):
     def __init__(self):
         super().__init__()
 
-    def _build_mesh(self, profile_params, trajectory_width, mapping_length):
+    def _build_mesh(self, profile_params, trajectory_width, mapping_length=6):
         max_z = profile_params[0]
         med_y = trajectory_width / 2 + profile_params[1]
         max_y = med_y + profile_params[2]

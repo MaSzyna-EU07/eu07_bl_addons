@@ -10,6 +10,8 @@ def specify_id(location):
         coord = abs(location[i])
         if coord != 0:
             coord_sign = coord / location[i]
+        else:
+            coord_sign = 1
 
         if coord >= SIZE:
             ids[i] = int(coord // SIZE * coord_sign)
