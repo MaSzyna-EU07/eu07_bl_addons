@@ -39,6 +39,10 @@ def get_switch_side(trajectory):
         return None
 
 
+def get_switch_straight(side_trajectory):
+    return side_trajectory.parent
+
+
 def get_profile_params(profile_instance):
     name_parts = profile_instance.name.split("_")
     params_strings = name_parts[2].split("-")
@@ -99,7 +103,14 @@ def set_material(trajectory, material, index):
     if material is not None:
         profile_instance = get_profile_instance(trajectory)
         if profile_instance is not None:
-            profile_instance.material_slots[index].material = material
+            set_material(trajectory, material, index)
+
+        if trajectory.scn_properties.type_ == "node:track:switch" and index == 1:
+            if trajectory.parent is None:
+                set_material(get_switch_side(trajectory), material, index)
+            else:
+                set_material(get_switch_straight(trajectory), material, index)
+
 
 
 def get_material(trajectory, index):
