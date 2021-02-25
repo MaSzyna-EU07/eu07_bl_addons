@@ -12,20 +12,19 @@ def get_neighbour(trajectory, point_index):
     if neighbour is None:
         point_pos = trajectory.data.splines[0].bezier_points[point_index-1].co
 
-        for curve in bpy.data.curves:
-            candidate_obj = bpy.data.objects.get(curve.name)
+        for candidate_obj in bpy.data.objects:
+            if candidate_obj.type == 'CURVE':
+                if candidate_obj.name == trajectory.name or \
+                        (candidate_obj.parent is not None):
+                    continue
 
-            if candidate_obj.name == trajectory.name or \
-                    (candidate_obj.parent is not None):
-                continue
+                for i in range(2):
+                    candidate_pos = candidate_obj.data.splines[0].bezier_points[i].co
 
-            for i in range(2):
-                candidate_pos = curve.splines[0].bezier_points[i].co
-
-                if point_pos + trajectory.location == candidate_pos + candidate_obj.location:
-                    candidate_obj[f"neighbour{i+1}"] = trajectory
-                    trajectory[f"neighbour{point_index}"] = candidate_obj
-                    return candidate_obj
+                    if point_pos + trajectory.location == candidate_pos + candidate_obj.location:
+                        candidate_obj[f"neighbour{i+1}"] = trajectory
+                        trajectory[f"neighbour{point_index}"] = candidate_obj
+                        return candidate_obj
 
         return None
 
@@ -103,14 +102,11 @@ def set_material(trajectory, material, index):
     if material is not None:
         profile_instance = get_profile_instance(trajectory)
         if profile_instance is not None:
-            set_material(trajectory, material, index)
+            profile_instance.material_slots[index].material = material
 
         if trajectory.scn_properties.type_ == "node:track:switch" and index == 1:
             if trajectory.parent is None:
                 set_material(get_switch_side(trajectory), material, index)
-            else:
-                set_material(get_switch_straight(trajectory), material, index)
-
 
 
 def get_material(trajectory, index):

@@ -56,22 +56,23 @@ class SceneryBuilder:
 
 
     def init_switches(self):
-        for curve in bpy.data.curves:
-            trajectory = bpy.data.objects[curve.name]
-            if "zwr" in trajectory.name and trajectory.parent is None:
-                for i in range(4):
-                    trajectory_straight = trajectory
-                    trajectory_side = trajectory_utils.get_switch_side(trajectory_straight)
+        for o in bpy.data.objects:
+            if o.type == 'CURVE':
+                trajectory = o
+                if trajectory.scn_properties.type_ == "node:track:switch" and trajectory.parent is None:
+                    for i in range(4):
+                        trajectory_straight = trajectory
+                        trajectory_side = trajectory_utils.get_switch_side(trajectory_straight)
 
-                    part_trajectory = trajectory_straight if i > 1 else trajectory_side
+                        part_trajectory = trajectory_straight if i > 1 else trajectory_side
 
-                    point_index = i - 1 if i > 1 else i + 1
+                        point_index = i - 1 if i > 1 else i + 1
 
-                    neighbour = trajectory_utils.get_neighbour(part_trajectory, point_index)
-                    if neighbour is not None:
-                        ballast_mat = trajectory_utils.get_material(neighbour, 1)
-                        trajectory_utils.copy_profile_instance(neighbour, trajectory_straight)
-                        trajectory_utils.copy_profile_instance(neighbour, trajectory_side)
+                        neighbour = trajectory_utils.get_neighbour(part_trajectory, point_index)
+                        if neighbour is not None:
+                            ballast_mat = trajectory_utils.get_material(neighbour, 1)
+                            trajectory_utils.copy_profile_instance(neighbour, trajectory_straight)
+                            trajectory_utils.copy_profile_instance(neighbour, trajectory_side)
 
-                        trajectory_utils.set_material(trajectory_straight, ballast_mat, 1)
-                        trajectory_utils.set_material(trajectory_side, ballast_mat, 1)
+                            trajectory_utils.set_material(trajectory_straight, ballast_mat, 1)
+                            trajectory_utils.set_material(trajectory_side, ballast_mat, 1)
