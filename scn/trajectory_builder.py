@@ -120,7 +120,7 @@ class TrajectoryProfileGenerator:
     def _build_mesh(self, profile_params, trajectory_width, mapping_length):
         pass
 
-    def _make_faces(self, verts, uvs, material_index, num_faces):
+    def _make_faces(self, verts, uvs, material_index, num_faces, flip_normal=False):
         for i in range(num_faces):
             vindex_start, vindex_end = i * 2, i * 2 + 4
             face_verts = verts[vindex_start:vindex_end]
@@ -134,6 +134,9 @@ class TrajectoryProfileGenerator:
 
             for vertex_index, loop in enumerate(face.loops):
                 loop[self.uv_layer].uv = face_uvs[vertex_index]
+
+            if flip_normal:
+                face.normal_flip()
 
 
 class TrackProfileGenerator(TrajectoryProfileGenerator):
@@ -181,12 +184,7 @@ class TrackProfileGenerator(TrajectoryProfileGenerator):
         width = 0.067
 
         # u coordinates
-        u_co = [
-            0,
-            0.25,
-            0.65,
-            1
-        ]
+
 
         for rail_index in range(2):
             sideY = -1 if rail_index == 1 else 1
@@ -200,21 +198,26 @@ class TrackProfileGenerator(TrajectoryProfileGenerator):
                 self.mesh.verts.new((maxX, maxY, 0)),
                 self.mesh.verts.new((-maxX, maxY, height)),
                 self.mesh.verts.new((maxX, maxY, height)),
-
                 self.mesh.verts.new((-maxX, minY, height)),
                 self.mesh.verts.new((maxX, minY, height)),
                 self.mesh.verts.new((-maxX, minY, 0)),
                 self.mesh.verts.new((maxX, minY, 0)),
             ]
 
-            verts_uv = [
-                (0, 0)
-            ] * 8
+            uvs_co = [
+                (0, 0),
+                (0, 1),
+                (0.25, 0),
+                (0.25, 1),
+                (0.65, 0),
+                (0.65, 1),
+                (1, 0),
+                (1, 1)
+            ]
 
-            if sideY == -1:
-                verts.reverse()
+            flip = True if sideY == -1 else False
 
-            self._make_faces(verts, verts_uv, 0, 3)
+            self._make_faces(verts, uvs_co, 0, 3, flip)
 
 
 

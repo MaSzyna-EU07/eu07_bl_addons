@@ -232,6 +232,8 @@ class LoadBasemapOperator(bpy.types.Operator):
 def update_visibility(self, context):
     obj = context.active_object
 
+    if obj is None: return
+
     if obj.scn_properties.type_.startswith("node:track"):
         profile_instance = trajectory_utils.get_profile_instance(obj)
         profile_instance.hide_set(not context.active_object.scn_properties.trajectory_visible)
@@ -558,6 +560,24 @@ class SCNObjectPropertiesPanel(bpy.types.Panel):
 
 
 class CopyMaterialsToSelectedOperator(bpy.types.Operator):
+    bl_idname = "scn.copy_materials_to_selected"
+    bl_label = "Copy Materials To Selected"
+
+    index: IntProperty()
+
+    def execute(self, context):
+        active = context.active_object
+
+        if ("node:track" in active.scn_properties.type_):
+
+            for o in context.selected_objects:
+                if ("node:track" in o.scn_properties.type_):
+                    trajectory_utils.set_material(o, trajectory_utils.get_material(active, self.index), self.index)
+
+        return {'FINISHED'}
+
+
+class AddTrackOperator(bpy.types.Operator):
     bl_idname = "scn.copy_materials_to_selected"
     bl_label = "Copy Materials To Selected"
 

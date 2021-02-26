@@ -44,20 +44,20 @@ class SceneryBuilder:
                     trajectory_side.parent = trajectory_straight
                     trajectory_side.location = (0, 0, 0)
 
-            elif element.type == "include" and element.path.endswith(".inc"):
-                inc = bpy.data.objects.new("include", None)
-                mesh = bpy.data.meshes.new("include")
-
-                asset_searcher = AssetSearcher(get_root())
-                inc_path = asset_searcher.includes.find(inc.path)
-
-                with open(inc_path, encoding='latin-1') as incfile:
-                for entry in eu07_tools.scn.load(incfile, element.parameters)
-
-                inc.location = eu07_tools.utils.switch_coordinate_system([float(p) for p in element.parameters[1:4]])
-                sector = sector_utils.get_sector_by_location(inc.location)
-
-                sector_utils.insert_into_sector(inc, sector)
+            # elif element.type == "include" and element.path.endswith(".inc"):
+            #     inc = bpy.data.objects.new("include", None)
+            #     mesh = bpy.data.meshes.new("include")
+            #
+            #     asset_searcher = AssetSearcher(get_root())
+            #     inc_path = asset_searcher.includes.find(inc.path)
+            #
+            #     with open(inc_path, encoding='latin-1') as incfile:
+            #         for entry in eu07_tools.scn.load(incfile, element.parameters)
+            #
+            #         inc.location = eu07_tools.utils.switch_coordinate_system([float(p) for p in element.parameters[1:4]])
+            #         sector = sector_utils.get_sector_by_location(inc.location)
+            #
+            #     sector_utils.insert_into_sector(inc, sector)
 
         self.init_switches()
 
