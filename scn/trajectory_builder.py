@@ -205,14 +205,14 @@ class TrackProfileGenerator(TrajectoryProfileGenerator):
             ]
 
             uvs_co = [
-                (0, 0),
-                (0, 1),
-                (0.25, 0),
-                (0.25, 1),
-                (0.65, 0),
-                (0.65, 1),
-                (1, 0),
-                (1, 1)
+                (0.1, 0),
+                (0.1, 1),
+                (0.344, 0),
+                (0.344, 1),
+                (0.689, 0),
+                (0.689, 1),
+                (0.9, 0),
+                (0.9, 1)
             ]
 
             flip = True if sideY == -1 else False
@@ -253,4 +253,31 @@ class RoadProfileGenerator(TrajectoryProfileGenerator):
 
 
 class RiverProfileGenerator(TrajectoryProfileGenerator):
-    pass
+    def __init__(self):
+        super().__init__()
+
+    def _build_mesh(self, profile_params, trajectory_width, mapping_length=6):
+        max_z = profile_params[0]
+        med_y = trajectory_width / 2
+        max_y = med_y + profile_params[2]
+        segment_length = mapping_length
+
+        verts = [
+            self.mesh.verts.new((-segment_length / 2, med_y, -max_z)),
+            self.mesh.verts.new((segment_length / 2, med_y, -max_z)),
+            self.mesh.verts.new((-segment_length / 2, -med_y, -max_z)),
+            self.mesh.verts.new((segment_length / 2, -med_y, -max_z)),
+        ]
+
+        slope_uv_length = math.sqrt(profile_params[2] ** 2 + max_z ** 2) / mapping_length
+        med_u = med_y / mapping_length
+        max_u = slope_uv_length + med_u
+
+        verts_uv = [
+            (0.5 + med_u, 0),
+            (0.5 + med_u, 1),
+            (0.5 - med_u, 0),
+            (0.5 - med_u, 1),
+        ]
+
+        self._make_faces(verts, verts_uv, 0, 1)

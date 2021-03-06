@@ -6,6 +6,22 @@ from . import trajectory_builder
 from . import sector_utils
 
 
+def create(name, location=None):
+    trajectory = bpy.data.objects.new(name, bpy.data.curves.new(name, 'CURVE'))
+    trajectory.data.dimensions = "3D"
+    trajectory.data.use_stretch = True
+    trajectory.data.use_deform_bounds = True
+    if location is not None:
+        trajectory.location = location
+
+    spline = trajectory.data.splines.new('BEZIER')
+    spline.use_smooth = False
+
+    spline.bezier_points.add(1)
+
+    return trajectory
+
+
 def get_neighbour(trajectory, point_index):
     neighbour = trajectory.get(f"neighbour{point_index}")
 
@@ -48,6 +64,33 @@ def get_profile_params(profile_instance):
     return [float(p) for p in params_strings]
 
 
+def update_profile_instance(self, context):
+    """ This func is called when one of the profile values are changed"""
+    trajectory = context.active_object
+    if trajectory is not None:
+        profile_params = [
+            trajectory.scn_properties.trajectory_profile_param1,
+            trajectory.scn_properties.trajectory_profile_param2,
+            trajectory.scn_properties.trajectory_profile_param3
+        ]
+
+        track_subtype = trajectory.scn_properties.type_.split(":")[-1]
+        trajectory_width = trajectory.scn_properties.trajectory_width
+
+        old_profile = find_profile(track_subtype, profile_params, trajectory_width)
+        new_profile = create_profile_instance(track_subtype, profile_params, trajectory_width)
+
+        if old_profile is not None:
+            set_material(trajectory, old_profile.material_slots[0].material, 0)
+            set_material(trajectory, old_profile.material_slots[1].material, 1)
+
+        set_profile_instance(trajectory, new_profile)
+
+
+def find_profile(track_subtype, profile_params, trajectory_width, mapping_length=6):
+    return bpy.data.objects.get(profile_name(track_subtype, profile_params, trajectory_width, mapping_length))
+
+
 def create_profile_instance(track_subtype, profile_params, trajectory_width, mapping_length=6):
     name = profile_name(track_subtype, profile_params, trajectory_width, mapping_length)
     profile = bpy.data.objects.get(name)
@@ -75,6 +118,9 @@ def copy_profile_instance(source, dest):
 def set_profile_instance(trajectory, new_profile_instance):
     unset_profile_instance(trajectory)
 
+    if (trajectory.scn_properties.type_ == "node:track:switch"):
+        print(new_profile_instance)
+
     sector = sector_utils.get_sector_by_location(trajectory.location)
     sector_utils.insert_into_sector(new_profile_instance, sector)
 
@@ -96,6 +142,7 @@ def unset_profile_instance(trajectory):
             bpy.data.objects.remove(original_instance)
 
         bpy.data.objects.remove(old_profile_instance)
+        bpy.data.orphans_purge()
 
 
 def set_material(trajectory, material, index):
@@ -119,4 +166,4 @@ def get_material(trajectory, index):
 
 
 def profile_name(track_subtype, profile_params, trajectory_width, mapping_length):
-    return f"TProfile_{track_subtype}_{'-'.join(str(x) for x in profile_params)}_ML{mapping_length}_{trajectory_width}"
+    return f"TProfile_{track_subtype}_{'-'.join(str(x) for x in profile_params)}_ML{mapping_length}_{trajectory_width*1000}"

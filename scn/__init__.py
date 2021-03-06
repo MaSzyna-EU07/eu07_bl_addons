@@ -316,6 +316,24 @@ class SCNObjectProperties(bpy.types.PropertyGroup):
         step=1,
     )
 
+    trajectory_profile_param1: FloatProperty(
+        name="Param 1",
+        default=0.2,
+        update=trajectory_utils.update_profile_instance
+    )
+
+    trajectory_profile_param2: FloatProperty(
+        name="Param 2",
+        default=0.5,
+        update=trajectory_utils.update_profile_instance
+    )
+
+    trajectory_profile_param3: FloatProperty(
+        name="Param 3",
+        default=1.3,
+        update=trajectory_utils.update_profile_instance
+    )
+
     trajectory_environment: EnumProperty(
         name="Environment",
         default="flat",
@@ -482,6 +500,12 @@ class SCNObjectPropertiesPanel(bpy.types.Panel):
                 width_r = self.layout.row()
                 width_r.prop(self.obj.scn_properties, "trajectory_width")
 
+                box = self.layout.box()
+                box.label(text="Profile:")
+                box.row().prop(self.obj.scn_properties, "trajectory_profile_param1")
+                box.row().prop(self.obj.scn_properties, "trajectory_profile_param2")
+                box.row().prop(self.obj.scn_properties, "trajectory_profile_param3")
+
                 friction_r = self.layout.row()
                 friction_r.prop(self.obj.scn_properties, "trajectory_friction")
 
@@ -578,21 +602,23 @@ class CopyMaterialsToSelectedOperator(bpy.types.Operator):
 
 
 class AddTrackOperator(bpy.types.Operator):
-    bl_idname = "scn.copy_materials_to_selected"
-    bl_label = "Copy Materials To Selected"
+    bl_idname = "scn.add_track"
+    bl_label = "Add Track"
 
-    index: IntProperty()
+    to_point: IntProperty(
+        name="To Point",
+        default=1,
+        max=2,
+        min=1
+    )
 
     def execute(self, context):
-        active = context.active_object
+        active_trajectory = context.active_object
 
-        if ("node:track" in active.scn_properties.type_):
+        new_trajectory = trajectory_utils.create("track", bpy.context.scene.cursor.location)
 
-            for o in context.selected_objects:
-                if ("node:track" in o.scn_properties.type_):
-                    trajectory_utils.set_material(o, trajectory_utils.get_material(active, self.index), self.index)
 
-        return {'FINISHED'}
+
 
 
 
