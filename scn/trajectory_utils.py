@@ -118,9 +118,6 @@ def copy_profile_instance(source, dest):
 def set_profile_instance(trajectory, new_profile_instance):
     unset_profile_instance(trajectory)
 
-    if (trajectory.scn_properties.type_ == "node:track:switch"):
-        print(new_profile_instance)
-
     sector = sector_utils.get_sector_by_location(trajectory.location)
     sector_utils.insert_into_sector(new_profile_instance, sector)
 
@@ -129,6 +126,8 @@ def set_profile_instance(trajectory, new_profile_instance):
     new_profile_instance.hide_select = True
     new_profile_instance.modifiers["Array"].curve = trajectory
     new_profile_instance.modifiers["Curve"].object = trajectory
+
+    bpy.data.orphans_purge()
 
 
 def unset_profile_instance(trajectory):
@@ -142,7 +141,6 @@ def unset_profile_instance(trajectory):
             bpy.data.objects.remove(original_instance)
 
         bpy.data.objects.remove(old_profile_instance)
-        bpy.data.orphans_purge()
 
 
 def set_material(trajectory, material, index):
