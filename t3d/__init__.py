@@ -106,18 +106,23 @@ class T3DExport(bpy.types.Operator, ExportHelper):
         name="Apply modifiers",
         default=True
     )
+    use_indices: BoolProperty(
+        name="Export face indices",
+        default=True
+    )
 
     def execute(self, context):
         Config = collections.namedtuple(
             "Config",
-            "root use_selection export_include_collections use_modifiers"
+            "root use_selection export_include_collections use_modifiers use_indices"
         )
 
         config = Config(
             get_root(self.filepath),
             self.use_selection, 
             self.export_include_collections, 
-            self.use_modifiers
+            self.use_modifiers,
+            self.use_indices
         )
 
         collection = bpy.context.scene.collection

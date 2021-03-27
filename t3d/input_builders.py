@@ -164,7 +164,7 @@ class MeshInputBuilder(SubmodelInputBuilder):
 
             for vertex in triangle.vertices:
                 bm_vertex = bm.verts.new(vertex.location)
-                if vertex.has_normal:
+                if vertex.use_normal:
                     bm_vertex.normal = vertex.normal
                     self.obj.t3d_properties.use_normals = True
 
