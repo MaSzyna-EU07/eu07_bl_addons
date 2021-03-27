@@ -182,7 +182,6 @@ class MeshInputBuilder(SubmodelInputBuilder):
                 for vertex_index, loop in enumerate(bm_face.loops):
                     vertex = submodel.vertices[vertex_index]
                     loop[uv_layer].uv = vertex.mapping
-                    #loop.tangent = vertex.tangent
 
         else:
 

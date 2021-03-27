@@ -216,7 +216,6 @@ class MeshOutputBuilder(SubmodelOutputBuilder):
                 self.submodel.indices.extend(indices)
 
             for vertex in mesh.vertices:
-                print("a", vertex.index)
                 co = vertex.co
                 normal = vertex.normal
 
