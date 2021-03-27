@@ -158,12 +158,13 @@ class MeshInputBuilder(SubmodelInputBuilder):
     def set_geometry(self, submodel):
         bm = bmesh.new()
         uv_layer = bm.loops.layers.uv.new()
+        custom_normals = []
 
         if submodel.use_indices:
-
             for vertex in submodel.vertices:
                 bm_vertex = bm.verts.new(vertex.location)
-                bm_vertex.normal = vertex.normal
+                custom_normals.append(vertex.normal)
+
 
             bm.verts.ensure_lookup_table()
 
@@ -184,7 +185,6 @@ class MeshInputBuilder(SubmodelInputBuilder):
                     loop[uv_layer].uv = vertex.mapping
 
         else:
-
             for triangle in submodel.triangles:
                 bm_vertices = []
 
@@ -206,6 +206,10 @@ class MeshInputBuilder(SubmodelInputBuilder):
 
         bm.to_mesh(self.obj.data)
         bm.free()
+
+        if submodel.use_indices:
+            self.obj.data.use_auto_smooth = True
+            self.obj.data.normals_split_custom_set_from_vertices(custom_normals)
 
 
 class FreeSpotLightInputBuilder(SubmodelInputBuilder):
