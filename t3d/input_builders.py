@@ -54,7 +54,7 @@ def _build_object(submodel, config):
         builder.set_wire_size(submodel.wire_size)
         builder.set_opacity(submodel.opacity)
         builder.set_map(submodel.map)
-        builder.set_geometry(submodel.triangles)
+        builder.set_geometry(submodel)
 
     elif submodel.type == 'FreeSpotLight':
         builder.set_near_atten_start(submodel.near_atten_start)
@@ -155,28 +155,56 @@ class MeshInputBuilder(SubmodelInputBuilder):
             duplicates_allowed = self._config.allow_duplicated_materials
             self.obj.active_material = create_material_from_abspath(full_path, duplicates_allowed)
 
-    def set_geometry(self, geometry):
+    def set_geometry(self, submodel):
         bm = bmesh.new()
         uv_layer = bm.loops.layers.uv.new()
 
-        for triangle in geometry:
-            bm_vertices = []
+        if submodel.use_indices:
 
-            for vertex in triangle.vertices:
+            for vertex in submodel.vertices:
                 bm_vertex = bm.verts.new(vertex.location)
-                if vertex.use_normal:
-                    bm_vertex.normal = vertex.normal
-                    self.obj.t3d_properties.use_normals = True
+                bm_vertex.normal = vertex.normal
 
-                bm_vertices.append(bm_vertex)
+            bm.verts.ensure_lookup_table()
 
-            bm_face = bm.faces.new(bm_vertices)
-            bm_face.smooth = (triangle.smooth > 0)
+            num_triangles = submodel.num_indices // 3
 
-            for vertex_index, loop in enumerate(bm_face.loops):
-                loop[uv_layer].uv = triangle.vertices[vertex_index].mapping
+            for i in range(num_triangles):
+                bm_verts = []
 
-        bmesh.ops.remove_doubles(bm, verts=bm.verts, dist=0.00001)
+                for index in submodel.indices[i*3:i*3+3]:
+                    bm_verts.append(bm.verts[index])
+
+                    vertex = submodel.vertices[index]
+
+                bm_face = bm.faces.new(bm_verts)
+
+                for vertex_index, loop in enumerate(bm_face.loops):
+                    vertex = submodel.vertices[vertex_index]
+                    loop[uv_layer].uv = vertex.mapping
+                    #loop.tangent = vertex.tangent
+
+        else:
+
+            for triangle in submodel.triangles:
+                bm_vertices = []
+
+                for vertex in triangle.vertices:
+                    bm_vertex = bm.verts.new(vertex.location)
+                    if vertex.use_normal:
+                        bm_vertex.normal = vertex.normal
+                        self.obj.t3d_properties.use_normals = True
+
+                    bm_vertices.append(bm_vertex)
+
+                bm_face = bm.faces.new(bm_vertices)
+                bm_face.smooth = (triangle.smooth > 0)
+
+                for vertex_index, loop in enumerate(bm_face.loops):
+                    loop[uv_layer].uv = triangle.vertices[vertex_index].mapping
+
+            bmesh.ops.remove_doubles(bm, verts=bm.verts, dist=0.00001)
+
         bm.to_mesh(self.obj.data)
         bm.free()
 
