@@ -210,18 +210,20 @@ class MeshOutputBuilder(SubmodelOutputBuilder):
                 indices = []
 
                 for loop_index in poly.loop_indices:
-                    print(loop_index)
                     loop = mesh.loops[loop_index]
                     indices.append(loop.vertex_index)
 
                 self.submodel.indices.extend(indices)
 
-            for loop in mesh.loops:
-                vertex = mesh.vertices[loop.vertex_index]
+            for vertex in mesh.vertices:
+                print("a", vertex.index)
                 co = vertex.co
                 normal = vertex.normal
-                uv = uv_data[loop.index].uv if uv_layer else [0, 0]
-                tangent = [*loop.tangent, 1]
+
+                for loop in mesh.loops:
+                    if loop.vertex_index == vertex.index:
+                        uv = uv_data[loop.index].uv if uv_layer else [0, 0]
+                        tangent = [*loop.tangent, 1]
 
                 vertex = self.submodel.vertices.new([*co, *normal, *uv, *tangent])
 
