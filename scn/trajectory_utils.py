@@ -77,14 +77,18 @@ def update_profile_instance(self, context):
         track_subtype = trajectory.scn_properties.type_.split(":")[-1]
         trajectory_width = trajectory.scn_properties.trajectory_width
 
-        old_profile = find_profile(track_subtype, profile_params, trajectory_width)
+        old_profile = get_profile_instance(trajectory)
+
+        mat0 = old_profile.material_slots[0].material
+        mat1 = old_profile.material_slots[1].material
+
         new_profile = create_profile_instance(track_subtype, profile_params, trajectory_width)
 
-        if old_profile is not None:
-            set_material(trajectory, old_profile.material_slots[0].material, 0)
-            set_material(trajectory, old_profile.material_slots[1].material, 1)
-
         set_profile_instance(trajectory, new_profile)
+
+        if old_profile is not None:
+            set_material(trajectory, mat0, 0)
+            set_material(trajectory, mat1, 1)
 
 
 def find_profile(track_subtype, profile_params, trajectory_width, mapping_length=6):
@@ -126,8 +130,6 @@ def set_profile_instance(trajectory, new_profile_instance):
     new_profile_instance.hide_select = True
     new_profile_instance.modifiers["Array"].curve = trajectory
     new_profile_instance.modifiers["Curve"].object = trajectory
-
-    bpy.data.orphans_purge()
 
 
 def unset_profile_instance(trajectory):
