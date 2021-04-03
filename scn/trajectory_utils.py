@@ -79,6 +79,8 @@ def update_profile_instance(self, context):
 
         old_profile = get_profile_instance(trajectory)
 
+        print(old_profile)
+
         mat0 = old_profile.material_slots[0].material
         mat1 = old_profile.material_slots[1].material
 
@@ -139,6 +141,7 @@ def unset_profile_instance(trajectory):
 
         is_last_user = old_profile_instance.data.users == 2
         if is_last_user:
+            # this is problemtaic!
             original_instance = bpy.data.objects.get(old_profile_instance.data.name)
             bpy.data.objects.remove(original_instance)
 
@@ -166,4 +169,4 @@ def get_material(trajectory, index):
 
 
 def profile_name(track_subtype, profile_params, trajectory_width, mapping_length):
-    return f"TProfile_{track_subtype}_{'-'.join(str(x) for x in profile_params)}_ML{mapping_length}_{trajectory_width*1000}"
+    return f"TProfile_{track_subtype}_{'-'.join(str(round(x, 3)) for x in profile_params)}_ML{mapping_length}_{trajectory_width*1000}"

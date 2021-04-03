@@ -165,24 +165,24 @@ class MeshInputBuilder(SubmodelInputBuilder):
                 bm_vertex = bm.verts.new(vertex.location)
                 custom_normals.append(vertex.normal)
 
-
             bm.verts.ensure_lookup_table()
 
             num_triangles = submodel.num_indices // 3
 
             for i in range(num_triangles):
                 bm_verts = []
+                uvs = []
 
                 for index in submodel.indices[i*3:i*3+3]:
                     bm_verts.append(bm.verts[index])
 
                     vertex = submodel.vertices[index]
+                    uvs.append(vertex.mapping)
 
                 bm_face = bm.faces.new(bm_verts)
 
                 for vertex_index, loop in enumerate(bm_face.loops):
-                    vertex = submodel.vertices[vertex_index]
-                    loop[uv_layer].uv = vertex.mapping
+                    loop[uv_layer].uv = uvs[vertex_index]
 
         else:
             for triangle in submodel.triangles:

@@ -2,6 +2,7 @@ import bpy
 
 from eu07_tools.utils import AssetSearcher
 from .trajectory_builder import TrajectoryBuilder
+from .terrain_builder import TerrainBuilder
 from . import trajectory_utils
 from common import create_material_from_relpath, get_root
 from . import sector_utils
@@ -9,11 +10,15 @@ import eu07_tools
 
 
 class SceneryBuilder:
-    def __init__(self):
+    def __init__(self, config):
         self._trajectory_builder = TrajectoryBuilder()
+        self._terrain_builder = TerrainBuilder(config)
 
     def run(self, data):
         for element in data:
+            if element.type == "node:triangles":
+                self._terrain_builder.add_triangle(element)
+
             if element.type == "node:track":
                 if element.subtype in "normal road river":
                     trajectory = self._trajectory_builder.build_trajectory(element)
@@ -60,6 +65,7 @@ class SceneryBuilder:
             #     sector_utils.insert_into_sector(inc, sector)
 
         self.init_switches()
+        self._terrain_builder.finish()
 
 
     def init_switches(self):
@@ -71,9 +77,12 @@ class SceneryBuilder:
                         trajectory_straight = trajectory
                         trajectory_side = trajectory_utils.get_switch_side(trajectory_straight)
 
-                        part_trajectory = trajectory_straight if i > 1 else trajectory_side
+                        part_trajectory = trajectory_straight if i < 1 else trajectory_side
 
                         point_index = i - 1 if i > 1 else i + 1
+
+                        if (part_trajectory is None):
+                            print(i, point_index)
 
                         neighbour = trajectory_utils.get_neighbour(part_trajectory, point_index)
                         if neighbour is not None:

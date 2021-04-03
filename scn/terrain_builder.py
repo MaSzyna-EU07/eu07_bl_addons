@@ -4,12 +4,13 @@ import bmesh
 
 from ..common import create_material_from_abspath
 
-class _TerrainBuilder:
+class TerrainBuilder:
     def __init__(self, config):
         self._config = config
         self._terrain_mesh = bmesh.new()
         self._uv_layer = self._terrain_mesh.loops.layers.uv.new()
         self._terrain_object = bpy.data.objects.new("terrain", bpy.data.meshes.new("terrain"))
+        self._terrain_object.scn_properties.type_ = "node:triangles"
         bpy.context.scene.collection.objects.link(self._terrain_object)
 
         self._maps = []
