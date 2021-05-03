@@ -41,7 +41,7 @@ class MATImport(bpy.types.Operator, ImportHelper):
 
     def nodify_mat_mapping(self, mapping, parent=None):
         self.add_texture_node_if_present(mapping, "texture_diffuse", parent)
-        self.add_texture_node_if_present(mapping, "texture_normal", parent)
+        self.add_texture_node_if_present(mapping, "texture_normalmap", parent)
 
         for key, value in mapping.items():
             if key.startswith("param_"):
@@ -52,6 +52,7 @@ class MATImport(bpy.types.Operator, ImportHelper):
                 frame.name = key
                 frame.name = self._create_node_name(key, frame)
                 frame.label = key
+                frame.parent = parent
                 self.nodify_mat_mapping(value, frame)
 
     def add_value_node_if_present(self, mapping, key, parent):
@@ -67,12 +68,12 @@ class MATImport(bpy.types.Operator, ImportHelper):
             texture_object = mapping[key]
 
             if texture_object.value_type == "TEXTURE_PATH":
-                tex_path = self.asset_searcher.textures_finder.find(texture_object.value)
+                tex_path = self.asset_searcher.textures.find(texture_object.value)
                 image = bpy.data.images.load(tex_path)
 
                 node.image = image
 
-            if key == "texture_normal":
+            if key == "texture_normalmap":
                 normal_map_node = self.nodes.new("ShaderNodeNormalMap")
 
             self.links.new(node.outputs[0], self.nodes.get("Principled BSDF").inputs[0])

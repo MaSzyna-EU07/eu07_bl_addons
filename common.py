@@ -80,8 +80,9 @@ def get_path_from_material(material):
             principled = next(n for n in nodes if n.type == 'BSDF_PRINCIPLED')
             # Get the slot for 'base color'
             base_color = principled.inputs['Base Color']  # Or principled.inputs[0]
-            link = base_color.links[0]
-            link_node = link.from_node
-            return eu07_tools.utils.shorten_asset_path(link_node.image.filepath)
+            if base_color.links:
+                link = base_color.links[0]
+                link_node = link.from_node
+                return eu07_tools.utils.shorten_asset_path(link_node.image.filepath)
 
     return "none"

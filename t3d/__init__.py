@@ -110,11 +110,15 @@ class T3DExport(bpy.types.Operator, ExportHelper):
         name="Export face indices",
         default=True
     )
+    namespace_prefix: StringProperty(
+        name="Namespace prefix",
+        default=""
+    )
 
     def execute(self, context):
         Config = collections.namedtuple(
             "Config",
-            "root use_selection export_include_collections use_modifiers use_indices"
+            "root use_selection export_include_collections use_modifiers use_indices namespace_prefix"
         )
 
         config = Config(
@@ -122,7 +126,8 @@ class T3DExport(bpy.types.Operator, ExportHelper):
             self.use_selection, 
             self.export_include_collections, 
             self.use_modifiers,
-            self.use_indices
+            self.use_indices,
+            self.namespace_prefix
         )
 
         collection = bpy.context.scene.collection

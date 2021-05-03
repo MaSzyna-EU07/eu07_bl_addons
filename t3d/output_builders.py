@@ -30,6 +30,12 @@ def export_model(collection, file, config):
     eu07_tools.t3d.dump(t3d, file)
 
 
+def trim_namespace(name, prefix):
+    if prefix:
+        if name.startswith(prefix):
+            return name[len(prefix):]
+
+
 class HierarchyMaker:
     def __init__(self, collection):
         self._collection = collection
@@ -99,6 +105,8 @@ def _build_submodel(obj, config):
     elif submodel_type == "Stars":
         builder.set_geometry()
 
+    builder.submodel.name = trim_namespace(builder.submodel.name, config.namespace_prefix)
+
     return builder.submodel
 
 
@@ -122,10 +130,10 @@ class SubmodelOutputBuilder(abc.ABC):
         self.submodel = None
 
     def set_parent(self):
-        self.submodel.parent_name = (
-            self.obj.parent.name if self.obj.parent 
-            else "none"
-        )
+        if self.obj.parent:
+            self.submodel.parent_name = trim_namespace(self.obj.parent.name, self.config.namespace_prefix)
+        else:
+            return "none"
 
     def set_diffuse(self):
         self.submodel.diffuse_color = self.obj.t3d_properties.diffuse_color * 255

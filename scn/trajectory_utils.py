@@ -118,6 +118,7 @@ def get_profile_instance(trajectory):
 
 def copy_profile_instance(source, dest):
     profile = get_profile_instance(source)
+    print(f"Copying profile from {source.name} to {dest.name}")
     set_profile_instance(dest, profile.copy())
 
 
