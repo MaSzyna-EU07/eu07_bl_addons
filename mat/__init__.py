@@ -47,6 +47,15 @@ class MATImport(bpy.types.Operator, ImportHelper):
             if key.startswith("param_"):
                 self.add_value_node_if_present(mapping, key, parent)
 
+            if key.startswith("size"):
+                size = mapping[key]
+
+                node_x = self._add_node_generic("ShaderNodeValue", "size(x)", parent)
+                node_x.outputs[0].default_value = size[0]
+
+                node_y = self._add_node_generic("ShaderNodeValue", "size(y)", parent)
+                node_y.outputs[0].default_value = size[1]
+
             elif key in eu07_tools.mat.NESTED_MAPPING_KEYS:
                 frame = self.nodes.new("NodeFrame")
                 frame.name = key
@@ -57,12 +66,18 @@ class MATImport(bpy.types.Operator, ImportHelper):
 
 
     def add_value_node_if_present(self, mapping, key, parent):
+        if key not in mapping:
+            return
+
         node = self._add_node_generic("ShaderNodeValue", key, parent)
 
         if node:
             pass
 
     def add_texture_node_if_present(self, mapping, key, parent):
+        if key not in mapping:
+            return
+
         node = self._add_node_generic("ShaderNodeTexImage", key, parent)
 
         if node:
@@ -80,10 +95,10 @@ class MATImport(bpy.types.Operator, ImportHelper):
             self.links.new(node.outputs[0], self.nodes.get("Principled BSDF").inputs[0])
 
 
-    def _add_node_generic(self, typename, key, parent):
+    def _add_node_generic(self, typename, name, parent):
         node = self.nodes.new(typename)
-        node.name = self._create_node_name(key, parent)
-        node.label = key
+        node.name = self._create_node_name(name, parent)
+        node.label = name
         node.parent = parent
 
         return node
