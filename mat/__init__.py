@@ -44,8 +44,9 @@ class MATImport(bpy.types.Operator, ImportHelper):
         self.add_texture_node_if_present(mapping, "texture_normalmap", parent)
 
         for key, value in mapping.items():
-            if key.startswith("param_"):
-                self.add_value_node_if_present(mapping, key, parent)
+            if key.startswith("param") or key in eu07_tools.mat.NUMERIC_KEYS:
+                node = self.add_value_node_if_present(mapping, key, parent)
+                node.outputs[0].default_value = mapping[key]
 
             if key.startswith("size"):
                 size = mapping[key]
@@ -70,9 +71,7 @@ class MATImport(bpy.types.Operator, ImportHelper):
             return
 
         node = self._add_node_generic("ShaderNodeValue", key, parent)
-
-        if node:
-            pass
+        return node
 
     def add_texture_node_if_present(self, mapping, key, parent):
         if key not in mapping:
@@ -89,10 +88,21 @@ class MATImport(bpy.types.Operator, ImportHelper):
 
                 node.image = image
 
-            if key == "texture_normalmap":
-                normal_map_node = self.nodes.new("ShaderNodeNormalMap")
+                if key == "texture_normalmap":
+                    node.image.colorspace_settings.name = 'Non-Color'
+                    normal_map_node = self.nodes.new("ShaderNodeNormalMap")
+                    normal_map_node.parent = parent
 
-            self.links.new(node.outputs[0], self.nodes.get("Principled BSDF").inputs[0])
+                    self.links.new(node.outputs[0], normal_map_node.inputs[1])
+
+                    if not parent:
+                        self.links.new(normal_map_node.outputs[0], self.nodes.get("Principled BSDF").inputs[-3])
+
+                elif key == "texture_diffuse" and not parent:
+                    self.links.new(node.outputs[0], self.nodes.get("Principled BSDF").inputs[0])
+
+
+
 
 
     def _add_node_generic(self, typename, name, parent):
