@@ -30,6 +30,7 @@ def create_material_from_abspath(abspath, duplicates_allowed=False):
 
     name = Path(abspath).relative_to(get_root()).with_suffix("").name
 
+
     if not duplicates_allowed and name in bpy.data.materials:
         return bpy.data.materials[name]
 

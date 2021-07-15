@@ -55,14 +55,15 @@ class MATImport(bpy.types.Operator, ImportHelper):
                 frame.parent = parent
                 self.nodify_mat_mapping(value, frame)
 
+
     def add_value_node_if_present(self, mapping, key, parent):
-        node = self._add_node_generic("ShaderNodeValue", mapping, key, parent)
+        node = self._add_node_generic("ShaderNodeValue", key, parent)
 
         if node:
             pass
 
     def add_texture_node_if_present(self, mapping, key, parent):
-        node = self._add_node_generic("ShaderNodeTexImage", mapping, key, parent)
+        node = self._add_node_generic("ShaderNodeTexImage", key, parent)
 
         if node:
             texture_object = mapping[key]
@@ -79,16 +80,13 @@ class MATImport(bpy.types.Operator, ImportHelper):
             self.links.new(node.outputs[0], self.nodes.get("Principled BSDF").inputs[0])
 
 
-    def _add_node_generic(self, typename, mapping, key, parent):
-        if key in mapping:
-            node = self.nodes.new(typename)
-            node.name = self._create_node_name(key, parent)
-            node.label = key
-            node.parent = parent
+    def _add_node_generic(self, typename, key, parent):
+        node = self.nodes.new(typename)
+        node.name = self._create_node_name(key, parent)
+        node.label = key
+        node.parent = parent
 
-            return node
-
-        return None
+        return node
 
     def _create_node_name(self, name, parent):
         return f"{parent.name}.{name}" if parent else name
