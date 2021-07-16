@@ -5,6 +5,21 @@ import eu07_tools
 from eu07_tools.utils import AssetSearcher
 
 
+class EU07WeatherSettingsPanel(bpy.types.Panel):
+    bl_idname = "SCENE_PT_eu07weather"
+    bl_label = "Weather Settings"
+    bl_space_type = "VIEW_3D"
+    bl_region_type = "UI"
+    bl_category = "[EU07] Utility"
+
+    def draw(self, context):
+        scene = context.scene
+
+        box = self.layout.box()
+        box.label(text="here comes the sun, dun dun dun dun...")
+
+
+
 def get_root(abspath=""):
     try:
         root = eu07_tools.utils.find_asset_root(abspath)
@@ -16,9 +31,10 @@ def get_root(abspath=""):
     return root
 
 
-def create_material_from_relpath(relpath, duplicated_allowed=False):
+def create_material_from_relpath(relpath, duplicated_allowed=False, mat_allowed=True):
     asset_searcher = AssetSearcher(get_root())
-    asset_searcher.textures.remove_extension(".mat")
+    if not mat_allowed:
+        asset_searcher.textures.remove_extension(".mat")
 
     abspath = asset_searcher.textures.find(relpath)
     return create_material_from_abspath(abspath, duplicated_allowed)
@@ -28,13 +44,17 @@ def create_material_from_abspath(abspath, duplicates_allowed=False):
     if abspath == "":
         return None
 
-    name = Path(abspath).relative_to(get_root()).with_suffix("").name
+    name = str(Path(abspath).relative_to(get_root()).with_suffix(""))
 
+    if not duplicates_allowed:
+        duplicate_candidate = bpy.data.materials.get(name)
+        if duplicate_candidate:
+            return duplicate_candidate
 
-    if not duplicates_allowed and name in bpy.data.materials:
+    if abspath.endswith(".mat"):
+        bpy.ops.import_material.mat(filepath=abspath, duplicates_allowed=duplicates_allowed)
         return bpy.data.materials[name]
 
-    # TODO: Load materials from .mat
     try:
         img = bpy.data.images.load(abspath, check_existing=True)
     except:

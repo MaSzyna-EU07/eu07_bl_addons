@@ -17,6 +17,7 @@ from .t3d import T3DExport, T3DImport, T3DSubmodelProperties, T3DSubmodelPropert
 from .scn import SCNImport, SCNExport, SCNObjectProperties, SCNObjectPropertiesPanel, LoadBasemapOperator, EU07SceneryProperties, LoadBasemapPanel, CopyMaterialsToSelectedOperator
 from .mat import MATImport
 from .e3d import E3DImport
+from .common import EU07WeatherSettingsPanel
 
 class EU07AddonPreferences(bpy.types.AddonPreferences):
     bl_idname = __name__
@@ -28,6 +29,9 @@ class EU07AddonPreferences(bpy.types.AddonPreferences):
 
     def draw(self, context):
         self.layout.prop(self, "root")
+
+
+
 
 def menu_func_import(self, context):
     self.layout.operator(T3DImport.bl_idname, text="[EU07] Text Model (.t3d)")
@@ -60,7 +64,8 @@ classes = (
     LoadBasemapPanel,
     EU07SceneryProperties,
     E3DImport,
-    CopyMaterialsToSelectedOperator
+    CopyMaterialsToSelectedOperator,
+    EU07WeatherSettingsPanel
 )
 
 def register():

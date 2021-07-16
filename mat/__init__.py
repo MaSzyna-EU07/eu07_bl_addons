@@ -2,11 +2,11 @@ from pathlib import Path
 
 from bpy_extras.io_utils import ImportHelper
 import bpy
-from bpy.props import StringProperty
+from bpy.props import StringProperty, BoolProperty
 
 import eu07_tools
-
 from ..common import get_root
+
 
 class MATImport(bpy.types.Operator, ImportHelper):
     bl_idname = "import_material.mat"
@@ -18,25 +18,43 @@ class MATImport(bpy.types.Operator, ImportHelper):
         options={'HIDDEN'}
     )
 
+    duplicates_allowed: BoolProperty(
+        default=False
+    )
+
     def execute(self, context):
-        root = get_root(self.filepath)
+        helper_mat_importer = HelperMATImporter()
+        helper_mat_importer.import_mat_from_abspath(self.filepath, self.duplicates_allowed)
+
+        return {'FINISHED'}
+
+
+class HelperMATImporter:
+    def import_mat_from_abspath(self, filepath, prevent_duplicate):
+        root = get_root(filepath)
 
         self.asset_searcher = eu07_tools.utils.AssetSearcher(
-            root, Path(self.filepath).parent
+            root, Path(filepath).parent
         )
         self.asset_searcher.textures.remove_extension(".mat")
 
-        mat_name = "[MAT]" + str(Path(self.filepath).relative_to(Path(root, "textures")))
+        mat_name = str(Path(filepath).relative_to(Path(root)).with_suffix(""))
+
+        if prevent_duplicate:
+            duplicate_candidate = bpy.data.materials.get(mat_name)
+            if duplicate_candidate:
+                return duplicate_candidate
+
         self.bl_mat = bpy.data.materials.new(mat_name)
         self.bl_mat.use_nodes = True
 
         self.nodes = self.bl_mat.node_tree.nodes
         self.links = self.bl_mat.node_tree.links
 
-        eu07_mat = eu07_tools.mat.load(open(self.filepath))
+        eu07_mat = eu07_tools.mat.load(open(filepath))
         self.nodify_mat_mapping(eu07_mat)
 
-        return {'FINISHED'}
+        return self.bl_mat
 
 
     def nodify_mat_mapping(self, mapping, parent=None):
@@ -44,7 +62,7 @@ class MATImport(bpy.types.Operator, ImportHelper):
         self.add_texture_node_if_present(mapping, "texture_normalmap", parent)
 
         for key, value in mapping.items():
-            if key.startswith("param") or key in eu07_tools.mat.NUMERIC_KEYS:
+            if key in eu07_tools.mat.NUMERIC_KEYS: #or key.startswith("param"):
                 node = self.add_value_node_if_present(mapping, key, parent)
                 node.outputs[0].default_value = mapping[key]
 
@@ -100,9 +118,6 @@ class MATImport(bpy.types.Operator, ImportHelper):
 
                 elif key == "texture_diffuse" and not parent:
                     self.links.new(node.outputs[0], self.nodes.get("Principled BSDF").inputs[0])
-
-
-
 
 
     def _add_node_generic(self, typename, name, parent):
