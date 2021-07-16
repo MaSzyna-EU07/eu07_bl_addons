@@ -33,6 +33,7 @@ def get_root(abspath=""):
 
 def create_material_from_relpath(relpath, duplicated_allowed=False, mat_allowed=True):
     asset_searcher = AssetSearcher(get_root())
+    asset_searcher.textures.remove_extension(".tex")
     if not mat_allowed:
         asset_searcher.textures.remove_extension(".mat")
 

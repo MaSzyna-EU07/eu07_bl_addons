@@ -31,6 +31,8 @@ class MATImport(bpy.types.Operator, ImportHelper):
 
 class HelperMATImporter:
     def import_mat_from_abspath(self, filepath, prevent_duplicate):
+        filepath = eu07_tools.utils.lower_filepath_name(filepath)
+
         root = get_root(filepath)
 
         self.asset_searcher = eu07_tools.utils.AssetSearcher(
@@ -51,8 +53,9 @@ class HelperMATImporter:
         self.nodes = self.bl_mat.node_tree.nodes
         self.links = self.bl_mat.node_tree.links
 
-        eu07_mat = eu07_tools.mat.load(open(filepath))
-        self.nodify_mat_mapping(eu07_mat)
+        with open(filepath, encoding="latin-1") as matfile:
+            eu07_mat = eu07_tools.mat.load(matfile)
+            self.nodify_mat_mapping(eu07_mat)
 
         return self.bl_mat
 
