@@ -141,19 +141,33 @@ class MeshInputBuilder(SubmodelInputBuilder):
         self.obj.t3d_properties.opacity = opacity
 
     def set_map(self, map_: str):
-        if map_ in ["-1", "-2", "-3", "-4", "replacableskin"]:
-            full_path = self._config.skins[map_]
+        if map_ == "none":
+            return
+
+        self.obj.active_material = bpy.data.materials.new("Material")
+        relpath = ""
+
+        is_repl = map_ in ["-1", "-2", "-3", "-4", "replacableskin"]
+
+        if is_repl:
             if map_ == "replacableskin":
                 map_ = "-1"
-            self.obj.t3d_properties.replacableskin_id = map_
-        elif map_ == "none":
-            full_path = ""
-        else:
-            full_path = self._config.asset_searcher.textures.find(map_)
 
-        if full_path:
+            self.obj.t3d_properties.replacableskin_id = map_
+
+            relpath = self._config.skins[map_]
+
+        else:
+            relpath = map_
+
+        abspath = self._config.asset_searcher.textures.find(relpath)
+
+        if abspath:
             duplicates_allowed = self._config.allow_duplicated_materials
-            self.obj.active_material = create_material_from_abspath(full_path, duplicates_allowed)
+            self.obj.active_material = create_material_from_abspath(abspath, duplicates_allowed)
+
+        if is_repl:
+            self.obj.active_material.name = f"Replacableskin {map_}"
 
     def set_geometry(self, submodel):
         bm = bmesh.new()
