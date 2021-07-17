@@ -11,11 +11,23 @@ import eu07_tools
 
 class SceneryBuilder:
     def __init__(self, config):
+        self._config = config
         self._trajectory_builder = TrajectoryBuilder()
         self._terrain_builder = TerrainBuilder(config)
 
     def run(self, data):
         for element in data:
+            if element.type == "include" and element.path.endswith(".scm"):
+                sb = SceneryBuilder(self._config)
+
+                assearch = self._config["asset_searcher"]
+
+                abspath = assearch.scenes.find(element.path)
+
+                with open(abspath, encoding='latin-1') as infile:
+                    scn_input = eu07_tools.scn.load(infile)
+                    sb.run(scn_input)
+
             if element.type == "node:triangles":
                 self._terrain_builder.add_triangle(element)
 

@@ -45,6 +45,20 @@ class SCNImport(bpy.types.Operator, ImportHelper):
         default=True
     )
 
+    inc_recursion_depth: IntProperty(
+        name="Include recursion depth",
+        default=1
+    )
+
+    weld_terrain: BoolProperty(
+        name="Weld Terrain Triangles",
+        default=True
+    )
+
+    cache_tracks_neighbours: BoolProperty(
+        name="Cache Tracks Neibourghs"
+    )
+
     def execute(self, context):
         root = get_root(self.filepath)
 

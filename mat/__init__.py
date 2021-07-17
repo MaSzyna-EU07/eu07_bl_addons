@@ -49,9 +49,15 @@ class HelperMATImporter:
 
         self.bl_mat = bpy.data.materials.new(mat_name)
         self.bl_mat.use_nodes = True
+        self.bl_mat.use_backface_culling = True
 
         self.nodes = self.bl_mat.node_tree.nodes
         self.links = self.bl_mat.node_tree.links
+
+        bsdf = self.nodes.get("Principled BSDF")
+
+        bsdf.inputs[5].default_value = 0
+        bsdf.inputs[8].default_value = 1
 
         with open(filepath, encoding="latin-1") as matfile:
             eu07_mat = eu07_tools.mat.load(matfile)
@@ -122,6 +128,10 @@ class HelperMATImporter:
                 elif key == "texture_diffuse" and not parent:
                     self.links.new(node.outputs[0], self.nodes.get("Principled BSDF").inputs[0])
 
+                    has_alpha = node.image.channels == 4
+                    if has_alpha:
+                        self.links.new(node.outputs[1], self.nodes.get("Principled BSDF").inputs[-4])
+                        self.bl_mat.blend_method = 'CLIP'
 
     def _add_node_generic(self, typename, name, parent):
         node = self.nodes.new(typename)

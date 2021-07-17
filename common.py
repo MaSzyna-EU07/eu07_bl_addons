@@ -66,11 +66,13 @@ def create_material_from_abspath(abspath, duplicates_allowed=False):
 
     bsdf = material.node_tree.nodes.get("Principled BSDF")
     bsdf.inputs[5].default_value = 0
+    bsdf.inputs[8].default_value = 1
 
     texture_node = material.node_tree.nodes.new("ShaderNodeTexImage")
     texture_node.name = "texture_diffuse"
     texture_node.label = "texture_diffuse"
     texture_node.image = img
+
 
     material.node_tree.links.new(
         texture_node.outputs[0],
