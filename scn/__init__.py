@@ -596,6 +596,7 @@ class SCNObjectPropertiesPanel(bpy.types.Panel):
                 for i in range(2):
                     mrow = self.layout.row()
                     mrow.prop(profile_instance.material_slots[i], "material")
+                    mrow.operator('import_material.mat', icon='PLUS', text="")
                     op = mrow.operator('scn.copy_materials_to_selected', text="Copy To Selected")
                     op.index = i
 

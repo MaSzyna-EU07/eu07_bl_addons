@@ -143,10 +143,3 @@ class HelperMATImporter:
 
     def _create_node_name(self, name, parent):
         return f"{parent.name}.{name}" if parent else name
-
-
-
-
-
-
-        
