@@ -18,7 +18,6 @@ class TerrainBuilder:
     def add_triangle(self, element):
         num_triangles = len(element.vertices) // 3
 
-
         try:
             material_index = self._maps.index(element.map)
         except ValueError:
@@ -42,7 +41,8 @@ class TerrainBuilder:
                 loop[self._uv_layer].uv = vertices[vertex_index].mapping
 
     def finish(self):
-        # remove doubles?
+        if self._config.get("do_weld_terrain"):
+            bmesh.ops.remove_doubles(self._terrain_mesh, verts=self._terrain_mesh.verts, dist=0.00001)
         self._terrain_mesh.to_mesh(self._terrain_object.data)
         self._terrain_mesh.free()
 

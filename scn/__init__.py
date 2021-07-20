@@ -51,7 +51,7 @@ class SCNImport(bpy.types.Operator, ImportHelper):
         default=1
     )
 
-    weld_terrain: BoolProperty(
+    do_weld_terrain: BoolProperty(
         name="Weld Terrain Triangles",
         default=True
     )
@@ -75,7 +75,8 @@ class SCNImport(bpy.types.Operator, ImportHelper):
         asset_searcher.textures.remove_extension(".mat")
 
         config = {
-            "asset_searcher": asset_searcher
+            "asset_searcher": asset_searcher,
+            "do_weld_terrain": self.do_weld_terrain
         }
 
         Sectorizer.sector_size = self.sector_size
