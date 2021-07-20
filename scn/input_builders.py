@@ -32,7 +32,8 @@ class SceneryBuilder:
             if element.type == "node:triangles":
                 self._terrain_builder.add_triangle(element)
 
-            if element.type == "node:track":
+            # temporary disabled
+            if element.type == "node:track" and False:
                 if element.subtype in "normal road river":
                     trajectory = self._trajectory_builder.build_trajectory(element)
                     self._trajectory_builder.create_spline(trajectory, element.p1, element.cv1, element.p2, element.cv2)

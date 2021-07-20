@@ -2,7 +2,7 @@ import eu07_tools
 import bpy
 import bmesh
 
-from ..common import create_material_from_abspath
+from ..common import create_material_from_relpath
 
 class TerrainBuilder:
     def __init__(self, config):
@@ -48,8 +48,8 @@ class TerrainBuilder:
 
 
         for map_ in self._maps:
-            map_ = map_.lstrip("@").split(":")[0]
-            abspath = self._config["asset_searcher"].textures.find(map_)
-            material = create_material_from_abspath(abspath, False)
+            map_ = map_.split(":")[0]
+            print(map_)
+            material = create_material_from_relpath(map_, False)
 
             self._terrain_object.data.materials.append(material)

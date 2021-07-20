@@ -28,27 +28,32 @@ class SCNImport(bpy.types.Operator, ImportHelper):
 
     import_terrain: BoolProperty(
         name="Import Terrain",
-        default=True
+        default=True,
+        options={'HIDDEN'}
     )
 
     import_tracks: BoolProperty(
         name="Import Tracks",
-        default=True
+        default=True,
+        options={'HIDDEN'}
     )
 
     import_roads: BoolProperty(
         name="Import Roads",
-        default=True
+        default=True,
+        options={'HIDDEN'}
     )
 
     import_rivers: BoolProperty(
         name="Import Rivers",
-        default=True
+        default=True,
+        options={'HIDDEN'}
     )
 
     inc_recursion_depth: IntProperty(
         name="Include recursion depth",
-        default=1
+        default=1,
+        options={'HIDDEN'}
     )
 
     do_weld_terrain: BoolProperty(
@@ -57,13 +62,15 @@ class SCNImport(bpy.types.Operator, ImportHelper):
     )
 
     cache_tracks_neighbours: BoolProperty(
-        name="Cache Tracks Neibourghs"
+        name="Cache Tracks Neibourghs",
+        options={'HIDDEN'}
     )
 
     sector_size: IntProperty(
         name="Sector Size",
         default=0,
-        min=0
+        min=0,
+        options={'HIDDEN'}
     )
 
     def execute(self, context):

@@ -110,7 +110,7 @@ class HelperMATImporter:
             texture_object = mapping[key]
 
             if texture_object.value_type == "TEXTURE_PATH":
-                tex_path = self.asset_searcher.textures.find(texture_object.value)
+                tex_path = self.asset_searcher.textures.find(texture_object.value.split(":")[0])
                 image = bpy.data.images.load(tex_path)
 
                 node.image = image
@@ -122,7 +122,8 @@ class HelperMATImporter:
 
                     self.links.new(node.outputs[0], normal_map_node.inputs[1])
 
-                    if not parent:
+                    # NOTE: Normal maps look kinda bad so i disabled link to shader slot.
+                    if not parent and False:
                         self.links.new(normal_map_node.outputs[0], self.nodes.get("Principled BSDF").inputs[-3])
 
                 elif key == "texture_diffuse" and not parent:

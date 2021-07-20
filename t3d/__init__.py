@@ -108,7 +108,7 @@ class T3DExport(bpy.types.Operator, ExportHelper):
     )
     use_indices: BoolProperty(
         name="Export face indices",
-        default=True
+        default=False
     )
     namespace_prefix: StringProperty(
         name="Namespace prefix",
