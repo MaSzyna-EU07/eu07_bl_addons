@@ -3,7 +3,7 @@ import bpy
 
 from . import trajectory_builder
 
-from . import sector_utils
+from .sectorizer import Sectorizer
 
 
 def create(name, location=None):
@@ -125,8 +125,7 @@ def copy_profile_instance(source, dest):
 def set_profile_instance(trajectory, new_profile_instance):
     unset_profile_instance(trajectory)
 
-    sector = sector_utils.get_sector_by_location(trajectory.location)
-    sector_utils.insert_into_sector(new_profile_instance, sector)
+    Sectorizer.auto_put(new_profile_instance)
 
     new_profile_instance.parent = trajectory
     new_profile_instance.location = (0, 0, 0)

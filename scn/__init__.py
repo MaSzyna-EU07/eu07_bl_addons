@@ -12,6 +12,7 @@ from .input_builders import SceneryBuilder
 from .output_builders import create_node_triangles_from_mesh, create_node_track
 
 from . import trajectory_utils
+from .sectorizer import Sectorizer
 
 import mathutils
 
@@ -59,6 +60,12 @@ class SCNImport(bpy.types.Operator, ImportHelper):
         name="Cache Tracks Neibourghs"
     )
 
+    sector_size: IntProperty(
+        name="Sector Size",
+        default=0,
+        min=0
+    )
+
     def execute(self, context):
         root = get_root(self.filepath)
 
@@ -70,6 +77,8 @@ class SCNImport(bpy.types.Operator, ImportHelper):
         config = {
             "asset_searcher": asset_searcher
         }
+
+        Sectorizer.sector_size = self.sector_size
 
         with open(self.filepath, encoding='latin-1') as infile:
             scn_input = eu07_tools.scn.load(infile)

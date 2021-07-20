@@ -5,7 +5,7 @@ from .trajectory_builder import TrajectoryBuilder
 from .terrain_builder import TerrainBuilder
 from . import trajectory_utils
 from common import create_material_from_relpath, get_root
-from . import sector_utils
+from .sectorizer import Sectorizer
 import eu07_tools
 
 
@@ -14,6 +14,7 @@ class SceneryBuilder:
         self._config = config
         self._trajectory_builder = TrajectoryBuilder()
         self._terrain_builder = TerrainBuilder(config)
+
 
     def run(self, data):
         for element in data:
@@ -39,9 +40,7 @@ class SceneryBuilder:
                         element.subtype, element.geometry_params, element.width, 6 # TODO: Get size from mat, then from track
                     )
 
-                    sector = sector_utils.get_sector_by_location(trajectory.location)
-
-                    sector_utils.insert_into_sector(trajectory, sector)
+                    Sectorizer.auto_put(trajectory)
                     trajectory_utils.set_profile_instance(trajectory, profile)
 
                     trajectory_utils.set_material(trajectory, create_material_from_relpath(element.map1), 0)
@@ -53,10 +52,8 @@ class SceneryBuilder:
                     trajectory_side = self._trajectory_builder.build_trajectory(element)
                     self._trajectory_builder.create_spline(trajectory_side, element.p3, element.cv3, element.p4, element.cv4)
 
-                    sector = sector_utils.get_sector_by_location(trajectory_straight.location)
-
-                    sector_utils.insert_into_sector(trajectory_straight, sector)
-                    sector_utils.insert_into_sector(trajectory_side, sector)
+                    Sectorizer.auto_put(trajectory_straight)
+                    Sectorizer.auto_put(trajectory_side)
 
                     trajectory_side.parent = trajectory_straight
                     trajectory_side.location = (0, 0, 0)
