@@ -11,7 +11,6 @@ from ..common import get_root
 class MATImport(bpy.types.Operator, ImportHelper):
     bl_idname = "import_material.mat"
     bl_label = "Import MAT"
-    filename_ext = ".mat"
 
     filter_glob: StringProperty(
         default="*.mat",
@@ -111,6 +110,10 @@ class HelperMATImporter:
 
             if texture_object.value_type == "TEXTURE_PATH":
                 tex_path = self.asset_searcher.textures.find(texture_object.value.split(":")[0])
+
+                if tex_path.endswith(".dds"):
+                    node.texture_mapping.scale[1] = -1
+
                 image = bpy.data.images.load(tex_path)
 
                 node.image = image
