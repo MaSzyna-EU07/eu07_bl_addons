@@ -15,7 +15,7 @@ from bpy.props import PointerProperty, StringProperty
 
 from .t3d import T3DExport, T3DImport, T3DSubmodelProperties, T3DSubmodelPropertiesPanel
 from .scn import SCNImport, SCNExport, SCNObjectProperties, SCNObjectPropertiesPanel, LoadBasemapOperator, EU07SceneryProperties, LoadBasemapPanel, CopyMaterialsToSelectedOperator
-from .mat import MATImport
+from .mat import EU07MaterialImporter
 from .e3d import E3DImport
 from .common import EU07WeatherSettingsPanel
 
@@ -37,7 +37,7 @@ def menu_func_import(self, context):
     self.layout.operator(T3DImport.bl_idname, text="[EU07] Text Model (.t3d)")
     self.layout.operator(E3DImport.bl_idname, text="[EU07] Binary Model (.e3d)")
     self.layout.operator(SCNImport.bl_idname, text="[EU07] Scenery File (.scn, .scm)")
-    self.layout.operator(MATImport.bl_idname, text="[EU07] Material (.mat)")
+    self.layout.operator(EU07MaterialImporter.bl_idname, text="[EU07] Material (.mat)")
 
 
 
@@ -55,7 +55,7 @@ classes = (
     T3DImport,
     T3DSubmodelProperties,
     T3DSubmodelPropertiesPanel,
-    MATImport,
+    EU07MaterialImporter,
     SCNImport,
     SCNExport,
     SCNObjectProperties,

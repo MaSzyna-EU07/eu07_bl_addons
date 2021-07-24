@@ -8,7 +8,7 @@ import eu07_tools
 from ..common import get_root
 
 
-class MATImport(bpy.types.Operator, ImportHelper):
+class EU07MaterialImporter(bpy.types.Operator, ImportHelper):
     bl_idname = "import_material.mat"
     bl_label = "Import MAT"
 
@@ -17,31 +17,37 @@ class MATImport(bpy.types.Operator, ImportHelper):
         options={'HIDDEN'}
     )
 
-    duplicates_allowed: BoolProperty(
+    prevent_duplication: BoolProperty(
         default=False
     )
 
     def execute(self, context):
         helper_mat_importer = HelperMATImporter()
-        helper_mat_importer.import_mat_from_abspath(self.filepath, self.duplicates_allowed)
+        helper_mat_importer.import_mat_from_abspath(self.filepath, self.prevent_duplication)
 
         return {'FINISHED'}
 
 
 class HelperMATImporter:
-    def import_mat_from_abspath(self, filepath, prevent_duplicate):
+    def __init__(self):
+        self.bl_mat = None
+        self.asset_searcher = None
+        self.nodes = None
+        self.links = None
+        self.bsdf = None
+
+    def import_mat_from_relpath(self, relpath, prevent_duplication):
+        pass
+
+    def import_mat_from_abspath(self, filepath, prevent_duplication):
         filepath = eu07_tools.utils.lower_filepath_name(filepath)
+        if not Path(filepath).exists():
+            return
 
         root = get_root(filepath)
-
-        self.asset_searcher = eu07_tools.utils.AssetSearcher(
-            root, Path(filepath).parent
-        )
-        self.asset_searcher.textures.remove_extension(".mat")
-
         mat_name = str(Path(filepath).relative_to(Path(root)).with_suffix(""))
 
-        if prevent_duplicate:
+        if prevent_duplication:
             duplicate_candidate = bpy.data.materials.get(mat_name)
             if duplicate_candidate:
                 return duplicate_candidate
@@ -49,20 +55,63 @@ class HelperMATImporter:
         self.bl_mat = bpy.data.materials.new(mat_name)
         self.bl_mat.use_nodes = True
         self.bl_mat.use_backface_culling = True
+        self.bl_mat.blend_method = 'CLIP'
 
         self.nodes = self.bl_mat.node_tree.nodes
         self.links = self.bl_mat.node_tree.links
+        self.bsdf = self.nodes.get("Principled BSDF")
 
-        bsdf = self.nodes.get("Principled BSDF")
+        self.bsdf.inputs["Specular"].default_value = 0
+        self.bsdf.inputs["Roughness"].default_value = 1
 
-        bsdf.inputs[5].default_value = 0
-        bsdf.inputs[8].default_value = 1
+        self.asset_searcher = eu07_tools.utils.AssetSearcher(
+            root, Path(filepath).parent
+        )
 
-        with open(filepath, encoding="latin-1") as matfile:
-            eu07_mat = eu07_tools.mat.load(matfile)
-            self.nodify_mat_mapping(eu07_mat)
-
+        if filepath.endswith(".mat"):
+            with open(filepath, encoding="latin-1") as matfile:
+                eu07_mat = eu07_tools.mat.load(matfile)
+                self.nodify_mat_mapping(eu07_mat)
+        else: # standalone texture
+            self._import_texture(filepath, "texture_diffuse")
+            
         return self.bl_mat
+
+
+    def _import_texture(self, relpath, node_name, parent=None):
+        self.asset_searcher.textures.remove_extension(".mat")
+
+        tex_path = self.asset_searcher.textures.find(relpath.split(":")[0])
+
+        if tex_path:
+
+            img_node = self.nodes.new("ShaderNodeTexImage")
+            img_node.name = node_name
+            img_node.label = node_name
+            img_node.parent = parent
+
+            if tex_path.endswith(".dds"):
+                img_node.texture_mapping.scale[1] = -1
+
+            img_node.image = bpy.data.images.load(tex_path, check_existing=True)
+
+            if node_name == "texture_normalmap":
+                img_node.image.colorspace_settings.name = 'Non-Color'
+                normal_map_node = self.nodes.new("ShaderNodeNormalMap")
+                normal_map_node.parent = parent
+                
+                self.links.new(img_node.outputs[0], normal_map_node.inputs[1])
+
+                # NOTE: Normal maps look kinda bad so i disabled link to shader slot.
+                if not parent and False:
+                    self.links.new(normal_map_node.outputs[0], self.nodes.get("Principled BSDF").inputs[self.NORMAL_INPUT])
+
+            elif node_name == "texture_diffuse" and not parent:
+                self.links.new(img_node.outputs[0], self.bsdf.inputs["Base Color"])
+                self.links.new(img_node.outputs[1], self.bsdf_inputs["Alpha"])
+
+
+        self.asset_searcher.textures.add_extension(".mat", priority=0)
 
 
     def nodify_mat_mapping(self, mapping, parent=None):
@@ -109,33 +158,7 @@ class HelperMATImporter:
             texture_object = mapping[key]
 
             if texture_object.value_type == "TEXTURE_PATH":
-                tex_path = self.asset_searcher.textures.find(texture_object.value.split(":")[0])
-
-                if tex_path.endswith(".dds"):
-                    node.texture_mapping.scale[1] = -1
-
-                image = bpy.data.images.load(tex_path)
-
-                node.image = image
-
-                if key == "texture_normalmap":
-                    node.image.colorspace_settings.name = 'Non-Color'
-                    normal_map_node = self.nodes.new("ShaderNodeNormalMap")
-                    normal_map_node.parent = parent
-
-                    self.links.new(node.outputs[0], normal_map_node.inputs[1])
-
-                    # NOTE: Normal maps look kinda bad so i disabled link to shader slot.
-                    if not parent and False:
-                        self.links.new(normal_map_node.outputs[0], self.nodes.get("Principled BSDF").inputs[-3])
-
-                elif key == "texture_diffuse" and not parent:
-                    self.links.new(node.outputs[0], self.nodes.get("Principled BSDF").inputs[0])
-
-                    has_alpha = node.image.channels == 4
-                    if has_alpha:
-                        self.links.new(node.outputs[1], self.nodes.get("Principled BSDF").inputs[-4])
-                        self.bl_mat.blend_method = 'CLIP'
+                self._import_texture(texture_object.value, key, parent)
 
     def _add_node_generic(self, typename, name, parent):
         node = self.nodes.new(typename)
@@ -145,5 +168,9 @@ class HelperMATImporter:
 
         return node
 
+
+
     def _create_node_name(self, name, parent):
         return f"{parent.name}.{name}" if parent else name
+
+
