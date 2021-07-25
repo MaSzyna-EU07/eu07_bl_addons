@@ -27,7 +27,7 @@ class EU07MaterialImporter(bpy.types.Operator, ImportHelper):
 
         return {'FINISHED'}
 
-
+# TODO: Refactor (get rid of staticmethods maybe)
 class HelperMATImporter:
     def __init__(self):
         self.bl_mat = None
@@ -36,18 +36,27 @@ class HelperMATImporter:
         self.links = None
         self.bsdf = None
 
-    def import_mat_from_relpath(self, relpath, prevent_duplication):
-        pass
+    @staticmethod
+    def import_material_from_relpath(self, relpath, prevent_duplication=True):
+        asset_searcher = eu07_tools.utils.AssetSearcher(get_root())
 
-    def import_mat_from_abspath(self, filepath, prevent_duplication):
+        abspath = asset_searcher.textures.find(relpath)
+        return HelperMATImporter.import_material_from_abspath(abspath, prevent_duplication)
+
+    @staticmethod
+    def import_material_from_abspath(self, filepath, prevent_duplication=True):
         filepath = eu07_tools.utils.lower_filepath_name(filepath)
         if not Path(filepath).exists():
             return
 
-        root = get_root(filepath)
-        mat_name = str(Path(filepath).relative_to(Path(root)).with_suffix(""))
+        # NOTE: What a stupid anti-pattern XD
+        HelperMATImporter().import_material(filepath, prevent_duplication)
 
+    def import_material(self, filepath, prevent_duplication=True):
         if prevent_duplication:
+            root = get_root(filepath)
+            mat_name = str(Path(filepath).relative_to(Path(root)).with_suffix(""))
+
             duplicate_candidate = bpy.data.materials.get(mat_name)
             if duplicate_candidate:
                 return duplicate_candidate
@@ -110,7 +119,6 @@ class HelperMATImporter:
                 self.links.new(img_node.outputs[0], self.bsdf.inputs["Base Color"])
                 self.links.new(img_node.outputs[1], self.bsdf_inputs["Alpha"])
 
-
         self.asset_searcher.textures.add_extension(".mat", priority=0)
 
 
@@ -167,8 +175,6 @@ class HelperMATImporter:
         node.parent = parent
 
         return node
-
-
 
     def _create_node_name(self, name, parent):
         return f"{parent.name}.{name}" if parent else name
