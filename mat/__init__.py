@@ -41,11 +41,14 @@ class HelperMATImporter:
         asset_searcher = eu07_tools.utils.AssetSearcher(get_root())
 
         abspath = asset_searcher.textures.find(relpath)
+        
+        if not abspath:
+            return None
+
         return HelperMATImporter.import_material_from_abspath(abspath, prevent_duplication)
 
     @staticmethod
     def import_material_from_abspath(filepath, prevent_duplication=True):
-        filepath = eu07_tools.utils.lower_filepath_name(filepath)
         if not Path(filepath).exists():
             return
 

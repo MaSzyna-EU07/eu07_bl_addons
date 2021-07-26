@@ -24,13 +24,7 @@ def create_node_triangles_from_mesh(mesh):
         node = eu07_tools.scn.create_element("node:triangles")
 
         material = mesh.materials[polygon.material_index]
-        if material:
-            tex_node = material.node_tree.nodes.get("texture_diffuse")
-            if tex_node:
-                img_path = tex_node.image.filepath
-                node.map = eu07_tools.utils.shorten_asset_path(
-                    bpy.path.abspath(img_path)
-                )
+        node.map = get_path_from_material(material)
 
         for local_vert_idx, global_vert_idx in enumerate(polygon.vertices):
             vertex = mesh.vertices[global_vert_idx]

@@ -34,8 +34,8 @@ def get_path_from_material(material):
     if material:
         if material.get("is_eu07_mat") and material["is_eu07_mat"] == "true":
             path = Path(material.name)
-            if "textures" in path:
-                return path.relative_to("textures")
+            if "textures" in path.parts:
+                return str(path.relative_to("textures"))
 
         elif material.use_nodes:
             # Get the nodes in the node tree
