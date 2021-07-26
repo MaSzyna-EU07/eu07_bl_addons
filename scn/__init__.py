@@ -79,7 +79,6 @@ class SCNImport(bpy.types.Operator, ImportHelper):
         asset_searcher = eu07_tools.utils.AssetSearcher(
             root, Path(self.filepath).parent
         )
-        asset_searcher.textures.remove_extension(".mat")
 
         config = {
             "asset_searcher": asset_searcher,
