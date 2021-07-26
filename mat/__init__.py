@@ -23,7 +23,7 @@ class EU07MaterialImporter(bpy.types.Operator, ImportHelper):
 
     def execute(self, context):
         helper_mat_importer = HelperMATImporter()
-        helper_mat_importer.import_mat_from_abspath(self.filepath, self.prevent_duplication)
+        helper_mat_importer.import_material_from_abspath(self.filepath, self.prevent_duplication)
 
         return {'FINISHED'}
 
@@ -41,7 +41,6 @@ class HelperMATImporter:
         asset_searcher = eu07_tools.utils.AssetSearcher(get_root())
 
         abspath = asset_searcher.textures.find(relpath)
-        print("imfr: importing from: ", abspath)
         return HelperMATImporter.import_material_from_abspath(abspath, prevent_duplication)
 
     @staticmethod
@@ -50,8 +49,6 @@ class HelperMATImporter:
         if not Path(filepath).exists():
             return
 
-        print("imfa: importing from: ", filepath)
-        # NOTE: What a stupid anti-pattern XD
         return HelperMATImporter().import_material(filepath, prevent_duplication)
 
     def import_material(self, filepath, prevent_duplication=True):
@@ -80,6 +77,8 @@ class HelperMATImporter:
         )
 
         if filepath.endswith(".mat"):
+            self.bl_mat["is_eu07_mat"] = "true"
+
             with open(filepath, encoding="latin-1") as matfile:
                 eu07_mat = eu07_tools.mat.load(matfile)
                 self.nodify_mat_mapping(eu07_mat)

@@ -32,7 +32,12 @@ def get_root(abspath=""):
 
 def get_path_from_material(material):
     if material:
-        if material.use_nodes:
+        if material.get("is_eu07_mat") and material["is_eu07_mat"] == "true":
+            path = Path(material.name)
+            if "textures" in path:
+                return path.relative_to("textures")
+
+        elif material.use_nodes:
             # Get the nodes in the node tree
             nodes = material.node_tree.nodes
             # Get a principled node

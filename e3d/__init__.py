@@ -35,16 +35,6 @@ class E3DImport(bpy.types.Operator, ImportHelper):
         name="Duplicate materials",
         default=False
     )
-    default_ext: EnumProperty(
-        name="Default texture extension",
-        default=".tga",
-        items=[
-            (".tga", "TGA", ""),
-            (".dds", "DDS", ""),
-            (".png", "PNG", ""),
-            (".dds", "BMP", "")
-        ]
-    )
 
     def execute(self, context):
         Config = collections.namedtuple("Config", "report_func root skins asset_searcher load_includes allow_duplicated_materials")
@@ -63,8 +53,6 @@ class E3DImport(bpy.types.Operator, ImportHelper):
             root, 
             Path(self.filepath).parent
         )
-        asset_searcher.textures.remove_extension(".mat")
-        asset_searcher.textures.set_extension_priority(self.default_ext, 1)
 
         config = Config(self.report, root, skins, asset_searcher, False, self.allow_duplicated_materials)
 
