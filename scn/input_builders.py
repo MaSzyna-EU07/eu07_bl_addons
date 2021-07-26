@@ -4,10 +4,10 @@ from eu07_tools.utils import AssetSearcher
 from .trajectory_builder import TrajectoryBuilder
 from .terrain_builder import TerrainBuilder
 from . import trajectory_utils
-from common import create_material_from_relpath, get_root
 from .sectorizer import Sectorizer
 import eu07_tools
 
+from ..mat import HelperMATImporter
 
 class SceneryBuilder:
     def __init__(self, config):
@@ -44,8 +44,8 @@ class SceneryBuilder:
                     Sectorizer.auto_put(trajectory)
                     trajectory_utils.set_profile_instance(trajectory, profile)
 
-                    trajectory_utils.set_material(trajectory, create_material_from_relpath(element.map1), 0)
-                    trajectory_utils.set_material(trajectory, create_material_from_relpath(element.map2), 1)
+                    trajectory_utils.set_material(trajectory, HelperMATImporter.import_material_from_relpath(element.map1), 0)
+                    trajectory_utils.set_material(trajectory, HelperMATImporter.import_material_from_relpath(element.map2), 1)
 
                 elif element.subtype in "switch":
                     trajectory_straight = self._trajectory_builder.build_trajectory(element)

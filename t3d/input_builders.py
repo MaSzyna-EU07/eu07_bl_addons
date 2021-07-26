@@ -7,7 +7,7 @@ from pathlib import Path
 import bmesh
 import bpy
 import eu07_tools
-from ..common import create_material_from_abspath
+from ..mat import HelperMATImporter
 
 
 def import_model(elements, collection, config):
@@ -164,7 +164,7 @@ class MeshInputBuilder(SubmodelInputBuilder):
 
         if abspath:
             duplicates_allowed = self._config.allow_duplicated_materials
-            self.obj.active_material = create_material_from_abspath(abspath, duplicates_allowed)
+            self.obj.active_material = HelperMATImporter.import_material_from_abspath(abspath, duplicates_allowed)
 
         if is_repl:
             self.obj.active_material.name = f"Replacableskin {map_}"
