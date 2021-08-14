@@ -17,7 +17,7 @@ from .t3d import T3DExport, T3DImport, T3DSubmodelProperties, T3DSubmodelPropert
 from .scn import SCNImport, SCNExport, SCNObjectProperties, SCNObjectPropertiesPanel, LoadBasemapOperator, EU07SceneryProperties, LoadBasemapPanel, CopyMaterialsToSelectedOperator, UpdateTrajectoryProfileOperator
 from .mat import EU07MaterialImporter
 from .e3d import E3DImport
-from .common import EU07WeatherSettingsPanel
+from .common import EU07UtilsPanel
 
 class EU07AddonPreferences(bpy.types.AddonPreferences):
     bl_idname = __name__
@@ -65,7 +65,7 @@ classes = (
     EU07SceneryProperties,
     E3DImport,
     CopyMaterialsToSelectedOperator,
-    EU07WeatherSettingsPanel,
+    EU07UtilsPanel,
     UpdateTrajectoryProfileOperator
 )
 

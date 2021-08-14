@@ -10,10 +10,11 @@ from ..common import get_root, get_qualified_material_name
 
 class EU07MaterialImporter(bpy.types.Operator, ImportHelper):
     bl_idname = "import_material.mat"
-    bl_label = "Import MAT"
+    bl_label = "Import material"
+
 
     filter_glob: StringProperty(
-        default="*.mat",
+        default="*.mat;*.tga;*.dds;*.png",
         options={'HIDDEN'}
     )
 

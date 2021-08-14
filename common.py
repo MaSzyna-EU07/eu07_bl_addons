@@ -5,9 +5,9 @@ import eu07_tools
 from eu07_tools.utils import AssetSearcher
 
 
-class EU07WeatherSettingsPanel(bpy.types.Panel):
-    bl_idname = "SCENE_PT_eu07weather"
-    bl_label = "Weather Settings"
+class EU07UtilsPanel(bpy.types.Panel):
+    bl_idname = "SCENE_PT_eu07utils"
+    bl_label = "Utilities"
     bl_space_type = "VIEW_3D"
     bl_region_type = "UI"
     bl_category = "[EU07] Utility"
@@ -16,7 +16,7 @@ class EU07WeatherSettingsPanel(bpy.types.Panel):
         scene = context.scene
 
         box = self.layout.box()
-        box.label(text="here comes the sun, dun dun dun dun...")
+        box.operator("import_material.mat", text="Import Material")
 
 
 
@@ -41,7 +41,7 @@ def get_path_from_material(material):
         if material.get("is_eu07_mat") and material["is_eu07_mat"] == "true":
             path = Path(material.name)
             if "textures" in path.parts:
-                return str(path.relative_to("textures"))
+                return str(path.relative_to("textures").with_suffix(""))
 
         elif material.use_nodes:
             # Get the nodes in the node tree
