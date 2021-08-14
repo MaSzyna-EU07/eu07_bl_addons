@@ -31,13 +31,10 @@ class E3DImport(bpy.types.Operator, ImportHelper):
     skin_4: StringProperty(
         name="Skin #4",
     )
-    allow_duplicated_materials: BoolProperty(
-        name="Duplicate materials",
-        default=False
-    )
+
 
     def execute(self, context):
-        Config = collections.namedtuple("Config", "report_func root skins asset_searcher load_includes allow_duplicated_materials")
+        Config = collections.namedtuple("Config", "report_func root skins asset_searcher load_includes")
 
         skins = {
             "replacableskin": self.skin_1,
@@ -54,7 +51,7 @@ class E3DImport(bpy.types.Operator, ImportHelper):
             Path(self.filepath).parent
         )
 
-        config = Config(self.report, root, skins, asset_searcher, False, self.allow_duplicated_materials)
+        config = Config(self.report, root, skins, asset_searcher, False)
 
         with open(self.filepath, "rb") as infile:
             e3d = eu07_tools.e3d.load(infile)

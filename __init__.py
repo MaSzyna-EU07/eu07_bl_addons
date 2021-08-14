@@ -14,7 +14,7 @@ import bpy
 from bpy.props import PointerProperty, StringProperty
 
 from .t3d import T3DExport, T3DImport, T3DSubmodelProperties, T3DSubmodelPropertiesPanel
-from .scn import SCNImport, SCNExport, SCNObjectProperties, SCNObjectPropertiesPanel, LoadBasemapOperator, EU07SceneryProperties, LoadBasemapPanel, CopyMaterialsToSelectedOperator
+from .scn import SCNImport, SCNExport, SCNObjectProperties, SCNObjectPropertiesPanel, LoadBasemapOperator, EU07SceneryProperties, LoadBasemapPanel, CopyMaterialsToSelectedOperator, UpdateTrajectoryProfileOperator
 from .mat import EU07MaterialImporter
 from .e3d import E3DImport
 from .common import EU07WeatherSettingsPanel
@@ -65,7 +65,8 @@ classes = (
     EU07SceneryProperties,
     E3DImport,
     CopyMaterialsToSelectedOperator,
-    EU07WeatherSettingsPanel
+    EU07WeatherSettingsPanel,
+    UpdateTrajectoryProfileOperator
 )
 
 def register():

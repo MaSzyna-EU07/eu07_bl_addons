@@ -8,6 +8,7 @@ import bmesh
 import bpy
 import eu07_tools
 from ..mat import HelperMATImporter
+from ..common import get_qualified_material_name
 
 
 def import_model(elements, collection, config):
@@ -144,9 +145,6 @@ class MeshInputBuilder(SubmodelInputBuilder):
         if map_ == "none":
             return
 
-        self.obj.active_material = bpy.data.materials.new("Material")
-        relpath = ""
-
         is_repl = map_ in ["-1", "-2", "-3", "-4", "replacableskin"]
 
         if is_repl:
@@ -155,19 +153,15 @@ class MeshInputBuilder(SubmodelInputBuilder):
 
             self.obj.t3d_properties.replacableskin_id = map_
 
-            relpath = self._config.skins[map_]
+            repl_mat_name = f"Replacableskin {map_}"
+            self.obj.active_material = bpy.data.materials.get(
+                repl_mat_name, bpy.data.materials.new(repl_mat_name)
+            )
 
         else:
-            relpath = map_
+            abspath = self._config.asset_searcher.textures.find(map_)
+            self.obj.active_material = HelperMATImporter.import_material_from_abspath(abspath)
 
-        abspath = self._config.asset_searcher.textures.find(relpath)
-
-        if abspath:
-            duplicates_allowed = self._config.allow_duplicated_materials
-            self.obj.active_material = HelperMATImporter.import_material_from_abspath(abspath, duplicates_allowed)
-
-        if is_repl:
-            self.obj.active_material.name = f"Replacableskin {map_}"
 
     def set_geometry(self, submodel):
         bm = bmesh.new()

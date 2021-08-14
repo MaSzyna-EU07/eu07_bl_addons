@@ -49,6 +49,6 @@ class TerrainBuilder:
 
         for map_ in self._maps:
             map_ = map_.split(":")[0]
-            material = HelperMATImporter.import_material_from_relpath(map_, False)
+            material = HelperMATImporter.import_material_from_relpath(map_)
 
             self._terrain_object.data.materials.append(material)

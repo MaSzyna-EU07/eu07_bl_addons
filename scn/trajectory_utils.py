@@ -64,34 +64,6 @@ def get_profile_params(profile_instance):
     return [float(p) for p in params_strings]
 
 
-def update_profile_instance(self, context):
-    """ This func is called when one of the profile values are changed"""
-    trajectory = context.active_object
-    if trajectory is not None:
-        profile_params = [
-            trajectory.scn_properties.trajectory_profile_param1,
-            trajectory.scn_properties.trajectory_profile_param2,
-            trajectory.scn_properties.trajectory_profile_param3
-        ]
-
-        track_subtype = trajectory.scn_properties.type_.split(":")[-1]
-        trajectory_width = trajectory.scn_properties.trajectory_width
-
-        old_profile = get_profile_instance(trajectory)
-
-        print(old_profile)
-
-        mat0 = old_profile.material_slots[0].material
-        mat1 = old_profile.material_slots[1].material
-
-        new_profile = create_profile_instance(track_subtype, profile_params, trajectory_width)
-
-        set_profile_instance(trajectory, new_profile)
-
-        if old_profile is not None:
-            set_material(trajectory, mat0, 0)
-            set_material(trajectory, mat1, 1)
-
 
 def find_profile(track_subtype, profile_params, trajectory_width, mapping_length=6):
     return bpy.data.objects.get(profile_name(track_subtype, profile_params, trajectory_width, mapping_length))

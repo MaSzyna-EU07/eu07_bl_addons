@@ -35,17 +35,13 @@ class T3DImport(bpy.types.Operator, ImportHelper):
     skin_4: StringProperty(
         name="Skin #4",
     )
-    allow_duplicated_materials: BoolProperty(
-        name="Duplicate materials",
-        default=False
-    )
     load_includes: BoolProperty(
         name="Load included submodels",
         default=True,
     )
 
     def execute(self, context):
-        Config = collections.namedtuple("Config", "report_func root skins asset_searcher load_includes allow_duplicated_materials")
+        Config = collections.namedtuple("Config", "report_func root skins asset_searcher load_includes")
 
         skins = {
             "replacableskin": self.skin_1,
@@ -62,7 +58,7 @@ class T3DImport(bpy.types.Operator, ImportHelper):
             Path(self.filepath).parent
         )
 
-        config = Config(self.report, root, skins, asset_searcher, self.load_includes, self.allow_duplicated_materials)
+        config = Config(self.report, root, skins, asset_searcher, self.load_includes)
 
         collection = bpy.context.scene.collection
 
@@ -279,7 +275,7 @@ class T3DSubmodelPropertiesPanel(bpy.types.Panel):
         selfillum_r = self.layout.row()
         selfillum_r.prop(self.obj.t3d_properties, "selfillum")
 
-        if (self.obj_is_mesh):
+        if self.obj_is_mesh:
             diffuse_r = self.layout.row()
             diffuse_r.prop(self.obj.t3d_properties, "diffuse_color")
 

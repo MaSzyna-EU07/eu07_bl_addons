@@ -14,6 +14,8 @@ from .output_builders import create_node_triangles_from_mesh, create_node_track
 from . import trajectory_utils
 from .sectorizer import Sectorizer
 
+from .trajectory_operators import UpdateTrajectoryProfileOperator
+
 import mathutils
 
 
@@ -353,19 +355,16 @@ class SCNObjectProperties(bpy.types.PropertyGroup):
     trajectory_profile_param1: FloatProperty(
         name="Param 1",
         default=0.2,
-        update=trajectory_utils.update_profile_instance
     )
 
     trajectory_profile_param2: FloatProperty(
         name="Param 2",
         default=0.5,
-        update=trajectory_utils.update_profile_instance
     )
 
     trajectory_profile_param3: FloatProperty(
         name="Param 3",
         default=1.3,
-        update=trajectory_utils.update_profile_instance
     )
 
     trajectory_environment: EnumProperty(
@@ -498,6 +497,7 @@ class SCNObjectProperties(bpy.types.PropertyGroup):
         name="*.inc file",
         subtype='FILE_PATH',
     )
+
     
     
 
@@ -518,6 +518,11 @@ class SCNObjectPropertiesPanel(bpy.types.Panel):
         type_r = self.layout.row()
         type_r.prop(self.obj.scn_properties, "type_")
 
+        if "include" in self.obj.scn_properties.type_:
+            filepath_r = self.layout.row()
+            filepath_r.prop(self.obj.scn_properties, "include_file")
+
+
         if ("node:" in self.obj.scn_properties.type_):
             maxdistance_r = self.layout.row()
             maxdistance_r.prop(self.obj.scn_properties, "node_max_distance")
@@ -534,11 +539,12 @@ class SCNObjectPropertiesPanel(bpy.types.Panel):
                 width_r = self.layout.row()
                 width_r.prop(self.obj.scn_properties, "trajectory_width")
 
-                box = self.layout.box()
-                box.label(text="Profile:")
-                box.row().prop(self.obj.scn_properties, "trajectory_profile_param1")
-                box.row().prop(self.obj.scn_properties, "trajectory_profile_param2")
-                box.row().prop(self.obj.scn_properties, "trajectory_profile_param3")
+                # box = self.layout.box()
+                # box.label(text="Profile:")
+                # box.row().prop(self.obj.scn_properties, "trajectory_profile_param1")
+                # box.row().prop(self.obj.scn_properties, "trajectory_profile_param2")
+                # box.row().prop(self.obj.scn_properties, "trajectory_profile_param3")
+                # box.row().operator('scn.update_trajectory_profile', text="Update Profile")
 
                 friction_r = self.layout.row()
                 friction_r.prop(self.obj.scn_properties, "trajectory_friction")

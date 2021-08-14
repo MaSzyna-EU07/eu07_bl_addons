@@ -5,7 +5,7 @@ import bpy
 from bpy.props import StringProperty, BoolProperty
 
 import eu07_tools
-from ..common import get_root
+from ..common import get_root, get_qualified_material_name
 
 
 class EU07MaterialImporter(bpy.types.Operator, ImportHelper):
@@ -17,13 +17,9 @@ class EU07MaterialImporter(bpy.types.Operator, ImportHelper):
         options={'HIDDEN'}
     )
 
-    prevent_duplication: BoolProperty(
-        default=False
-    )
-
     def execute(self, context):
         helper_mat_importer = HelperMATImporter()
-        helper_mat_importer.import_material_from_abspath(self.filepath, self.prevent_duplication)
+        helper_mat_importer.import_material_from_abspath(self.filepath)
 
         return {'FINISHED'}
 
@@ -37,7 +33,7 @@ class HelperMATImporter:
         self.bsdf = None
 
     @staticmethod
-    def import_material_from_relpath(relpath, prevent_duplication=True):
+    def import_material_from_relpath(relpath):
         asset_searcher = eu07_tools.utils.AssetSearcher(get_root())
 
         abspath = asset_searcher.textures.find(relpath)
@@ -45,23 +41,22 @@ class HelperMATImporter:
         if not abspath:
             return None
 
-        return HelperMATImporter.import_material_from_abspath(abspath, prevent_duplication)
+        return HelperMATImporter.import_material_from_abspath(abspath)
 
     @staticmethod
-    def import_material_from_abspath(filepath, prevent_duplication=True):
+    def import_material_from_abspath(filepath):
         if not Path(filepath).exists():
             return
 
-        return HelperMATImporter().import_material(filepath, prevent_duplication)
+        return HelperMATImporter().import_material(filepath)
 
-    def import_material(self, filepath, prevent_duplication=True):
+    def import_material(self, filepath):
         root = get_root(filepath)
-        mat_name = str(Path(filepath).relative_to(Path(root)).with_suffix(""))
+        mat_name = get_qualified_material_name(filepath)
 
-        if prevent_duplication:
-            duplicate_candidate = bpy.data.materials.get(mat_name)
-            if duplicate_candidate:
-                return duplicate_candidate
+        duplicate_candidate = bpy.data.materials.get(mat_name)
+        if duplicate_candidate:
+            return duplicate_candidate
 
         self.bl_mat = bpy.data.materials.new(mat_name)
         self.bl_mat.use_nodes = True
