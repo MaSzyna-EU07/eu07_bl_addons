@@ -35,6 +35,8 @@ def trim_namespace(name, prefix):
         if name.startswith(prefix):
             return name[len(prefix):]
 
+    return name
+
 
 class HierarchyMaker:
     def __init__(self, collection):

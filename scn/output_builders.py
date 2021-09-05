@@ -29,8 +29,8 @@ def create_node_triangles_from_mesh(mesh):
         for local_vert_idx, global_vert_idx in enumerate(polygon.vertices):
             vertex = mesh.vertices[global_vert_idx]
 
-            xyz = eu07_tools.utils.switch_coordinate_system(vertex.co)
-            ijk = eu07_tools.utils.switch_coordinate_system(vertex.normal)
+            xyz = eu07_tools.utils.swizzle_coords(vertex.co)
+            ijk = eu07_tools.utils.swizzle_coords(vertex.normal)
 
             if uv_layer:
                 mesh_loop_idx = polygon.loop_indices[local_vert_idx]
@@ -44,7 +44,7 @@ def create_node_triangles_from_mesh(mesh):
 def create_node_track(track_object):
     properties = track_object.scn_properties
 
-    mesh = next(c for c in track_object.children if c.name.startswith("TProfile"))
+    mesh = next(c for c in track_object.children if c.name.startswith("TrajectoryProfileTemplate"))
 
     node = eu07_tools.scn.create_element("node:track")
     node.subtype = properties.type_.split(":")[-1]
@@ -89,7 +89,7 @@ def create_node_track(track_object):
     if (node.is_junction):
         junction_track_object = next((c for c in track_object.children if c.type == 'CURVE'))
 
-        junction_mesh = next(c for c in track_object.children if c.name.startswith("TProfile"))
+        junction_mesh = next(c for c in track_object.children if c.name.startswith("TrajectoryProfileTemplate"))
 
         curve_data = extract_curve_data_for_scn(junction_track_object)
         node.p3 = curve_data[0]
@@ -112,17 +112,17 @@ def extract_curve_data_for_scn(track_object):
 
     values = []
 
-    p1 = eu07_tools.utils.switch_coordinate_system(track_object.matrix_world.translation + spline.bezier_points[0].co)
+    p1 = eu07_tools.utils.swizzle_coords(track_object.matrix_world.translation + spline.bezier_points[0].co)
 
-    p2 = eu07_tools.utils.switch_coordinate_system(track_object.matrix_world.translation + spline.bezier_points[1].co)
+    p2 = eu07_tools.utils.swizzle_coords(track_object.matrix_world.translation + spline.bezier_points[1].co)
 
     # AUTO type because curve modifier works bad when we set both handles at the same position as vertex, so little cheat there
     cv1 = spline.bezier_points[0].handle_right if spline.bezier_points[0].handle_right_type != 'AUTO' else (0, 0, 0)
     cv2 = spline.bezier_points[1].handle_left if spline.bezier_points[1].handle_left_type != 'AUTO' else (0, 0, 0)
 
-    cv1 = eu07_tools.utils.switch_coordinate_system(cv1)
+    cv1 = eu07_tools.utils.swizzle_coords(cv1)
     if spline.bezier_points[1].handle_left_type != 'AUTO':
-        cv2 = eu07_tools.utils.switch_coordinate_system(cv2 - spline.bezier_points[1].co)
+        cv2 = eu07_tools.utils.swizzle_coords(cv2 - spline.bezier_points[1].co)
 
     return [p1, cv1, cv2, p2]
     

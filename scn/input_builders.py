@@ -6,6 +6,7 @@ from .terrain_builder import TerrainBuilder
 from . import trajectory_utils
 from .sectorizer import Sectorizer
 import eu07_tools
+from . import tree_utils
 
 from ..mat import HelperMATImporter
 
@@ -18,16 +19,32 @@ class SceneryBuilder:
 
     def run(self, data):
         for element in data:
-            if element.type == "include" and element.path.endswith(".scm"):
-                sb = SceneryBuilder(self._config)
+            if element.type == "include":
+                if element.path.endswith(".scm"):
+                    sb = SceneryBuilder(self._config)
 
-                assearch = self._config["asset_searcher"]
+                    assearch = self._config["asset_searcher"]
 
-                abspath = assearch.scenes.find(element.path)
+                    abspath = assearch.scenes.find(element.path)
 
-                with open(abspath, encoding='latin-1') as infile:
-                    scn_input = eu07_tools.scn.load(infile)
-                    sb.run(scn_input)
+                    with open(abspath, encoding='latin-1') as infile:
+                        scn_input = eu07_tools.scn.load(infile)
+                        sb.run(scn_input)
+
+                if "tree.inc" in element.path:
+                    tree_instance = tree_utils.instantiate_tree()
+
+                    height = float(element.parameters[5])
+                    breadth = float(element.parameters[6])
+                    tree_utils.set_tree_size(tree_instance, height, breadth)
+
+                    tree_instance.location = eu07_tools.utils.swizzle_coords([float(x) for x in element.parameters[1:4]])
+                    tree_instance.rotation_euler[2] = float(element.parameters[4])
+
+                    material = HelperMATImporter.import_material_from_relpath(element.parameters[0])
+                    tree_utils.set_tree_material(tree_instance, material)
+
+                    bpy.context.scene.collection.objects.link(tree_instance)
 
             if element.type == "node:triangles":
                 self._terrain_builder.add_triangle(element)

@@ -83,7 +83,7 @@ def create_profile_instance(track_subtype, profile_params, trajectory_width, map
 
 def get_profile_instance(trajectory):
     try:
-        return next((c for c in trajectory.children if c.name.startswith("TProfile")))
+        return next((c for c in trajectory.children if c.name.startswith("TrajectoryProfileTemplate")))
     except StopIteration:
         return None
 
@@ -141,4 +141,4 @@ def get_material(trajectory, index):
 
 
 def profile_name(track_subtype, profile_params, trajectory_width, mapping_length):
-    return f"TProfile_{track_subtype}_{'-'.join(str(round(x, 3)) for x in profile_params)}_ML{mapping_length}_{trajectory_width*1000}"
+    return f"TrajectoryProfileTemplate_{track_subtype}_{'-'.join(str(round(x, 3)) for x in profile_params)}_ML{mapping_length}_{trajectory_width*1000}"

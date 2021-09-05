@@ -96,7 +96,7 @@ class TrajectoryProfileGenerator:
     def generate_profile(self, track_subtype, profile_params, trajectory_width, mapping_length=6):
         name = trajectory_utils.profile_name(track_subtype, profile_params, trajectory_width, mapping_length)
         self.object = bpy.data.objects.new(name, bpy.data.meshes.new(name))
-        collection = bpy.data.collections.get("Profiles") or bpy.data.collections.new("Profiles")
+        collection = bpy.data.collections.get("Templates") or bpy.data.collections.new("Templates")
         collection.objects.link(self.object)
 
         for i in range(2):

@@ -17,7 +17,7 @@ class _LinesBuilder:
 
         else:
             for point in lines_node.points:
-                bm_vert = self._lines_mesh.verts.new(eu07_tools.utils.switch_coordinate_system(point))
+                bm_vert = self._lines_mesh.verts.new(eu07_tools.utils.swizzle_coords(point))
                 edge_verts.append(bm_vert)
 
                 if len(edge_verts) == 2:

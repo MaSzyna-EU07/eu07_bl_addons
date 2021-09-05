@@ -31,7 +31,7 @@ class TerrainBuilder:
 
             bm_face_verts = []
             for vertex in vertices:
-                bm_vert = self._terrain_mesh.verts.new(eu07_tools.utils.switch_coordinate_system(vertex.location))
+                bm_vert = self._terrain_mesh.verts.new(eu07_tools.utils.swizzle_coords(vertex.location))
                 bm_face_verts.append(bm_vert)
 
             bm_face = self._terrain_mesh.faces.new(bm_face_verts)
