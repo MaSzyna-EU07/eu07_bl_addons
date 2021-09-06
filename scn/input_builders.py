@@ -15,6 +15,14 @@ class SceneryBuilder:
         self._config = config
         self._trajectory_builder = TrajectoryBuilder()
         self._terrain_builder = TerrainBuilder(config)
+        self._trees_checklist = [
+            "ljtree.inc",
+            "ljtreebig.inc",
+            "ljtreesmall.inc",
+            "tree.inc",
+            "treebig.inc",
+            "treesmall.inc"
+        ]
 
 
     def run(self, data):
@@ -31,20 +39,22 @@ class SceneryBuilder:
                         scn_input = eu07_tools.scn.load(infile)
                         sb.run(scn_input)
 
-                if "tree.inc" in element.path:
-                    tree_instance = tree_utils.instantiate_tree()
+                for tree_inc_name in self._trees_checklist:
+                    if tree_inc_name in element.path.lower():
+                        tree_instance = tree_utils.instantiate_tree()
 
-                    height = float(element.parameters[5])
-                    breadth = float(element.parameters[6])
-                    tree_utils.set_tree_size(tree_instance, height, breadth)
+                        height = float(element.parameters[5])
+                        breadth = float(element.parameters[6])
+                        tree_utils.set_tree_size(tree_instance, height, breadth)
 
-                    tree_instance.location = eu07_tools.utils.swizzle_coords([float(x) for x in element.parameters[1:4]])
-                    tree_instance.rotation_euler[2] = float(element.parameters[4])
+                        tree_instance.location = eu07_tools.utils.swizzle_coords([float(x) for x in element.parameters[1:4]])
+                        tree_instance.rotation_euler[2] = float(element.parameters[4])
 
-                    material = HelperMATImporter.import_material_from_relpath(element.parameters[0])
-                    tree_utils.set_tree_material(tree_instance, material)
+                        material = HelperMATImporter.import_material_from_relpath(element.parameters[0])
+                        tree_utils.set_tree_material(tree_instance, material)
 
-                    bpy.context.scene.collection.objects.link(tree_instance)
+                        bpy.context.scene.collection.objects.link(tree_instance)
+                        break
 
             if element.type == "node:triangles":
                 self._terrain_builder.add_triangle(element)
