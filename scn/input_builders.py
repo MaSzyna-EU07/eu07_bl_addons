@@ -1,6 +1,7 @@
 import bpy
 
 from eu07_tools.utils import AssetSearcher
+from .decorations import DecorationsBuilder
 from .trajectory_builder import TrajectoryBuilder
 from .terrain_builder import TerrainBuilder
 from . import trajectory_utils
@@ -15,6 +16,7 @@ class SceneryBuilder:
         self._config = config
         self._trajectory_builder = TrajectoryBuilder()
         self._terrain_builder = TerrainBuilder(config)
+        self._decoration_builder = DecorationsBuilder(config)
         self._trees_checklist = [
             "ljtree.inc",
             "ljtreebig.inc",

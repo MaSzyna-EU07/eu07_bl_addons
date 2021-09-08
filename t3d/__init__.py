@@ -53,7 +53,13 @@ class T3DImport(bpy.types.Operator, ImportHelper):
     )
     merge_all: BoolProperty(
         name="Merge to single mesh",
-        default=False
+        default=False,
+        options={'HIDDEN'}
+    )
+    link_merged_object: BoolProperty(
+        name="Link merged object to scene collection",
+        default="True",
+        options={'HIDDEN'}
     )
 
     def execute(self, context):
@@ -93,7 +99,8 @@ class T3DImport(bpy.types.Operator, ImportHelper):
                 name = str(Path(self.filepath).with_suffix("").relative_to(root))
                 named_mesh = bpy.data.meshes.new(name)
                 named_obj = bpy.data.objects.new(name, named_mesh)
-                bpy.context.scene.collection.objects.link(named_obj)
+                if self.link_merged_object:
+                    bpy.context.scene.collection.objects.link(named_obj)
 
                 named_obj.select_set(True)
 
