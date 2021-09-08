@@ -53,7 +53,7 @@ class SceneryBuilder:
                         material = HelperMATImporter.import_material_from_relpath(element.parameters[0])
                         tree_utils.set_tree_material(tree_instance, material)
 
-                        bpy.context.scene.collection.objects.link(tree_instance)
+                        Sectorizer.auto_put(tree_instance)
                         break
 
             if element.type == "node:triangles":

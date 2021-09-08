@@ -12,11 +12,21 @@ from ..common import get_qualified_material_name
 
 
 def import_model(elements, collection, config):
+    imported = []
+
     for element in elements:
 
         if element.element_type == "submodel":
+            if (
+                (element.type == "Mesh" and not config.import_meshes) or
+                (element.type == "FreeSpotLight" and not config.import_spots) or
+                (element.type == "Stars" and not config.import_stars)
+            ):
+                continue
+
             obj = _build_object(element, config)
             collection.objects.link(obj)
+            imported.append(obj)
 
         elif element.element_type == "include" and config.load_includes:
             full_path = config.asset_searcher.models.find(element.path)
@@ -33,6 +43,8 @@ def import_model(elements, collection, config):
 
             else:
                 config.report_func({"WARNING"}, f"Can't find included file: {element.path}")
+
+    return imported
 
 
 def _build_object(submodel, config):

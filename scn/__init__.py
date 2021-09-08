@@ -18,6 +18,8 @@ from .trajectory_operators import UpdateTrajectoryProfileOperator
 
 import mathutils
 
+import cProfile, pstats
+from pstats import SortKey
 
 class SCNImport(bpy.types.Operator, ImportHelper):
     bl_idname = "import_scene.scn"
@@ -70,9 +72,8 @@ class SCNImport(bpy.types.Operator, ImportHelper):
 
     sector_size: IntProperty(
         name="Sector Size",
-        default=0,
+        default=2000,
         min=0,
-        options={'HIDDEN'}
     )
 
     def execute(self, context):
@@ -93,7 +94,12 @@ class SCNImport(bpy.types.Operator, ImportHelper):
             scn_input = eu07_tools.scn.load(infile)
 
             builder = SceneryBuilder(config)
-            builder.run(scn_input)
+            with cProfile.Profile() as pr:
+                builder.run(scn_input)
+
+            sortby = SortKey.TIME
+            ps = pstats.Stats(pr).sort_stats(sortby)
+            ps.print_stats()
 
         del builder
 

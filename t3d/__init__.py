@@ -39,9 +39,28 @@ class T3DImport(bpy.types.Operator, ImportHelper):
         name="Load included submodels",
         default=True,
     )
+    import_meshes: BoolProperty(
+        name="Import Meshes",
+        default=True,
+    )
+    import_spots: BoolProperty(
+        name="Import FreeSpotLights",
+        default=True
+    )
+    import_stars: BoolProperty(
+        name="Import Stars",
+        default=True
+    )
+    merge_all: BoolProperty(
+        name="Merge to single mesh",
+        default=False
+    )
 
     def execute(self, context):
-        Config = collections.namedtuple("Config", "report_func root skins asset_searcher load_includes")
+        Config = collections.namedtuple(
+            "Config",
+            "report_func root skins asset_searcher load_includes import_meshes import_spots import_stars merge_all"
+        )
 
         skins = {
             "replacableskin": self.skin_1,
@@ -58,13 +77,34 @@ class T3DImport(bpy.types.Operator, ImportHelper):
             Path(self.filepath).parent
         )
 
-        config = Config(self.report, root, skins, asset_searcher, self.load_includes)
+        config = Config(
+            self.report, root, skins, asset_searcher,
+            self.load_includes, self.import_meshes, self.import_spots, self.import_stars,
+            self.merge_all
+        )
 
         collection = bpy.context.scene.collection
 
         with open(self.filepath, "r", encoding="latin-1") as file:
             elements = eu07_tools.t3d.load(file)
-            import_model(elements, collection, config)
+            imported = import_model(elements, collection, config)
+
+            if self.merge_all:
+                name = str(Path(self.filepath).with_suffix("").relative_to(root))
+                named_mesh = bpy.data.meshes.new(name)
+                named_obj = bpy.data.objects.new(name, named_mesh)
+                bpy.context.scene.collection.objects.link(named_obj)
+
+                named_obj.select_set(True)
+
+                for imported_object in imported:
+                    if imported_object.type == 'MESH':
+                        imported_object.select_set(True)
+
+                context.view_layer.objects.active = ob = named_obj
+
+                bpy.ops.object.join()
+
         
         return {'FINISHED'}
         
