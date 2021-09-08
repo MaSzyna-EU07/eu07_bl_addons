@@ -13,11 +13,12 @@ sys.path.append(os.path.dirname(__file__))
 import bpy
 from bpy.props import PointerProperty, StringProperty
 
-from .t3d import T3DExport, T3DImport, T3DSubmodelProperties, T3DSubmodelPropertiesPanel
 from .scn import SCNImport, SCNExport, SCNObjectProperties, SCNObjectPropertiesPanel, LoadBasemapOperator, EU07SceneryProperties, LoadBasemapPanel, CopyMaterialsToSelectedOperator, UpdateTrajectoryProfileOperator
 from .mat import EU07MaterialImporter
 from .e3d import E3DImport
 from .common import EU07UtilsPanel
+
+from . import t3d
 
 class EU07AddonPreferences(bpy.types.AddonPreferences):
     bl_idname = __name__
@@ -34,7 +35,6 @@ class EU07AddonPreferences(bpy.types.AddonPreferences):
 
 
 def menu_func_import(self, context):
-    self.layout.operator(T3DImport.bl_idname, text="[EU07] Text Model (.t3d)")
     self.layout.operator(E3DImport.bl_idname, text="[EU07] Binary Model (.e3d)")
     self.layout.operator(SCNImport.bl_idname, text="[EU07] Scenery File (.scn, .scm)")
     self.layout.operator(EU07MaterialImporter.bl_idname, text="[EU07] Material (.mat)")
@@ -42,7 +42,6 @@ def menu_func_import(self, context):
 
 
 def menu_func_export(self, context):
-    self.layout.operator(T3DExport.bl_idname, text="[EU07] Text Model (.t3d)")
     self.layout.operator(SCNExport.bl_idname, text="[EU07] Scenery File (.scn, .scm)")
     #self.layout.operator(MATExport.bl_idname, text="EU07 Material (.mat)")
 
@@ -51,10 +50,6 @@ def menu_materialslot(self, context):
 
 classes = (
     EU07AddonPreferences,
-    T3DExport,
-    T3DImport,
-    T3DSubmodelProperties,
-    T3DSubmodelPropertiesPanel,
     EU07MaterialImporter,
     SCNImport,
     SCNExport,
@@ -69,11 +64,12 @@ classes = (
     UpdateTrajectoryProfileOperator
 )
 
+
 def register():
+    t3d.register()
     for c in classes:
         bpy.utils.register_class(c)
 
-    bpy.types.Object.t3d_properties = PointerProperty(type=T3DSubmodelProperties)
     bpy.types.Object.scn_properties = PointerProperty(type=SCNObjectProperties)
     bpy.types.Scene.eu07_properties = PointerProperty(type=EU07SceneryProperties)
 
@@ -82,6 +78,7 @@ def register():
 
 
 def unregister():
+    t3d.unregister()
     for c in classes:
         bpy.utils.unregister_class(c)
 

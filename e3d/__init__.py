@@ -4,7 +4,7 @@ from pathlib import Path
 import bpy
 from ..common import get_root
 import eu07_tools
-from ..t3d import input_builders as t3d_input_builders
+from ..t3d import input as t3d_input_builders
 from bpy.props import (BoolProperty, EnumProperty, FloatProperty,
                        FloatVectorProperty, IntProperty, StringProperty)
 from bpy_extras.io_utils import ExportHelper, ImportHelper
