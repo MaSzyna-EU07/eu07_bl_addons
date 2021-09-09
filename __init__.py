@@ -14,11 +14,11 @@ import bpy
 from bpy.props import PointerProperty, StringProperty
 
 from .scn import SCNImport, SCNExport, SCNObjectProperties, SCNObjectPropertiesPanel, LoadBasemapOperator, EU07SceneryProperties, LoadBasemapPanel, CopyMaterialsToSelectedOperator, UpdateTrajectoryProfileOperator
-from .mat import EU07MaterialImporter
 from .e3d import E3DImport
 from .common import EU07UtilsPanel
 
 from . import t3d
+from . import mat
 
 class EU07AddonPreferences(bpy.types.AddonPreferences):
     bl_idname = __name__
@@ -37,20 +37,19 @@ class EU07AddonPreferences(bpy.types.AddonPreferences):
 def menu_func_import(self, context):
     self.layout.operator(E3DImport.bl_idname, text="[EU07] Binary Model (.e3d)")
     self.layout.operator(SCNImport.bl_idname, text="[EU07] Scenery File (.scn, .scm)")
-    self.layout.operator(EU07MaterialImporter.bl_idname, text="[EU07] Material (.mat)")
+
 
 
 
 def menu_func_export(self, context):
     self.layout.operator(SCNExport.bl_idname, text="[EU07] Scenery File (.scn, .scm)")
-    #self.layout.operator(MATExport.bl_idname, text="EU07 Material (.mat)")
+
 
 def menu_materialslot(self, context):
     self.layout.operator(CopyMaterialsToSelectedOperator.bl_idname, text="Copy To Selected")
 
 classes = (
     EU07AddonPreferences,
-    EU07MaterialImporter,
     SCNImport,
     SCNExport,
     SCNObjectProperties,
@@ -67,6 +66,8 @@ classes = (
 
 def register():
     t3d.register()
+    mat.register()
+
     for c in classes:
         bpy.utils.register_class(c)
 
