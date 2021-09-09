@@ -18,7 +18,9 @@ from .e3d import E3DImport
 from .common import EU07UtilsPanel
 
 from . import t3d
+from . import e3d
 from . import mat
+
 
 class EU07AddonPreferences(bpy.types.AddonPreferences):
     bl_idname = __name__
@@ -35,7 +37,6 @@ class EU07AddonPreferences(bpy.types.AddonPreferences):
 
 
 def menu_func_import(self, context):
-    self.layout.operator(E3DImport.bl_idname, text="[EU07] Binary Model (.e3d)")
     self.layout.operator(SCNImport.bl_idname, text="[EU07] Scenery File (.scn, .scm)")
 
 
@@ -57,7 +58,6 @@ classes = (
     LoadBasemapOperator,
     LoadBasemapPanel,
     EU07SceneryProperties,
-    E3DImport,
     CopyMaterialsToSelectedOperator,
     EU07UtilsPanel,
     UpdateTrajectoryProfileOperator
@@ -66,6 +66,7 @@ classes = (
 
 def register():
     t3d.register()
+    e3d.register()
     mat.register()
 
     for c in classes:

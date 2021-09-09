@@ -1,63 +1,33 @@
-import collections
-from pathlib import Path
-
 import bpy
-from ..common import get_root
-import eu07_tools
-from ..t3d import input as t3d_input_builders
-from bpy.props import (BoolProperty, EnumProperty, FloatProperty,
-                       FloatVectorProperty, IntProperty, StringProperty)
-from bpy_extras.io_utils import ExportHelper, ImportHelper
+
+from .input import E3DImport
 
 
-class E3DImport(bpy.types.Operator, ImportHelper):
-    bl_idname = "import_scene.e3d"
-    bl_label = "Import E3D"
-    filename_ext = ".e3d"
-
-    filter_glob: StringProperty(
-        default="*.e3d",
-        options={'HIDDEN'}
-    )
-    skin_1: StringProperty(
-        name="Skin #1",
-    )
-    skin_2: StringProperty(
-        name="Skin #2",
-    )
-    skin_3: StringProperty(
-        name="Skin #3",
-    )
-    skin_4: StringProperty(
-        name="Skin #4",
-    )
+classes = (
+    E3DImport,
+)
 
 
-    def execute(self, context):
-        Config = collections.namedtuple("Config", "report_func root skins asset_searcher load_includes")
+def menu_func_import(self, context):
+    self.layout.operator(E3DImport.bl_idname, text="[EU07] Binary Model (.e3d)")
 
-        skins = {
-            "replacableskin": self.skin_1,
-            "-1": self.skin_1, 
-            "-2": self.skin_2, 
-            "-3": self.skin_3, 
-            "-4": self.skin_4
-        }
 
-        root = get_root(self.filepath)
+def menu_func_export(self, context):
+    pass
+    #self.layout.operator(E3DExport.bl_idname, text="[EU07] Binary Model (.e3d)")
 
-        asset_searcher = eu07_tools.utils.AssetSearcher(
-            root, 
-            Path(self.filepath).parent
-        )
 
-        config = Config(self.report, root, skins, asset_searcher, False)
+def register():
+    for c in classes:
+        bpy.utils.register_class(c)
 
-        with open(self.filepath, "rb") as infile:
-            e3d = eu07_tools.e3d.load(infile)
-            t3d = list(eu07_tools.utils.e3d_to_t3d(e3d))
+    bpy.types.TOPBAR_MT_file_import.append(menu_func_import)
+    bpy.types.TOPBAR_MT_file_export.append(menu_func_export)
 
-            collection = bpy.context.scene.collection
-            t3d_input_builders.import_model(t3d, collection, config)
 
-        return {'FINISHED'}
+def unregister():
+    for c in classes:
+        bpy.utils.unregister_class(c)
+
+    bpy.types.TOPBAR_MT_file_import.remove(menu_func_import)
+    bpy.types.TOPBAR_MT_file_export.remove(menu_func_export)
