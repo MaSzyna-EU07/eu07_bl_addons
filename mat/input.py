@@ -5,7 +5,7 @@ from bpy.props import StringProperty
 from bpy_extras.io_utils import ImportHelper
 import eu07_tools
 
-from ..common import get_root, get_qualified_material_name
+from common import get_root, get_qualified_material_name
 
 
 

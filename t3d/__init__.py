@@ -1,24 +1,24 @@
 import bpy
 from bpy.props import PointerProperty
 
-from .input import T3DImport
-from .output import T3DExport
+from .input import T3DImporter
+from .output import T3DExporter
 from .properties import T3DSubmodelProperties, T3DSubmodelPropertiesPanel
 
 classes = (
-    T3DImport,
-    T3DExport,
+    T3DImporter,
+    T3DExporter,
     T3DSubmodelProperties,
     T3DSubmodelPropertiesPanel
 )
 
 
 def menu_func_import(self, context):
-    self.layout.operator(T3DImport.bl_idname, text="[EU07] Text Model (.t3d)")
+    self.layout.operator(T3DImporter.bl_idname, text="[EU07] Text Model (.t3d)")
 
 
 def menu_func_export(self, context):
-    self.layout.operator(T3DExport.bl_idname, text="[EU07] Text Model (.t3d)")
+    self.layout.operator(T3DExporter.bl_idname, text="[EU07] Text Model (.t3d)")
 
 
 def register():
