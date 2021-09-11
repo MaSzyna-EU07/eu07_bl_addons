@@ -2,7 +2,7 @@ import eu07_tools
 import bpy
 import bmesh
 
-from ..mat import HelperMATImporter
+from mat import HelperMATImporter
 
 class TerrainBuilder:
     def __init__(self, config):

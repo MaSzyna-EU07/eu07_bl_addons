@@ -4,7 +4,7 @@ import os
 import bpy
 from bpy.props import IntProperty, EnumProperty, BoolProperty
 
-from ..common import get_root
+from common import get_root
 
 
 class BasemapProperties(bpy.types.PropertyGroup):

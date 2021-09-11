@@ -1,9 +1,9 @@
 
 import bpy
 
-from . import trajectory_builder
+from scn.trajectory_tools import trajectory_builder
 
-from .sectorizer import Sectorizer
+from scn.sectorizer import Sectorizer
 
 
 def create(name, location=None):
@@ -60,7 +60,7 @@ def get_switch_straight(side_trajectory):
 
 def get_profile_params(profile_instance):
     name_parts = profile_instance.name.split("_")
-    params_strings = name_parts[2].split("-")
+    params_strings = name_parts[2].split(";")
     return [float(p) for p in params_strings]
 
 
@@ -141,4 +141,4 @@ def get_material(trajectory, index):
 
 
 def profile_name(track_subtype, profile_params, trajectory_width, mapping_length):
-    return f"TrajectoryProfileTemplate_{track_subtype}_{'-'.join(str(round(x, 3)) for x in profile_params)}_ML{mapping_length}_{trajectory_width*1000}"
+    return f"TrajectoryProfileTemplate_{track_subtype}_{';'.join(str(round(x, 3)) for x in profile_params)}_ML{mapping_length}_{trajectory_width*1000}"

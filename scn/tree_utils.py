@@ -1,5 +1,16 @@
 import bpy
 import bmesh
+import eu07_tools
+
+
+inc_names = [
+    "ljtree.inc",
+    "ljtreebig.inc",
+    "ljtreesmall.inc",
+    "tree.inc",
+    "treebig.inc",
+    "treesmall.inc"
+]
 
 
 def instantiate_tree():
@@ -20,40 +31,47 @@ def get_tree_template():
         mesh = bmesh.new()
         uv_layer = mesh.loops.layers.uv.new()
 
-        verts = [
-            mesh.verts.new((-0.5, 0, 0)),
-            mesh.verts.new((0.5, 0, 0)),
-            mesh.verts.new((0.5, 0, 1)),
-            mesh.verts.new((-0.5, 0, 1)),
-
-            mesh.verts.new((-0.5, 0, 0)),
-            mesh.verts.new((0.5, 0, 0)),
-            mesh.verts.new((0.5, 0, 1)),
-            mesh.verts.new((-0.5, 0, 1)),
-
-            mesh.verts.new((0, -0.5, 0)),
-            mesh.verts.new((0, 0.5, 0)),
-            mesh.verts.new((0, 0.5, 1)),
-            mesh.verts.new((0, -0.5, 1)),
-
-            mesh.verts.new((0, -0.5, 0)),
-            mesh.verts.new((0, 0.5, 0)),
-            mesh.verts.new((0, 0.5, 1)),
-            mesh.verts.new((0, -0.5, 1)),
+        geometry_data = [
+            (1, 1, 0, 0, 0.99),
+            (1, 0, 0, 0, 0),
+            (-1, 1, 0, 1, 0.99),
+            (-1, 0, 0, 1, 0),
+            (-1, 1, 0, 1, 0.99),
+            (1, 0, 0, 0, 0),
+            (1, 0, 0, 0, 0),
+            (1, 1, 0, 0, 0.99),
+            (-1, 1, 0, 1, 0.99),
+            (-1, 1, 0, 1, 0.99),
+            (-1, 0, 0, 1, 0),
+            (1, 0, 0, 0, 0),
+            (0, 0, -1, 0, 0),
+            (0, 1, -1, 0, 0.99),
+            (0, 1, 1, 1, 0.99),
+            (0, 1, 1, 1, 0.99),
+            (0, 0, 1, 1, 0),
+            (0, 0, -1, 0, 0),
+            (0, 1, -1, 0, 0.99),
+            (0, 0, -1, 0, 0),
+            (0, 1, 1, 1, 0.99),
+            (0, 0, 1, 1, 0),
+            (0, 1, 1, 1, 0.99),
+            (0, 0, -1, 0, 0)
         ]
 
-        uvs = [
-            (0, 0),
-            (1, 0),
-            (1, 1),
-            (0, 1)
-        ]
 
-        for i in range(4):
-            face = mesh.faces.new(verts[i * 4:i * 4 + 4])
+        for i in range(len(geometry_data) // 3):
+            vertex_index_start = i * 3
+            vertex_index_end = vertex_index_start + 3
+
+            face_verts_data = geometry_data[vertex_index_start:vertex_index_end]
+
+            face_verts_coords = [eu07_tools.utils.swizzle_coords(vertex_data[:3]) for vertex_data in face_verts_data]
+
+            face_verts = [mesh.verts.new(coords) for coords in face_verts_coords]
+            face = mesh.faces.new(face_verts)
 
             for vertex_index, loop in enumerate(face.loops):
-                loop[uv_layer].uv = uvs[vertex_index]
+                loop[uv_layer].uv = face_verts_data[vertex_index][3:]
 
             if i % 2 == 0:
                 face.normal_flip()

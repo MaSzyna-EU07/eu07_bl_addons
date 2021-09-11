@@ -1,15 +1,15 @@
 import bpy
 from bpy.props import PointerProperty
 
-from .input_builders import SCNImport
-from .output_builders import SCNExport
+from .input import SCNImporter
+from .output import SCNExporter
 from .basemaps import BasemapPanel, LoadBasemapOperator, BasemapProperties
 from .scenery_object import SCNObjectProperties, SCNObjectPropertiesPanel, CopyMaterialsToSelectedOperator
 
 
 classes = (
-    SCNImport,
-    SCNExport,
+    SCNImporter,
+    SCNExporter,
 
     BasemapProperties,
     BasemapPanel,
@@ -22,11 +22,11 @@ classes = (
 
 
 def menu_func_import(self, context):
-    self.layout.operator(SCNImport.bl_idname, text="[EU07] Scenery File (.scn, .scm)")
+    self.layout.operator(SCNImporter.bl_idname, text="[EU07] Scenery File (.scn, .scm)")
 
 
 def menu_func_export(self, context):
-    self.layout.operator(SCNExport.bl_idname, text="[EU07] Scenery File (.scn, .scm)")
+    self.layout.operator(SCNExporter.bl_idname, text="[EU07] Scenery File (.scn, .scm)")
 
 
 def register():

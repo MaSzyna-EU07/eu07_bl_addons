@@ -1,7 +1,7 @@
 import bpy
 from bpy.props import EnumProperty, FloatProperty, IntProperty, BoolProperty, StringProperty
 
-from . import trajectory_utils
+from . import trajectory_tools
 
 
 def update_material_list(self, context):
@@ -18,7 +18,7 @@ def update_visibility(self, context):
     if obj is None: return
 
     if obj.scn_properties.type_.startswith("node:track"):
-        profile_instance = trajectory_utils.get_profile_instance(obj)
+        profile_instance = trajectory_tools.get_profile_instance(obj)
         profile_instance.hide_set(not context.active_object.scn_properties.trajectory_visible)
 
 
@@ -380,6 +380,6 @@ class CopyMaterialsToSelectedOperator(bpy.types.Operator):
 
             for o in context.selected_objects:
                 if ("node:track" in o.scn_properties.type_):
-                    trajectory_utils.set_material(o, trajectory_utils.get_material(active, self.index), self.index)
+                    trajectory_tools.set_material(o, trajectory_tools.get_material(active, self.index), self.index)
 
         return {'FINISHED'}
