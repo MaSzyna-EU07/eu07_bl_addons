@@ -42,6 +42,7 @@ class SCNObjectProperties(bpy.types.PropertyGroup):
             ("origin", "Origin", ""),
             ("camera", "Camera", ""),
             ("include", "Include", ""),
+            ("tree", "Tree", "")
         ]
     )
 
@@ -240,11 +241,6 @@ class SCNObjectProperties(bpy.types.PropertyGroup):
         default=""
     )
 
-    include_file: StringProperty(
-        name="*.inc file",
-        subtype='FILE_PATH',
-    )
-
 class SCNObjectPropertiesPanel(bpy.types.Panel):
     bl_idname = "OBJECT_PT_scn"
     bl_label = "SCN Object"
@@ -274,11 +270,19 @@ class SCNObjectPropertiesPanel(bpy.types.Panel):
             mindistance_r = self.layout.row()
             mindistance_r.prop(self.obj.scn_properties, "node_min_distance")
 
+        if "tree" in self.obj.scn_properties.type_:
+            height_r = self.layout.row()
+            height_r.label(text=f"Height: {round(self.obj.scale[2], 2)}")
+            breadth_r = self.layout.row()
+            breadth_r.label(text=f"Breadth: {round(self.obj.scale[1], 2)}")
+            material_r = self.layout.row()
+            material_r.prop(self.obj, "active_material", text="Material")
+
         if ("node:track" in self.obj.scn_properties.type_):
             if (self.obj.type != 'CURVE'):
                 self.layout.label(text="Trajectory must be a Curve!")
             else:
-                profile_instance = trajectory_utils.get_profile_instance(self.obj)
+                profile_instance = trajectory_tools.get_profile_instance(self.obj)
 
                 width_r = self.layout.row()
                 width_r.prop(self.obj.scn_properties, "trajectory_width")

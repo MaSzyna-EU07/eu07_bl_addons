@@ -1,8 +1,11 @@
+import math
+from pathlib import Path
+
 import bmesh
-
 import eu07_tools
-from common import get_root, get_path_from_material
 
+from scn import tree_utils
+from common import get_root, get_path_from_material
 from .. import trajectory_tools
 
 
@@ -37,6 +40,20 @@ def create_node_triangles_from_mesh(mesh):
 
             node.vertices.new((*xyz, *ijk, *uv))
         yield node
+
+
+def create_tree_include(tree_object):
+    tree_inc = eu07_tools.scn.create_element("include")
+    tree_inc.path = "tree.inc"
+    tree_inc.parameters.append(get_path_from_material(tree_object.active_material))
+    tree_inc.parameters.extend(eu07_tools.utils.swizzle_coords(tree_object.location))
+    tree_inc.parameters.append(math.degrees(tree_object.rotation_euler[2]))
+    tree_inc.parameters.extend(tree_utils.get_tree_size(tree_object))
+
+    tree_inc.parameters = [str(p) for p in tree_inc.parameters]
+
+    return tree_inc
+
 
 def create_node_track(track_object):
     properties = track_object.scn_properties

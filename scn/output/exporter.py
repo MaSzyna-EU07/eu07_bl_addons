@@ -4,7 +4,7 @@ from bpy.props import StringProperty, BoolProperty
 from bpy_extras.io_utils import ExportHelper
 import eu07_tools
 
-from .output_builders import create_node_triangles_from_mesh, create_node_track
+from .output_builders import create_node_triangles_from_mesh, create_node_track, create_tree_include
 
 
 class SCNExporter(bpy.types.Operator, ExportHelper):
@@ -30,6 +30,8 @@ class SCNExporter(bpy.types.Operator, ExportHelper):
 
             tracks = []
             for o in objects:
+                if 'tree' in o.scn_properties.type_:
+                    eu07_tools.scn.dump((create_tree_include(o),), outfile)
                 if 'node:triangles' in o.scn_properties.type_:
                     eu07_tools.scn.dump(create_node_triangles_from_mesh(o.data.copy()), outfile)
                 if 'node:track' in o.scn_properties.type_:

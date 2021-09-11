@@ -63,7 +63,10 @@ class DecorationsBuilder:
 
     def load_decoration(self, decoration):
         if decoration.typename == "include":
-            pass
+            path = self.config["asset_searcher"].includes.find(decoration.path)
+            params_meaning = analyze_inc_parameters_context(path)
+
+            content = eu07_tools.scn.load(path, decoration.parameters)
 
         if decoration.typename == "node:model":
             self.load_model(decoration)
