@@ -126,6 +126,7 @@ class TrajectoryProfileGenerator:
             face_verts = verts[vindex_start:vindex_end]
             face_uvs = uvs[vindex_start:vindex_end]
 
+            # flipping vert order to generate a face with normal pointing outwards
             face_verts[:2] = reversed(face_verts[:2])
             face_uvs[:2] = reversed(face_uvs[:2])
 
@@ -226,20 +227,20 @@ class RoadProfileGenerator(TrajectoryProfileGenerator):
         super().__init__()
 
     def _build_mesh(self, profile_params, trajectory_width, mapping_length=6):
-        max_z = profile_params[0]
-        med_y = trajectory_width / 2
-        max_y = med_y + profile_params[2]
+        max_z, side_width, slope_width = profile_params
+        surface_max_y = trajectory_width / 2
         segment_length = mapping_length
 
+        # generate road surface
         verts = [
-            self.mesh.verts.new((-segment_length / 2, med_y, -max_z)),
-            self.mesh.verts.new((segment_length / 2, med_y, -max_z)),
-            self.mesh.verts.new((-segment_length / 2, -med_y, -max_z)),
-            self.mesh.verts.new((segment_length / 2, -med_y, -max_z)),
+            self.mesh.verts.new((-segment_length / 2, surface_max_y, 0)),
+            self.mesh.verts.new((segment_length / 2, surface_max_y, 0)),
+            self.mesh.verts.new((-segment_length / 2, -surface_max_y, 0)),
+            self.mesh.verts.new((segment_length / 2, -surface_max_y, 0)),
         ]
 
         slope_uv_length = math.sqrt(profile_params[2] ** 2 + max_z ** 2) / mapping_length
-        med_u = med_y / mapping_length
+        med_u = surface_max_y / mapping_length
         max_u = slope_uv_length + med_u
 
         verts_uv = [
@@ -250,6 +251,31 @@ class RoadProfileGenerator(TrajectoryProfileGenerator):
         ]
 
         self._make_faces(verts, verts_uv, 0, 1)
+
+        # generate side of the road
+
+        for side_index in range(2):
+            sideY = -1 if side_index == 1 else 1
+
+            side_med_y = (surface_max_y + side_width) * sideY
+            side_max_y = (surface_max_y + side_width + slope_width) * sideY
+
+
+            verts = [
+                self.mesh.verts.new((-segment_length / 2, side_max_y, -max_z)),
+                self.mesh.verts.new((segment_length / 2, side_max_y, -max_z)),
+                self.mesh.verts.new((-segment_length / 2, side_med_y, 0)),
+                self.mesh.verts.new((segment_length / 2, side_med_y, 0)),
+                self.mesh.verts.new((-segment_length / 2, surface_max_y * sideY, 0)),
+                self.mesh.verts.new((segment_length / 2, surface_max_y * sideY, 0))
+            ]
+
+            verts_uv = [
+                (0,0),
+            ] * 8
+
+            flip = True if sideY == -1 else False
+            self._make_faces(verts, verts_uv, 1, 2, flip)
 
 
 class RiverProfileGenerator(TrajectoryProfileGenerator):
