@@ -271,8 +271,13 @@ class RoadProfileGenerator(TrajectoryProfileGenerator):
             ]
 
             verts_uv = [
-                (0,0),
-            ] * 8
+                (0, 0),
+                (0, 1),
+                (0.5, 0),
+                (0.5, 1),
+                (1, 0),
+                (1, 1)
+            ]
 
             flip = True if sideY == -1 else False
             self._make_faces(verts, verts_uv, 1, 2, flip)
