@@ -254,33 +254,75 @@ class RoadProfileGenerator(TrajectoryProfileGenerator):
 
         # generate side of the road
 
-        for side_index in range(2):
-            sideY = -1 if side_index == 1 else 1
+        if max_z < 0:
+            left_sidewalk_width = side_width
+            right_sidewalk_width = slope_width
 
-            side_med_y = (surface_max_y + side_width) * sideY
-            side_max_y = (surface_max_y + side_width + slope_width) * sideY
+            for side_index in range(2):
+                sideY = -1 if side_index == 1 else 1
+
+                sidewalk_width = left_sidewalk_width if sideY == 1 else right_sidewalk_width
+
+                if sidewalk_width == 0:
+                    continue
+
+                slope_factor = 1 / 3.75
+
+                sidewalk_begin_y = surface_max_y * sideY
+                sidewalk_edge_end_y = (surface_max_y + (slope_factor * abs(max_z))) * sideY
+                sidewalk_end_y = (abs(sidewalk_edge_end_y) + sidewalk_width) * sideY
+
+                verts = [
+                    self.mesh.verts.new((segment_length / 2, sidewalk_begin_y, 0)),
+                    self.mesh.verts.new((-segment_length / 2, sidewalk_begin_y, 0)),
+                    self.mesh.verts.new((segment_length / 2, sidewalk_edge_end_y, -max_z)),
+                    self.mesh.verts.new((-segment_length / 2, sidewalk_edge_end_y, -max_z)),
+                    self.mesh.verts.new((segment_length / 2, sidewalk_end_y, -max_z)),
+                    self.mesh.verts.new((-segment_length / 2, sidewalk_end_y, -max_z)),
+                ]
+
+                u_coord = 0.515625 if sideY == 1 else 0.484375
+
+                verts_uv = [
+                    (0, 0),
+                    (0, 1),
+                    (u_coord + slope_factor * abs(max_z), 0),
+                    (u_coord + slope_factor * abs(max_z), 1),
+                    (u_coord, 0),
+                    (u_coord, 1)
+                ]
+
+                flip = True if sideY == -1 else False
+                self._make_faces(verts, verts_uv, 1, 2, flip)
+        else:
+
+            for side_index in range(2):
+                sideY = -1 if side_index == 1 else 1
+
+                side_med_y = (surface_max_y + side_width) * sideY
+                side_max_y = (surface_max_y + side_width + slope_width) * sideY
 
 
-            verts = [
-                self.mesh.verts.new((-segment_length / 2, side_max_y, -max_z)),
-                self.mesh.verts.new((segment_length / 2, side_max_y, -max_z)),
-                self.mesh.verts.new((-segment_length / 2, side_med_y, 0)),
-                self.mesh.verts.new((segment_length / 2, side_med_y, 0)),
-                self.mesh.verts.new((-segment_length / 2, surface_max_y * sideY, 0)),
-                self.mesh.verts.new((segment_length / 2, surface_max_y * sideY, 0))
-            ]
+                verts = [
+                    self.mesh.verts.new((-segment_length / 2, side_max_y, -max_z)),
+                    self.mesh.verts.new((segment_length / 2, side_max_y, -max_z)),
+                    self.mesh.verts.new((-segment_length / 2, side_med_y, 0)),
+                    self.mesh.verts.new((segment_length / 2, side_med_y, 0)),
+                    self.mesh.verts.new((-segment_length / 2, surface_max_y * sideY, 0)),
+                    self.mesh.verts.new((segment_length / 2, surface_max_y * sideY, 0))
+                ]
 
-            verts_uv = [
-                (0, 0),
-                (0, 1),
-                (0.5, 0),
-                (0.5, 1),
-                (1, 0),
-                (1, 1)
-            ]
+                verts_uv = [
+                    (0, 0),
+                    (0, 1),
+                    (0.5, 0),
+                    (0.5, 1),
+                    (1, 0),
+                    (1, 1)
+                ]
 
-            flip = True if sideY == -1 else False
-            self._make_faces(verts, verts_uv, 1, 2, flip)
+                flip = True if sideY == -1 else False
+                self._make_faces(verts, verts_uv, 1, 2, flip)
 
 
 class RiverProfileGenerator(TrajectoryProfileGenerator):
