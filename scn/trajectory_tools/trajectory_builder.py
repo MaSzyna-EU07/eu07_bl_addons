@@ -181,7 +181,7 @@ class TrackProfileGenerator(TrajectoryProfileGenerator):
         self.generate_rails(mapping_length, trajectory_width)
 
     def generate_rails(self, mapping_length, trajectory_width):
-        height = 0.15
+        height = 0.172
         width = 0.067
 
         # u coordinates
