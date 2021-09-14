@@ -336,10 +336,10 @@ class RiverProfileGenerator(TrajectoryProfileGenerator):
         segment_length = mapping_length
 
         verts = [
-            self.mesh.verts.new((-segment_length / 2, med_y, -max_z)),
-            self.mesh.verts.new((segment_length / 2, med_y, -max_z)),
-            self.mesh.verts.new((-segment_length / 2, -med_y, -max_z)),
-            self.mesh.verts.new((segment_length / 2, -med_y, -max_z)),
+            self.mesh.verts.new((-segment_length / 2, med_y, 0)),
+            self.mesh.verts.new((segment_length / 2, med_y, 0)),
+            self.mesh.verts.new((-segment_length / 2, -med_y, 0)),
+            self.mesh.verts.new((segment_length / 2, -med_y, 0)),
         ]
 
         slope_uv_length = math.sqrt(profile_params[2] ** 2 + max_z ** 2) / mapping_length
@@ -354,3 +354,23 @@ class RiverProfileGenerator(TrajectoryProfileGenerator):
         ]
 
         self._make_faces(verts, verts_uv, 0, 1)
+
+        for side_index in range(2):
+            sideY = -1 if side_index == 1 else 1
+
+            verts = [
+                self.mesh.verts.new((-segment_length / 2, med_y * sideY, 0)),
+                self.mesh.verts.new((segment_length / 2, med_y * sideY, 0)),
+                self.mesh.verts.new((-segment_length / 2, max_y * sideY, max_z)),
+                self.mesh.verts.new((segment_length / 2, max_y * sideY, max_z)),
+            ]
+
+            verts_uv = [
+                (1, 0),
+                (1, 1),
+                (0, 0),
+                (0, 1),
+            ]
+
+            flip = True if sideY == 1 else False
+            self._make_faces(verts, verts_uv, 1, 1, flip)
