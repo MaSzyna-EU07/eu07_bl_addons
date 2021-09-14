@@ -1,6 +1,7 @@
 import math
 
 import bpy
+import mathutils
 import eu07_tools
 
 from scn.decorations import DecorationsBuilder
@@ -10,6 +11,7 @@ from scn import trajectory_tools
 from scn.sectorizer import Sectorizer
 from scn import tree_utils
 from mat import HelperMATImporter
+from scn import camera
 
 class SceneryBuilder:
     def __init__(self, config):
@@ -22,6 +24,10 @@ class SceneryBuilder:
 
     def run(self, data):
         for element in data:
+
+            if element.type == "camera":
+                camera.create_camera_from_element(element)
+
             if element.type == "include":
                 if element.path.endswith(".scm"):
                     sb = SceneryBuilder(self._config)
