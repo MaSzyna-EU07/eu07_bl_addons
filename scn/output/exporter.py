@@ -5,6 +5,7 @@ from bpy_extras.io_utils import ExportHelper
 import eu07_tools
 
 from .output_builders import create_node_triangles_from_mesh, create_node_track, create_tree_include
+import scn
 
 
 class SCNExporter(bpy.types.Operator, ExportHelper):
@@ -32,6 +33,8 @@ class SCNExporter(bpy.types.Operator, ExportHelper):
             for o in objects:
                 if 'tree' in o.scn_properties.type_:
                     eu07_tools.scn.dump((create_tree_include(o),), outfile)
+                if 'camera' in o.scn_properties.type_:
+                    eu07_tools.scn.dump((scn.camera.create_element_from_camera(o),), outfile)
                 if 'node:triangles' in o.scn_properties.type_:
                     eu07_tools.scn.dump(create_node_triangles_from_mesh(o.data.copy()), outfile)
                 if 'node:track' in o.scn_properties.type_:

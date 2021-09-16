@@ -1,4 +1,5 @@
 import math
+import copy
 
 import bpy
 import mathutils
@@ -28,8 +29,7 @@ def create_camera_from_element(element):
 
     # by default, camera points to south, so we need additional rotations there
     # because blender's camera points to the bottom by default
-    camera_object.rotation_euler.rotate_axis('Z', math.radians(180))
-    camera_object.rotation_euler.rotate_axis('X', math.radians(90))
+    camera_object.rotation_euler = compensate_camera_angles(camera_object.rotation_euler.copy())
 
     collection = bpy.data.collections.get("Cameras", bpy.data.collections.new("Cameras"))
     collection.objects.link(camera_object)
@@ -41,7 +41,9 @@ def create_element_from_camera(camera_object):
     element = eu07_tools.scn.create_element("camera")
 
     element.location = eu07_tools.utils.swizzle_coords(camera_object.location)
-    element.rotation = eu07_tools.utils.swizzle_coords(camera_object.rotation - mathutils.Vector(-90, 0, -180))
+    element.rotation = eu07_tools.utils.swizzle_coords(
+        [math.degrees(x) for x in compensate_camera_angles(camera_object.rotation_euler.copy(), factor=-1)]
+    )
 
     if camera_object.scn_properties.camera_use_index:
         element.index = camera_object.scn_properties.camera_index
@@ -61,4 +63,12 @@ def get_cameras_with_index(index):
     return users
 
 
+def compensate_camera_angles(euler, factor=1):
+    if factor == -1:
+        euler.rotate_axis('X', math.radians(90 * factor))
+        euler.rotate_axis('Z', math.radians(180 * factor))
+    else:
+        euler.rotate_axis('Z', math.radians(180 * factor))
+        euler.rotate_axis('X', math.radians(90 * factor))
 
+    return euler
