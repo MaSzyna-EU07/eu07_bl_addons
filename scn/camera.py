@@ -4,17 +4,24 @@ import bpy
 import mathutils
 import eu07_tools
 
+from scn.sectorizer import Sectorizer
+
 
 def create_camera_from_element(element):
     camera_datablock = bpy.data.cameras.new(f"Camera {element.index}")
     camera_object = bpy.data.objects.new(f"Camera {element.index}", camera_datablock)
+    camera_object.scn_properties.type_ = "camera"
+
+    if element.index != -1:
+        camera_object.scn_properties.camera_use_index = True
+        camera_object.scn_properties.camera_index = element.index
 
     camera_object.location = element.location.swizzled()
     camera_object.rotation_euler = mathutils.Euler(
         [
             math.radians(element.rotation.x),
-            math.radians(element.rotation.y),
-            math.radians(element.rotation.z)
+            math.radians(element.rotation.z),
+            math.radians(element.rotation.y)
         ],
         'XYZ'
     )
@@ -24,10 +31,34 @@ def create_camera_from_element(element):
     camera_object.rotation_euler.rotate_axis('Z', math.radians(180))
     camera_object.rotation_euler.rotate_axis('X', math.radians(90))
 
-    bpy.context.scene.collection.objects.link(camera_object)
+    collection = bpy.data.collections.get("Cameras", bpy.data.collections.new("Cameras"))
+    collection.objects.link(camera_object)
+
+    Sectorizer.auto_put(camera_object)
 
 
-def create_element_from_camera(camera):
+def create_element_from_camera(camera_object):
     element = eu07_tools.scn.create_element("camera")
 
+    element.location = eu07_tools.utils.swizzle_coords(camera_object.location)
+    element.rotation = eu07_tools.utils.swizzle_coords(camera_object.rotation - mathutils.Vector(-90, 0, -180))
+
+    if camera_object.scn_properties.camera_use_index:
+        element.index = camera_object.scn_properties.camera_index
+
     return element
+
+
+def get_cameras_with_index(index):
+    users = []
+
+    for obj in bpy.data.collections["Cameras"].objects:
+        if obj.scn_properties.type_ == 'camera':
+            if obj.scn_properties.camera_use_index:
+                if obj.scn_properties.camera_index == index:
+                    users.append(obj)
+
+    return users
+
+
+

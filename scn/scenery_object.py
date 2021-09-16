@@ -1,6 +1,8 @@
 import bpy
 from bpy.props import EnumProperty, FloatProperty, IntProperty, BoolProperty, StringProperty
 
+import scn
+
 from . import trajectory_tools
 
 
@@ -241,6 +243,18 @@ class SCNObjectProperties(bpy.types.PropertyGroup):
         default=""
     )
 
+    camera_use_index: BoolProperty(
+        name="Use index",
+        default=True
+    )
+
+    camera_index: IntProperty(
+        name="Index",
+        default=0,
+        min=0,
+        max=9
+    )
+
 class SCNObjectPropertiesPanel(bpy.types.Panel):
     bl_idname = "OBJECT_PT_scn"
     bl_label = "SCN Object"
@@ -269,6 +283,27 @@ class SCNObjectPropertiesPanel(bpy.types.Panel):
 
             mindistance_r = self.layout.row()
             mindistance_r.prop(self.obj.scn_properties, "node_min_distance")
+
+        if "camera" in self.obj.scn_properties.type_:
+            use_index_r = self.layout.row()
+            use_index_r.prop(self.obj.scn_properties, "camera_use_index")
+
+            if self.obj.scn_properties.camera_use_index:
+                index_r = self.layout.row()
+                index_r.prop(self.obj.scn_properties, "camera_index")
+
+                duplicates = scn.camera.get_cameras_with_index(self.obj.scn_properties.camera_index)
+                duplicates_names = [cam.name for cam in duplicates]
+                duplicates_names.remove(self.obj.name)
+
+                if len(duplicates_names) > 0:
+                    warning_r = self.layout.row()
+                    warning_r.label(text="Same index in:", icon='ERROR')
+
+                    for name in duplicates_names:
+                        name_r = self.layout.row()
+                        name_r.label(text=name)
+
 
         if "tree" in self.obj.scn_properties.type_:
             height_r = self.layout.row()
