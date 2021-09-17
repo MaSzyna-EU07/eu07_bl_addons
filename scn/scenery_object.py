@@ -255,6 +255,12 @@ class SCNObjectProperties(bpy.types.PropertyGroup):
         max=9
     )
 
+    sound_path: StringProperty(
+        name="Path",
+        default="",
+        subtype='FILE_PATH'
+    )
+
 class SCNObjectPropertiesPanel(bpy.types.Panel):
     bl_idname = "OBJECT_PT_scn"
     bl_label = "SCN Object"
@@ -283,6 +289,10 @@ class SCNObjectPropertiesPanel(bpy.types.Panel):
 
             mindistance_r = self.layout.row()
             mindistance_r.prop(self.obj.scn_properties, "node_min_distance")
+
+        if "node:sound" in self.obj.scn_properties.type_:
+            use_index_r = self.layout.row()
+            use_index_r.prop(self.obj.scn_properties, "sound_path")
 
         if "camera" in self.obj.scn_properties.type_:
             use_index_r = self.layout.row()

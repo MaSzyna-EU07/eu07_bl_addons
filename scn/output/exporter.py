@@ -33,6 +33,8 @@ class SCNExporter(bpy.types.Operator, ExportHelper):
             for o in objects:
                 if 'tree' in o.scn_properties.type_:
                     eu07_tools.scn.dump((create_tree_include(o),), outfile)
+                if 'node:sound' in o.scn_properties.type_:
+                    eu07_tools.scn.dump((scn.sound.create_element_from_sound(o),), outfile)
                 if 'camera' in o.scn_properties.type_:
                     eu07_tools.scn.dump((scn.camera.create_element_from_camera(o),), outfile)
                 if 'node:triangles' in o.scn_properties.type_:

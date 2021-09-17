@@ -9,9 +9,8 @@ from scn.trajectory_tools.trajectory_builder import TrajectoryBuilder
 from scn.terrain_builder import TerrainBuilder
 from scn import trajectory_tools
 from scn.sectorizer import Sectorizer
-from scn import tree_utils
 from mat import HelperMATImporter
-from scn import camera
+import scn
 
 class SceneryBuilder:
     def __init__(self, config):
@@ -26,7 +25,7 @@ class SceneryBuilder:
         for element in data:
 
             if element.type == "camera":
-                camera.create_camera_from_element(element)
+                scn.camera.create_camera_from_element(element)
 
             if element.type == "include":
                 if element.path.endswith(".scm"):
@@ -40,25 +39,28 @@ class SceneryBuilder:
                         scn_input = eu07_tools.scn.load(infile)
                         sb.run(scn_input)
 
-                for tree_inc_name in tree_utils.inc_names:
+                for tree_inc_name in scn.tree_utils.inc_names:
                     if tree_inc_name in element.path.lower():
-                        tree_instance = tree_utils.instantiate_tree()
+                        tree_instance = scn.tree_utils.instantiate_tree()
 
                         height = float(element.parameters[5])
                         breadth = float(element.parameters[6])
-                        tree_utils.set_tree_size(tree_instance, height, breadth)
+                        scn.tree_utils.set_tree_size(tree_instance, height, breadth)
 
                         tree_instance.location = eu07_tools.utils.swizzle_coords([float(x) for x in element.parameters[1:4]])
                         tree_instance.rotation_euler[2] = math.radians(float(element.parameters[4]))
 
                         material = HelperMATImporter.import_material_from_relpath(element.parameters[0])
-                        tree_utils.set_tree_material(tree_instance, material)
+                        scn.tree_utils.set_tree_material(tree_instance, material)
 
                         Sectorizer.auto_put(tree_instance)
                         break
 
             if element.type == "node:triangles":
                 self._terrain_builder.add_triangle(element)
+
+            if element.type == "node:sound":
+                scn.sound.create_sound_from_element(element)
 
             # temporary disabled
             if element.type == "node:track":
