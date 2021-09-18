@@ -9,6 +9,7 @@ from .scenery_object import SCNObjectProperties, SCNObjectPropertiesPanel, CopyM
 from . import sound
 from . import camera
 from . import tree_utils
+from . import memcell
 
 
 classes = (

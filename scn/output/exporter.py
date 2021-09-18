@@ -33,13 +33,15 @@ class SCNExporter(bpy.types.Operator, ExportHelper):
             for o in objects:
                 if 'tree' in o.scn_properties.type_:
                     eu07_tools.scn.dump((create_tree_include(o),), outfile)
-                if 'node:sound' in o.scn_properties.type_:
+                elif 'node:memcell' in o.scn_properties.type_:
+                    eu07_tools.scn.dump((scn.memcell.create_element_from_memcell(o),), outfile)
+                elif 'node:sound' in o.scn_properties.type_:
                     eu07_tools.scn.dump((scn.sound.create_element_from_sound(o),), outfile)
-                if 'camera' in o.scn_properties.type_:
+                elif 'camera' in o.scn_properties.type_:
                     eu07_tools.scn.dump((scn.camera.create_element_from_camera(o),), outfile)
-                if 'node:triangles' in o.scn_properties.type_:
+                elif 'node:triangles' in o.scn_properties.type_:
                     eu07_tools.scn.dump(create_node_triangles_from_mesh(o.data.copy()), outfile)
-                if 'node:track' in o.scn_properties.type_:
+                elif 'node:track' in o.scn_properties.type_:
                     is_junction_track = (o.parent is not None)
                     if not is_junction_track:
                         tracks.append(create_node_track(o))

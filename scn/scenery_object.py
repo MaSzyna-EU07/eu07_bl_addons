@@ -39,6 +39,7 @@ class SCNObjectProperties(bpy.types.PropertyGroup):
             ("node:track:river", "River", ""),
             ("node:track:tributary", "River Tributary", ""),
             ("node:sound", "Sound Source", ""),
+            ("node:memcell", "Memory Cell", ""),
             ("node:triangles", "Terrain", ""),
             ("node:lines", "Lines", ""),
             ("origin", "Origin", ""),
@@ -261,6 +262,26 @@ class SCNObjectProperties(bpy.types.PropertyGroup):
         subtype='FILE_PATH'
     )
 
+    memcell_value_text: StringProperty(
+        name="Text Value",
+        default=""
+    )
+
+    memcell_value_first: StringProperty(
+        name="1st numeric value",
+        default="0"
+    )
+
+    memcell_value_second: StringProperty(
+        name="2nd numeric value",
+        default="0"
+    )
+
+    memcell_track_name: StringProperty(
+        name="Track name",
+        default="none"
+    )
+
 class SCNObjectPropertiesPanel(bpy.types.Panel):
     bl_idname = "OBJECT_PT_scn"
     bl_label = "SCN Object"
@@ -291,8 +312,21 @@ class SCNObjectPropertiesPanel(bpy.types.Panel):
             mindistance_r.prop(self.obj.scn_properties, "node_min_distance")
 
         if "node:sound" in self.obj.scn_properties.type_:
-            use_index_r = self.layout.row()
-            use_index_r.prop(self.obj.scn_properties, "sound_path")
+            sound_path_r = self.layout.row()
+            sound_path_r.prop(self.obj.scn_properties, "sound_path")
+
+        if "node:memcell" in self.obj.scn_properties.type_:
+            value_text_r = self.layout.row()
+            value_text_r.prop(self.obj.scn_properties, "memcell_value_text")
+
+            value_1st_r = self.layout.row()
+            value_1st_r.prop(self.obj.scn_properties, "memcell_value_first")
+
+            value_2nd_r = self.layout.row()
+            value_2nd_r.prop(self.obj.scn_properties, "memcell_value_second")
+
+            track_name_r = self.layout.row()
+            track_name_r.prop(self.obj.scn_properties, "track_name")
 
         if "camera" in self.obj.scn_properties.type_:
             use_index_r = self.layout.row()

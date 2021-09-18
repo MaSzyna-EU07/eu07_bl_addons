@@ -27,6 +27,9 @@ class SceneryBuilder:
             if element.type == "camera":
                 scn.camera.create_camera_from_element(element)
 
+            if element.type == "node:memcell":
+                scn.memcell.create_memcell_from_element(element)
+
             if element.type == "include":
                 if element.path.endswith(".scm"):
                     sb = SceneryBuilder(self._config)
