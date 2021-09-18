@@ -1,6 +1,7 @@
 import math
 from pathlib import Path
 
+import bpy
 import bmesh
 import eu07_tools
 
@@ -10,7 +11,11 @@ from .. import trajectory_tools
 
 
 
-def create_node_triangles_from_mesh(mesh):
+def create_node_triangles_from_mesh(terrain_object):
+    depsgraph = bpy.context.evaluated_depsgraph_get()
+    obj_eval = terrain_object.evaluated_get(depsgraph)
+
+    mesh = bpy.data.meshes.new_from_object(obj_eval)
     bm = bmesh.new()
     bm.from_mesh(mesh)
     bmesh.ops.triangulate(bm, faces=bm.faces)
@@ -18,28 +23,28 @@ def create_node_triangles_from_mesh(mesh):
     bm.free()
 
     uv_layer = mesh.uv_layers.active
+    if uv_layer:
+        uv_data = uv_layer.data[:]
 
     mesh.validate_material_indices()
+    mesh.calc_normals_split()
     for polygon in mesh.polygons:
         node = eu07_tools.scn.create_element("node:triangles")
 
         material = mesh.materials[polygon.material_index]
         node.map = get_path_from_material(material)
 
-        for local_vert_idx, global_vert_idx in enumerate(polygon.vertices):
-            vertex = mesh.vertices[global_vert_idx]
+        for loop_index in polygon.loop_indices:
+            loop = mesh.loops[loop_index]
 
-            xyz = eu07_tools.utils.swizzle_coords(vertex.co)
-            ijk = eu07_tools.utils.swizzle_coords(vertex.normal)
-
-            if uv_layer:
-                mesh_loop_idx = polygon.loop_indices[local_vert_idx]
-                uv = uv_layer.data[mesh_loop_idx].uv
-            else:
-                uv = [0, 0]
+            xyz = eu07_tools.utils.swizzle_coords(terrain_object.matrix_world @ mesh.vertices[loop.vertex_index].co)
+            ijk = eu07_tools.utils.swizzle_coords(loop.normal)
+            uv = uv_data[loop_index].uv if uv_layer else [0, 0]
 
             node.vertices.new((*xyz, *ijk, *uv))
         yield node
+
+    bpy.data.meshes.remove(mesh)
 
 
 def create_tree_include(tree_object):

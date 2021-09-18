@@ -40,7 +40,7 @@ class SCNExporter(bpy.types.Operator, ExportHelper):
                 elif 'camera' in o.scn_properties.type_:
                     eu07_tools.scn.dump((scn.camera.create_element_from_camera(o),), outfile)
                 elif 'node:triangles' in o.scn_properties.type_:
-                    eu07_tools.scn.dump(create_node_triangles_from_mesh(o.data.copy()), outfile)
+                    eu07_tools.scn.dump(create_node_triangles_from_mesh(o), outfile)
                 elif 'node:track' in o.scn_properties.type_:
                     is_junction_track = (o.parent is not None)
                     if not is_junction_track:
