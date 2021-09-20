@@ -2,6 +2,8 @@ import bpy
 import bmesh
 import eu07_tools
 
+from bpy_extras import view3d_utils
+
 
 inc_names = [
     "ljtree.inc",
@@ -17,6 +19,13 @@ def instantiate_tree():
     tree_instance = bpy.data.objects.new("Tree", get_tree_template().data)
     tree_instance.material_slots[0].link = 'OBJECT'
     tree_instance.scn_properties.type_ = "tree"
+
+    constraint = tree_instance.constraints.new('LIMIT_ROTATION')
+    constraint.use_transform_limit = True
+    constraint.use_limit_y = True
+    constraint.use_limit_x = True
+    constraint.min_y, constraint.max_y = 0, 0
+    constraint.min_x, constraint.max_x = 0, 0
 
     return tree_instance
 
@@ -99,3 +108,57 @@ def get_tree_size(tree_instance):
 
 def set_tree_material(tree_instance, material):
     tree_instance.material_slots[0].material = material
+
+
+class AddTreeOperator(bpy.types.Operator):
+    bl_idname = "eu07.add_tree"
+    bl_label = "Add Tree"
+
+    def execute(self, context):
+        self.tree_instance.location = self.snapped_loc
+        return {'FINISHED'}
+
+    def modal(self, context, event):
+        if event.type == 'MOUSEMOVE':  # Apply
+            region = context.region
+            region_data = context.space_data.region_3d
+            self.mouse_pos = event.mouse_region_x, event.mouse_region_y
+
+            origin = view3d_utils.region_2d_to_origin_3d(region, region_data, self.mouse_pos)
+            direction = view3d_utils.region_2d_to_vector_3d(region, region_data, self.mouse_pos)
+
+            depsgraph = bpy.context.evaluated_depsgraph_get()
+            hit, location, normal, index, obj, matrix =\
+                context.scene.ray_cast(depsgraph, origin, direction)
+
+            print(location)
+
+            if hit and obj.scn_properties.type_ != "tree":
+                print("hitted", obj, "at", location)
+
+                self.snapped_loc = location
+
+            self.execute(context)
+        elif event.type == 'LEFTMOUSE':  # Confirm
+            return {'FINISHED'}
+        elif event.type in {'RIGHTMOUSE', 'ESC'}:  # Cancel
+            bpy.context.scene.collection.objects.unlink(self.tree_instance)
+            bpy.data.objects.remove(self.tree_instance)
+            return {'CANCELLED'}
+
+        return {'PASS_THROUGH'}
+
+    def invoke(self, context, event):
+        self.snapped_loc = context.scene.cursor.location
+        self.tree_instance = instantiate_tree()
+        context.scene.collection.objects.link(self.tree_instance)
+        self.mouse_pos = event.mouse_region_x, event.mouse_region_y
+        self.execute(context)
+
+        context.window_manager.modal_handler_add(self)
+        return {'RUNNING_MODAL'}
+
+
+
+
+

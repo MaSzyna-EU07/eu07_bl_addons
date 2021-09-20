@@ -4,6 +4,8 @@ from bpy.props import StringProperty, BoolProperty
 from bpy_extras.io_utils import ExportHelper
 import eu07_tools
 
+from datetime import datetime
+
 from .output_builders import create_node_triangles_from_mesh, create_node_track, create_tree_include
 import scn
 
@@ -28,6 +30,9 @@ class SCNExporter(bpy.types.Operator, ExportHelper):
                 objects = [o for o in bpy.data.objects if o.select_get()]
             else:
                 objects = bpy.data.objects
+
+            export_date = datetime.now().strftime("%d/%m/%Y %H:%M")
+            outfile.write(f"// Exported from BlendSCN Editor {export_date}\n\n")
 
             tracks = []
             for o in objects:
