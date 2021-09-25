@@ -1,7 +1,8 @@
 from pathlib import Path
 
 import bpy
-from bpy.props import StringProperty
+from bpy.types import OperatorFileListElement
+from bpy.props import StringProperty, CollectionProperty
 from bpy_extras.io_utils import ImportHelper
 import eu07_tools
 
@@ -18,9 +19,22 @@ class EU07MaterialImporter(bpy.types.Operator, ImportHelper):
         options={'HIDDEN'}
     )
 
+    files: CollectionProperty(
+        name="File Path",
+        type=OperatorFileListElement,
+    )
+    directory: StringProperty(
+        subtype='DIR_PATH',
+    )
+
+    filename_ext = ""
+
     def execute(self, context):
-        helper_mat_importer = HelperMATImporter()
-        helper_mat_importer.import_material_from_abspath(self.filepath)
+        directory = self.directory
+        for file_elem in self.files:
+            filepath = str(Path(directory, file_elem.name))
+            helper_mat_importer = HelperMATImporter()
+            helper_mat_importer.import_material_from_abspath(filepath)
 
         return {'FINISHED'}
 
