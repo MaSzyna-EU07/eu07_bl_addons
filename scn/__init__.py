@@ -6,6 +6,7 @@ from .output import SCNExporter
 from .basemaps import BasemapPanel, LoadBasemapOperator, BasemapProperties
 from .scenery_object import SCNObjectProperties, SCNObjectPropertiesPanel, CopyMaterialsToSelectedOperator
 from .tree_utils import AddTreeOperator
+from .scenery_tools_panel import SCNToolsPanel
 
 from . import sound
 from . import camera
@@ -17,15 +18,16 @@ classes = (
     SCNImporter,
     SCNExporter,
 
-    BasemapProperties,
-    BasemapPanel,
-    LoadBasemapOperator,
+    #BasemapProperties,
+    #BasemapPanel,
+    #LoadBasemapOperator,
 
+    SCNToolsPanel,
     SCNObjectProperties,
     SCNObjectPropertiesPanel,
     CopyMaterialsToSelectedOperator,
 
-    AddTreeOperator
+    AddTreeOperator,
 )
 
 

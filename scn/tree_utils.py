@@ -1,8 +1,11 @@
+import re
+
 import bpy
 import bmesh
 import eu07_tools
-
 from bpy_extras import view3d_utils
+
+import preferences
 
 
 inc_names = [
@@ -109,6 +112,12 @@ def get_tree_size(tree_instance):
 def set_tree_material(tree_instance, material):
     tree_instance.material_slots[0].material = material
 
+def filter_trees_materials(regex):
+    print(regex)
+    for mat in bpy.data.materials:
+        if re.search(regex, mat.name):
+            yield mat
+
 
 class AddTreeOperator(bpy.types.Operator):
     bl_idname = "eu07.add_tree"
@@ -116,6 +125,8 @@ class AddTreeOperator(bpy.types.Operator):
 
     def execute(self, context):
         self.tree_instance.location = self.snapped_loc
+        bpy.ops.object.select_all(action='DESELECT')
+        self.tree_instance.select_set(True)
         return {'FINISHED'}
 
     def modal(self, context, event):
@@ -131,11 +142,8 @@ class AddTreeOperator(bpy.types.Operator):
             hit, location, normal, index, obj, matrix =\
                 context.scene.ray_cast(depsgraph, origin, direction)
 
-            print(location)
-
+            # TODO: When ray hits the tree, the instance should snap to terrain behind that tree;
             if hit and obj.scn_properties.type_ != "tree":
-                print("hitted", obj, "at", location)
-
                 self.snapped_loc = location
 
             self.execute(context)
@@ -145,12 +153,25 @@ class AddTreeOperator(bpy.types.Operator):
             bpy.context.scene.collection.objects.unlink(self.tree_instance)
             bpy.data.objects.remove(self.tree_instance)
             return {'CANCELLED'}
+        elif event.type == 'WHEELUPMOUSE':
+            self.material_select_index += 1
+            if self.material_select_index > len(self.materials) - 1:
+                self.material_select_index = 0
+        elif event.type == 'WHEELDOWNMOUSE':
+            self.material_select_index -= 1
+            if self.material_select_index < 0:
+                self.material_select_index = len(self.materials) - 1
 
-        return {'PASS_THROUGH'}
+        self.tree_instance.material_slots[0].material = self.materials[self.material_select_index]
+
+        return {'RUNNING_MODAL'}
 
     def invoke(self, context, event):
         self.snapped_loc = context.scene.cursor.location
+        self.materials = list(filter_trees_materials(r'{}'.format(preferences.get_preferences().trees_material_regex)))
         self.tree_instance = instantiate_tree()
+        self.material_select_index = 0
+        self.tree_instance.scale = (3, 3, 7)
         context.scene.collection.objects.link(self.tree_instance)
         self.mouse_pos = event.mouse_region_x, event.mouse_region_y
         self.execute(context)

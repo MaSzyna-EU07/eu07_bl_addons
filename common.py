@@ -3,6 +3,7 @@ from pathlib import Path
 import bpy
 import eu07_tools
 from eu07_tools.utils import AssetSearcher
+import preferences
 
 
 class EU07UtilsPanel(bpy.types.Panel):
@@ -24,7 +25,7 @@ def get_root(abspath=""):
     try:
         root = eu07_tools.utils.find_asset_root(abspath)
     except ValueError:
-        root = bpy.context.preferences.addons['eu07_bl_addons'].preferences.root
+        root = preferences.get_preferences().root
         if not root:
             raise ValueError(f"Can't find root path for {abspath}")
 

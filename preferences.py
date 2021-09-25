@@ -1,6 +1,9 @@
 import bpy
 from bpy.props import StringProperty
 
+def get_preferences():
+    return bpy.context.preferences.addons['eu07_bl_addons'].preferences
+
 
 class EU07AddonPreferences(bpy.types.AddonPreferences):
     bl_idname = __package__
@@ -10,8 +13,15 @@ class EU07AddonPreferences(bpy.types.AddonPreferences):
         subtype='FILE_PATH'
     )
 
+    trees_material_regex: StringProperty(
+        name="Trees material name filter",
+        default="tree|drzewo|plant"
+    )
+
     def draw(self, context):
         self.layout.prop(self, "root")
+        self.layout.prop(self, "trees_material_regex")
+
 
 
 def register():
