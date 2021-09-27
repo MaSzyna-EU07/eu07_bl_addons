@@ -66,7 +66,7 @@ class SceneryBuilder:
                         scn.tree_utils.set_tree_material(tree_instance, material)
 
                         Sectorizer.auto_put(tree_instance)
-                        obj = tree_instance
+                        tree_instance.scn_properties.scm_file_id = self._scm_id
                         break
 
             if element.type == "node:triangles":
@@ -103,7 +103,7 @@ class SceneryBuilder:
                     trajectory_side.parent = trajectory_straight
                     trajectory_side.location = (0, 0, 0)
 
-                    obj = trajectory
+                    obj = trajectory_straight
 
                 obj.scn_properties.scm_file_id = self._scm_id
 
