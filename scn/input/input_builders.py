@@ -1,4 +1,5 @@
 import math
+import pathlib
 
 import bpy
 import mathutils
@@ -33,6 +34,10 @@ class SceneryBuilder:
                 if element.path.endswith(".scm"):
                     scm_id = scn.scm_files.add_scm_file()
                     bpy.context.scene.scm_file_index = scm_id
+
+                    current_scm = scn.scm_files.get_current_scm()
+                    current_scm.file_path = element.path
+                    current_scm.name = pathlib.Path(element.path).stem
 
                     sb = SceneryBuilder(self._config, scm_id)
 
