@@ -2,7 +2,7 @@ from pathlib import Path
 
 import bpy
 from bpy.types import OperatorFileListElement
-from bpy.props import StringProperty, CollectionProperty
+from bpy.props import StringProperty, CollectionProperty, BoolProperty
 from bpy_extras.io_utils import ImportHelper
 import eu07_tools
 
@@ -27,6 +27,11 @@ class EU07MaterialImporter(bpy.types.Operator, ImportHelper):
         subtype='DIR_PATH',
     )
 
+    use_fake_user: BoolProperty(
+        name="Use fake user",
+        default=False
+    )
+
     filename_ext = ""
 
     def execute(self, context):
@@ -34,7 +39,8 @@ class EU07MaterialImporter(bpy.types.Operator, ImportHelper):
         for file_elem in self.files:
             filepath = str(Path(directory, file_elem.name))
             helper_mat_importer = HelperMATImporter()
-            helper_mat_importer.import_material_from_abspath(filepath)
+            material = helper_mat_importer.import_material_from_abspath(filepath)
+            material.use_fake_user = self.use_fake_user
 
         return {'FINISHED'}
 

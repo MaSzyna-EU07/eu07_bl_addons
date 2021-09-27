@@ -49,6 +49,12 @@ class SCNObjectProperties(bpy.types.PropertyGroup):
         ]
     )
 
+    scm_file_id: IntProperty(
+        name="SCM File ID",
+        min=-1,
+        default=-1,
+    )
+
     node_max_distance: FloatProperty(
         name='Max Distance',
         min=-1,

@@ -1,5 +1,5 @@
 import bpy
-from bpy.props import PointerProperty
+from bpy.props import PointerProperty, CollectionProperty, IntProperty
 
 from .input import SCNImporter
 from .output import SCNExporter
@@ -7,6 +7,7 @@ from .basemaps import BasemapPanel, LoadBasemapOperator, BasemapProperties
 from .scenery_object import SCNObjectProperties, SCNObjectPropertiesPanel, CopyMaterialsToSelectedOperator
 from .tree_utils import AddTreeOperator
 from .scenery_tools_panel import SCNToolsPanel
+from .scm_files import SCMFile, SCN_UL_SCMFiles, SCN_PT_SCMFiles, LIST_OT_AddSCMFile, LIST_OT_DeleteSCMFile, LIST_OT_AssignToSCMFile, LIST_OT_SelectAssignedToSCM
 
 from . import sound
 from . import camera
@@ -28,6 +29,14 @@ classes = (
     CopyMaterialsToSelectedOperator,
 
     AddTreeOperator,
+
+    SCN_UL_SCMFiles,
+    SCN_PT_SCMFiles,
+    SCMFile,
+    LIST_OT_AddSCMFile,
+    LIST_OT_DeleteSCMFile,
+    LIST_OT_AssignToSCMFile,
+    LIST_OT_SelectAssignedToSCM
 )
 
 
@@ -44,6 +53,9 @@ def register():
         bpy.utils.register_class(c)
 
     bpy.types.Object.scn_properties = PointerProperty(type=SCNObjectProperties)
+    bpy.types.Scene.scm_files = CollectionProperty(type=SCMFile)
+    bpy.types.Scene.scm_file_index = IntProperty(min=0)
+    bpy.types.Scene.scm_file_index_counter = IntProperty(min=0)
 
     bpy.types.TOPBAR_MT_file_import.append(menu_func_import)
     bpy.types.TOPBAR_MT_file_export.append(menu_func_export)

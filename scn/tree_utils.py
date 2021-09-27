@@ -139,17 +139,19 @@ class AddTreeOperator(bpy.types.Operator):
             direction = view3d_utils.region_2d_to_vector_3d(region, region_data, self.mouse_pos)
 
             depsgraph = bpy.context.evaluated_depsgraph_get()
-            hit, location, normal, index, obj, matrix =\
-                context.scene.ray_cast(depsgraph, origin, direction)
 
-            # TODO: When ray hits the tree, the instance should snap to terrain behind that tree;
-            if hit and obj.scn_properties.type_ != "tree":
-                self.snapped_loc = location
+            obj = self.tree_instance
+            while True:
+                hit, origin, normal, index, obj, matrix = \
+                    context.scene.ray_cast(depsgraph, origin + direction * 0.0001, direction)
+                if hit and obj is not self.tree_instance:
+                    self.snapped_loc = origin
+                    break
 
             self.execute(context)
-        elif event.type == 'LEFTMOUSE':  # Confirm
+        elif event.type == 'LEFTMOUSE':
             return {'FINISHED'}
-        elif event.type in {'RIGHTMOUSE', 'ESC'}:  # Cancel
+        elif event.type in {'RIGHTMOUSE', 'ESC'}:
             bpy.context.scene.collection.objects.unlink(self.tree_instance)
             bpy.data.objects.remove(self.tree_instance)
             return {'CANCELLED'}
