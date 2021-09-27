@@ -1,6 +1,6 @@
 import math
 import bpy
-
+from bpy_extras import view3d_utils
 
 class Sectorizer:
     sector_size = 2000
@@ -40,6 +40,18 @@ class Sectorizer:
         return sector
 
     @staticmethod
+    def iter_visible_sectors():
+        for collection in bpy.context.scene.collection.children:
+            if collection.name.startswith("sector"):
+                yield collection
+
+    @staticmethod
+    def iter_all_sectors():
+        for collection in bpy.data.collections:
+            if collection.name.endswith("sector"):
+                yield collection
+
+    @staticmethod
     def get_sector_by_location(location):
         if Sectorizer.sector_size == 0:
             return bpy.context.scene.collection
@@ -50,36 +62,29 @@ class Sectorizer:
     def insert_into_sector(obj, sector):
         sector.objects.link(obj)
 
-    def show_sectors_around(self, center, radius=2000):
-        center_sector = self.specify_id(center)
-
-        # hardcoded at the moment
-        offsets = [
-            [0, 1],
-            [1, 1],
-            [1, 0],
-            [1, -1],
-            [0, -1],
-            [-1, -1],
-            [-1, 0],
-            [-1, 1]
-        ]
-
-        sectors_to_show = []
-
-        for offset in offsets:
-            sector_id = Sectorizer._format_id(offset[0], offset[1])
-            sector = Sectorizer.get_sector_by_id(sector_id)
-            if sector:
-                sectors_to_show.append(sector)
-
-        Sectorizer.link_sectors(sectors_to_show)
-
     @staticmethod
-    def link_sectors(self, sectors):
+    def link_sectors(sectors):
         for sector in sectors:
             bpy.context.scene.collection.children.link(sector)
 
     @staticmethod
-    def _format_id(self, x, y):
+    def unlink_sectors(sectors):
+        for sector in sectors:
+            bpy.context.scene.collection.children.unlink(sector)
+
+    @staticmethod
+    def _format_id(x, y):
         return f"sector x{x} y{y}"
+
+
+class SCN_OT_LoadSectors(bpy.types.Operator):
+    bl_idname = "scn.load_sectors"
+    bl_label = "Load sectors around camera"
+
+    def execute(self, context):
+        # BUG: Rail profiles don't want to link :/
+        camera_location = view3d_utils.region_2d_to_origin_3d(context.region, context.space_data.region_3d, (0.5, 0.5))
+        Sectorizer.unlink_sectors(Sectorizer.iter_visible_sectors())
+        Sectorizer.link_sectors([Sectorizer.get_sector_by_location(camera_location)])
+
+        return {'FINISHED'}

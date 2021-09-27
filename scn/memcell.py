@@ -17,6 +17,8 @@ def create_memcell_from_element(element):
 
     Sectorizer.auto_put(memcell_object)
 
+    return memcell_object
+
 def create_element_from_memcell(memcell_object):
     element = eu07_tools.scn.create_element("node:memcell", memcell_object.name)
     element.location = eu07_tools.utils.swizzle_coords(memcell_object.location)

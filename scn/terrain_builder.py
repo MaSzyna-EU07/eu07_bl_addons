@@ -52,3 +52,5 @@ class TerrainBuilder:
             material = HelperMATImporter.import_material_from_relpath(map_)
 
             self._terrain_object.data.materials.append(material)
+
+        return self._terrain_object

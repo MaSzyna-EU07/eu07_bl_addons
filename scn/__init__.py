@@ -8,6 +8,7 @@ from .scenery_object import SCNObjectProperties, SCNObjectPropertiesPanel, CopyM
 from .tree_utils import AddTreeOperator
 from .scenery_tools_panel import SCNToolsPanel
 from .scm_files import SCMFile, SCN_UL_SCMFiles, SCN_PT_SCMFiles, LIST_OT_AddSCMFile, LIST_OT_DeleteSCMFile, LIST_OT_AssignToSCMFile, LIST_OT_SelectAssignedToSCM
+from .sectorizer import SCN_OT_LoadSectors
 
 from . import sound
 from . import camera
@@ -36,7 +37,8 @@ classes = (
     LIST_OT_AddSCMFile,
     LIST_OT_DeleteSCMFile,
     LIST_OT_AssignToSCMFile,
-    LIST_OT_SelectAssignedToSCM
+    LIST_OT_SelectAssignedToSCM,
+    SCN_OT_LoadSectors
 )
 
 

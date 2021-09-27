@@ -15,7 +15,7 @@ class SCMFile(bpy.types.PropertyGroup):
 
     file_path: bpy.props.StringProperty(
         name="Path",
-        subtype='FILE_PATH',
+        description="Path to .scm file, relative to scenery directory",
     )
 
     file_index: bpy.props.IntProperty(
@@ -41,12 +41,18 @@ class LIST_OT_AddSCMFile(bpy.types.Operator):
     bl_label = "Add new SCM layer to the list"
 
     def execute(self, context):
-        added = context.scene.scm_files.add()
-        added.file_index = context.scene.scm_file_index_counter
-
-        context.scene.scm_file_index_counter += 1
+        add_scm_file()
 
         return {'FINISHED'}
+
+
+def add_scm_file():
+    added = bpy.context.scene.scm_files.add()
+    added.file_index = bpy.context.scene.scm_file_index_counter
+
+    bpy.context.scene.scm_file_index_counter += 1
+
+    return added.file_index
 
 
 class LIST_OT_DeleteSCMFile(bpy.types.Operator):

@@ -36,6 +36,8 @@ def create_camera_from_element(element):
 
     Sectorizer.auto_put(camera_object)
 
+    return camera_object
+
 
 def create_element_from_camera(camera_object):
     element = eu07_tools.scn.create_element("camera")

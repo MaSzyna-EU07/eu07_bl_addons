@@ -19,6 +19,8 @@ def create_sound_from_element(element):
 
     Sectorizer.auto_put(sound_object)
 
+    return sound_object
+
 
 def create_element_from_sound(sound_object):
     element = eu07_tools.scn.create_element("node:sound", sound_object.name)

@@ -13,26 +13,28 @@ from mat import HelperMATImporter
 import scn
 
 class SceneryBuilder:
-    def __init__(self, config):
+    def __init__(self, config, scm_id=-1):
         self._config = config
         self._trajectory_builder = TrajectoryBuilder()
         self._terrain_builder = TerrainBuilder(config)
         self._decoration_builder = DecorationsBuilder(config)
-
-
+        self._scm_id = scm_id
 
     def run(self, data):
         for element in data:
-
+            obj = None
             if element.type == "camera":
-                scn.camera.create_camera_from_element(element)
+                obj = scn.camera.create_camera_from_element(element)
 
             if element.type == "node:memcell":
-                scn.memcell.create_memcell_from_element(element)
+                obj = scn.memcell.create_memcell_from_element(element)
 
             if element.type == "include":
                 if element.path.endswith(".scm"):
-                    sb = SceneryBuilder(self._config)
+                    scm_id = scn.scm_files.add_scm_file()
+                    bpy.context.scene.scm_file_index = scm_id
+
+                    sb = SceneryBuilder(self._config, scm_id)
 
                     assearch = self._config["asset_searcher"]
 
@@ -41,6 +43,8 @@ class SceneryBuilder:
                     with open(abspath, encoding='latin-1') as infile:
                         scn_input = eu07_tools.scn.load(infile)
                         sb.run(scn_input)
+
+                    bpy.context.scene.scm_file_index = -1
 
                 for tree_inc_name in scn.tree_utils.inc_names:
                     if tree_inc_name in element.path.lower():
@@ -57,15 +61,15 @@ class SceneryBuilder:
                         scn.tree_utils.set_tree_material(tree_instance, material)
 
                         Sectorizer.auto_put(tree_instance)
+                        obj = tree_instance
                         break
 
             if element.type == "node:triangles":
                 self._terrain_builder.add_triangle(element)
 
             if element.type == "node:sound":
-                scn.sound.create_sound_from_element(element)
+                obj = scn.sound.create_sound_from_element(element)
 
-            # temporary disabled
             if element.type == "node:track":
                 if element.subtype in "normal road river":
                     trajectory = self._trajectory_builder.build_trajectory(element)
@@ -80,6 +84,8 @@ class SceneryBuilder:
                     trajectory_tools.set_material(trajectory, HelperMATImporter.import_material_from_relpath(element.map1), 0)
                     trajectory_tools.set_material(trajectory, HelperMATImporter.import_material_from_relpath(element.map2), 1)
 
+                    obj = trajectory
+
                 elif element.subtype in "switch":
                     trajectory_straight = self._trajectory_builder.build_trajectory(element)
                     self._trajectory_builder.create_spline(trajectory_straight, element.p1, element.cv1, element.p2, element.cv2)
@@ -92,24 +98,13 @@ class SceneryBuilder:
                     trajectory_side.parent = trajectory_straight
                     trajectory_side.location = (0, 0, 0)
 
-            # elif element.type == "include" and element.path.endswith(".inc"):
-            #     inc = bpy.data.objects.new("include", None)
-            #     mesh = bpy.data.meshes.new("include")
-            #
-            #     asset_searcher = AssetSearcher(get_root())
-            #     inc_path = asset_searcher.includes.find(inc.path)
-            #
-            #     with open(inc_path, encoding='latin-1') as incfile:
-            #         for entry in eu07_tools.scn.load(incfile, element.parameters)
-            #
-            #         inc.location = eu07_tools.utils.switch_coordinate_system([float(p) for p in element.parameters[1:4]])
-            #         sector = sector_utils.get_sector_by_location(inc.location)
-            #
-            #     sector_utils.insert_into_sector(inc, sector)
+                    obj = trajectory
+
+                obj.scn_properties.scm_file_id = self._scm_id
 
         self.init_switches()
-        self._terrain_builder.finish()
-
+        obj = self._terrain_builder.finish()
+        obj.scn_properties.scm_file_id = self._scm_id
 
     def init_switches(self):
         for o in bpy.data.objects:
