@@ -1,3 +1,4 @@
+import math
 import re
 
 import bpy
@@ -6,7 +7,7 @@ import eu07_tools
 from bpy_extras import view3d_utils
 
 import preferences
-
+from common import get_path_from_material
 
 inc_names = [
     "ljtree.inc",
@@ -113,10 +114,22 @@ def set_tree_material(tree_instance, material):
     tree_instance.material_slots[0].material = material
 
 def filter_trees_materials(regex):
-    print(regex)
     for mat in bpy.data.materials:
         if re.search(regex, mat.name):
             yield mat
+
+
+def create_tree_include(tree_object):
+    tree_inc = eu07_tools.scn.create_element("include")
+    tree_inc.path = "tree.inc"
+    tree_inc.parameters.append(get_path_from_material(tree_object.active_material))
+    tree_inc.parameters.extend(eu07_tools.utils.swizzle_coords(tree_object.location))
+    tree_inc.parameters.append(math.degrees(tree_object.rotation_euler[2]))
+    tree_inc.parameters.extend(get_tree_size(tree_object))
+
+    tree_inc.parameters = [str(p) for p in tree_inc.parameters]
+
+    return tree_inc
 
 
 class AddTreeOperator(bpy.types.Operator):

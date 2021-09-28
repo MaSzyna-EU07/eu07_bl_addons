@@ -7,7 +7,7 @@ import eu07_tools
 
 from scn.decorations import DecorationsBuilder
 from scn.trajectory_tools.trajectory_builder import TrajectoryBuilder
-from scn.terrain_builder import TerrainBuilder
+from scn.terrain import TerrainBuilder
 from scn import trajectory_tools
 from scn.sectorizer import Sectorizer
 from mat import HelperMATImporter

@@ -1,5 +1,6 @@
 import bpy
 
+MAIN_FILE_INDEX = -1
 
 def get_current_scm():
     if bpy.context.scene.scm_files:
@@ -64,12 +65,17 @@ class LIST_OT_DeleteSCMFile(bpy.types.Operator):
         return context.scene.scm_files
 
     def execute(self, context):
+        deletable_scm = get_current_scm()
 
         scm_files = context.scene.scm_files
         scm_file_index = context.scene.scm_file_index
 
         scm_files.remove(scm_file_index)
         context.scene.scm_file_index = min(max(0, scm_file_index - 1), len(scm_files) - 1)
+
+        for obj in bpy.data.objects:
+            if obj.scn_properties.scm_file_id == deletable_scm.file_index:
+                obj.scn_properties.scm_file_id = MAIN_FILE_INDEX
 
         if not scm_files:
             context.scene.scm_file_index_counter = 0

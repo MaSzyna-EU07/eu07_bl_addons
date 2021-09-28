@@ -39,7 +39,7 @@ def create_camera_from_element(element):
     return camera_object
 
 
-def create_element_from_camera(camera_object):
+def create_camera_from_object(camera_object):
     element = eu07_tools.scn.create_element("camera")
 
     element.location = eu07_tools.utils.swizzle_coords(camera_object.location)

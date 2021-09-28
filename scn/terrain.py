@@ -2,6 +2,7 @@ import eu07_tools
 import bpy
 import bmesh
 
+from common import get_path_from_material
 from mat import HelperMATImporter
 
 class TerrainBuilder:
@@ -54,3 +55,39 @@ class TerrainBuilder:
             self._terrain_object.data.materials.append(material)
 
         return self._terrain_object
+
+
+def create_node_triangles_from_mesh(terrain_object):
+    depsgraph = bpy.context.evaluated_depsgraph_get()
+    obj_eval = terrain_object.evaluated_get(depsgraph)
+
+    mesh = bpy.data.meshes.new_from_object(obj_eval)
+    bm = bmesh.new()
+    bm.from_mesh(mesh)
+    bmesh.ops.triangulate(bm, faces=bm.faces)
+    bm.to_mesh(mesh)
+    bm.free()
+
+    uv_layer = mesh.uv_layers.active
+    if uv_layer:
+        uv_data = uv_layer.data[:]
+
+    mesh.validate_material_indices()
+    mesh.calc_normals_split()
+    for polygon in mesh.polygons:
+        node = eu07_tools.scn.create_element("node:triangles")
+
+        material = mesh.materials[polygon.material_index]
+        node.map = get_path_from_material(material)
+
+        for loop_index in polygon.loop_indices:
+            loop = mesh.loops[loop_index]
+
+            xyz = eu07_tools.utils.swizzle_coords(terrain_object.matrix_world @ mesh.vertices[loop.vertex_index].co)
+            ijk = eu07_tools.utils.swizzle_coords(loop.normal)
+            uv = uv_data[loop_index].uv if uv_layer else [0, 0]
+
+            node.vertices.new((*xyz, *ijk, *uv))
+        yield node
+
+    bpy.data.meshes.remove(mesh)

@@ -1,13 +1,13 @@
+from datetime import datetime
+import pathlib
+
 import bpy
-import bmesh
 from bpy.props import StringProperty, BoolProperty
 from bpy_extras.io_utils import ExportHelper
 import eu07_tools
 
-from datetime import datetime
-
-from .output_builders import create_node_triangles_from_mesh, create_node_track, create_tree_include
-import scn
+from common import get_root
+from scn import tree_utils, memcell, sound, camera, terrain, trajectory_tools, scm_files
 
 
 class SCNExporter(bpy.types.Operator, ExportHelper):
@@ -25,32 +25,52 @@ class SCNExporter(bpy.types.Operator, ExportHelper):
     )
 
     def execute(self, context):
-        with open(self.filepath, mode="w", encoding="windows-1250", newline="\r\n") as outfile:
-            if self.use_selection:
-                objects = [o for o in bpy.data.objects if o.select_get()]
-            else:
-                objects = bpy.data.objects
+        scenery_dir = pathlib.Path(get_root(), "scenery")
 
+        outfiles = {
+            scm.file_index: self._open_for_writing(scenery_dir / scm.file_path) for scm in context.scene.scm_files
+        }
+        outfiles[scm_files.MAIN_FILE_INDEX] = self._open_for_writing(self.filepath)
+
+        outputs = {}
+        for scm_id, outfile in outfiles.items():
+            outputs[scm_id] = eu07_tools.scn.SCNOutput(outfile)
+
+        for outfile in outfiles:
             export_date = datetime.now().strftime("%d/%m/%Y %H:%M")
             outfile.write(f"// Exported from BlendSCN Editor {export_date}\n\n")
 
-            tracks = []
-            for o in objects:
-                if 'tree' in o.scn_properties.type_:
-                    eu07_tools.scn.dump((create_tree_include(o),), outfile)
-                elif 'node:memcell' in o.scn_properties.type_:
-                    eu07_tools.scn.dump((scn.memcell.create_element_from_memcell(o),), outfile)
-                elif 'node:sound' in o.scn_properties.type_:
-                    eu07_tools.scn.dump((scn.sound.create_element_from_sound(o),), outfile)
-                elif 'camera' in o.scn_properties.type_:
-                    eu07_tools.scn.dump((scn.camera.create_element_from_camera(o),), outfile)
-                elif 'node:triangles' in o.scn_properties.type_:
-                    eu07_tools.scn.dump(create_node_triangles_from_mesh(o), outfile)
-                elif 'node:track' in o.scn_properties.type_:
-                    is_junction_track = (o.parent is not None)
-                    if not is_junction_track:
-                        tracks.append(create_node_track(o))
+        if self.use_selection:
+            objects = [o for o in bpy.data.objects if o.select_get()]
+        else:
+            objects = bpy.data.objects
 
-            eu07_tools.scn.dump(tracks, outfile)
+        for obj in objects:
+            output = outputs.get(obj.scn_properties.scm_file_id)
+            element = self._create_element_from_object(obj)
+
+            output.dump_element(element)
+
+        for outfile in outfiles:
+            outfile.close()
 
         return {'FINISHED'}
+
+    def _open_for_writing(self, filepath):
+        return open(filepath, mode="w", encoding="windows-1250", newline="\r\n")
+
+    def _create_element_from_object(self, obj):
+        if obj.scn_properties.type == "tree":
+            element = tree_utils.create_tree_include(obj)
+        elif obj.scn_properties.type == "node:memcell":
+            element = memcell.create_memcell_from_object(obj)
+        elif obj.scn_properties.type == "node:sound":
+            element = sound.create_sound_from_object(obj)
+        elif obj.scn_properties.type == "camera":
+            element = camera.create_camera_from_object(obj)
+        elif obj.scn_properties.type == "node:triangles":
+            element = terrain.create_node_triangles_from_mesh(obj)
+        elif "node:track" in obj.scn_properties.type:
+            element = trajectory_tools.create_element_from_track(obj)
+
+        return element

@@ -22,7 +22,7 @@ def create_sound_from_element(element):
     return sound_object
 
 
-def create_element_from_sound(sound_object):
+def create_sound_from_object(sound_object):
     element = eu07_tools.scn.create_element("node:sound", sound_object.name)
 
     element.max_distance = sound_object.scn_properties.node_max_distance
