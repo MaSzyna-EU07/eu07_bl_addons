@@ -8,6 +8,13 @@ def get_current_scm():
 
     return None
 
+def get_by_id(id_):
+    for scm in bpy.context.scene.scm_files:
+        if scm.file_index == id_:
+            return scm
+
+    return None
+
 
 class SCMFile(bpy.types.PropertyGroup):
     name: bpy.props.StringProperty(

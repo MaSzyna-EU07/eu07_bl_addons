@@ -27,6 +27,9 @@ def create(name, location=None):
 def create_element_from_track(track_object):
     properties = track_object.scn_properties
 
+    if track_object.parent and "node:track" in track_object.parent.scn_properties.type_:
+        return None
+
     mesh = next(c for c in track_object.children if c.name.startswith("TrajectoryProfileTemplate"))
 
     node = eu07_tools.scn.create_element("node:track")
@@ -70,6 +73,7 @@ def create_element_from_track(track_object):
     node.p2 = curve_data[3]
 
     if (node.is_junction):
+
         junction_track_object = next((c for c in track_object.children if c.type == 'CURVE'))
 
         junction_mesh = next(c for c in track_object.children if c.name.startswith("TrajectoryProfileTemplate"))
