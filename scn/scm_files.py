@@ -144,8 +144,9 @@ class SCN_PT_SCMFiles(bpy.types.Panel):
 
         item = get_current_scm()
 
-        name_row = self.layout.row()
-        name_row.prop(item, "name")
+        if item:
+            name_row = self.layout.row()
+            name_row.prop(item, "name")
 
-        path_row = self.layout.row()
-        path_row.prop(item, "file_path")
+            path_row = self.layout.row()
+            path_row.prop(item, "file_path")

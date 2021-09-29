@@ -7,7 +7,7 @@ from bpy_extras.io_utils import ExportHelper
 import eu07_tools
 
 from common import get_root
-from scn import tree_utils, memcell, sound, camera, terrain, trajectory_tools, scm_files, firstinit
+from scn import tree_utils, memcell, sound, camera, terrain, trajectory_tools, scm_files, firstinit,config
 
 
 class SCNExporter(bpy.types.Operator, ExportHelper):
@@ -49,6 +49,7 @@ class SCNExporter(bpy.types.Operator, ExportHelper):
 
             outputs[scm_id] = eu07_tools.scn.SCNOutput(outfile)
 
+        outputs[scm_files.MAIN_FILE_INDEX].dump_element(config.get_config_as_element())
         outputs[scm_files.MAIN_FILE_INDEX].dump_from_iterable(includes)
         outfiles[scm_files.MAIN_FILE_INDEX].write("\n")
         outfiles[scm_files.MAIN_FILE_INDEX].write(firstinit.get_firstinit())
