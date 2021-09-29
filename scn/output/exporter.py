@@ -7,13 +7,13 @@ from bpy_extras.io_utils import ExportHelper
 import eu07_tools
 
 from common import get_root
-from scn import tree_utils, memcell, sound, camera, terrain, trajectory_tools, scm_files
+from scn import tree_utils, memcell, sound, camera, terrain, trajectory_tools, scm_files, firstinit
 
 
 class SCNExporter(bpy.types.Operator, ExportHelper):
     bl_idname = "export_scene.scn"
     bl_label = "Export SCN"
-    filename_ext = ".scm"
+    filename_ext = ".scn"
 
     filter_glob: StringProperty(
         default="*.scn;*.scm;*.inc",
@@ -50,6 +50,8 @@ class SCNExporter(bpy.types.Operator, ExportHelper):
             outputs[scm_id] = eu07_tools.scn.SCNOutput(outfile)
 
         outputs[scm_files.MAIN_FILE_INDEX].dump_from_iterable(includes)
+        outfiles[scm_files.MAIN_FILE_INDEX].write("\n")
+        outfiles[scm_files.MAIN_FILE_INDEX].write(firstinit.get_firstinit())
 
         if self.use_selection:
             objects = [o for o in bpy.data.objects if o.select_get()]
