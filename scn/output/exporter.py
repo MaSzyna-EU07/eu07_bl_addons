@@ -25,6 +25,7 @@ class SCNExporter(bpy.types.Operator, ExportHelper):
     )
 
     def execute(self, context):
+
         scenery_dir = pathlib.Path(get_root(), "scenery")
 
         includes = []
@@ -57,10 +58,15 @@ class SCNExporter(bpy.types.Operator, ExportHelper):
 
         for obj in objects:
             output = outputs.get(obj.scn_properties.scm_file_id)
-            element = self._create_element_from_object(obj)
 
-            if element:
-                output.dump_element(element)
+            if obj.scn_properties.type_ == "node:triangles":
+                output.dump_from_iterable(terrain.create_node_triangles_from_mesh(obj))
+
+            else:
+                element = self._create_element_from_object(obj)
+
+                if element:
+                    output.dump_element(element)
 
         for outfile in outfiles.values():
             outfile.close()
@@ -80,9 +86,6 @@ class SCNExporter(bpy.types.Operator, ExportHelper):
             element = sound.create_sound_from_object(obj)
         elif obj.scn_properties.type_ == "camera":
             element = camera.create_camera_from_object(obj)
-        # NOTE: this function returns a generator - make it return single node traingles?
-        #elif obj.scn_properties.type_ == "node:triangles":
-            #element = terrain.create_node_triangles_from_mesh(obj)
         elif "node:track" in obj.scn_properties.type_:
             element = trajectory_tools.create_element_from_track(obj)
 
