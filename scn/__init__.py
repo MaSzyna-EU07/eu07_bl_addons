@@ -9,7 +9,7 @@ from .tree_utils import AddTreeOperator
 from .scenery_tools_panel import SCNToolsPanel
 from .scm_files import SCMFile, SCN_UL_SCMFiles, SCN_PT_SCMFiles, LIST_OT_AddSCMFile, LIST_OT_DeleteSCMFile, LIST_OT_AssignToSCMFile, LIST_OT_SelectAssignedToSCM
 from .sectorizer import SCN_OT_LoadSectors
-from .config import SCNConfig, SCN_PT_SceneryConfig, SCN_UL_SceneryConfig, SCN_OT_AddConfigSetting
+from .config import SCNConfig, SCN_PT_SceneryConfig, SCN_UL_SceneryConfig, SCN_OT_AddConfigSetting, SCN_OT_DeleteConfigSetting
 
 from . import sound
 from . import camera
@@ -44,6 +44,7 @@ classes = (
     SCN_PT_SceneryConfig,
     SCN_OT_AddConfigSetting,
     SCN_UL_SceneryConfig,
+    SCN_OT_DeleteConfigSetting,
 
     SCN_OT_LoadSectors,
 )

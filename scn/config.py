@@ -2,7 +2,7 @@ import bpy
 
 import eu07_tools
 
-def get_current_config_setting():
+def get_active_setting():
     if bpy.context.scene.scn_config:
         return bpy.context.scene.scn_config[bpy.context.scene.scn_config_setting_index]
 
@@ -18,6 +18,11 @@ def get_config_as_element():
 
     return element
 
+
+def set_config_from_element(element):
+    pass
+
+
 class SCNConfig(bpy.types.PropertyGroup):
     key: bpy.props.StringProperty(
         name="Key",
@@ -25,11 +30,6 @@ class SCNConfig(bpy.types.PropertyGroup):
 
     value: bpy.props.StringProperty(
         name="Value"
-    )
-
-    index: bpy.props.IntProperty(
-        name="Index",
-        min=0
     )
 
 
@@ -58,8 +58,9 @@ class SCN_PT_SceneryConfig(bpy.types.Panel):
 
         operators_row = self.layout.row()
         operators_row.operator("scn.add_config_setting", text="Add")
+        operators_row.operator("scn.delete_config_setting", text="Remove")
 
-        item = get_current_config_setting()
+        item = get_active_setting()
 
         if item:
             name_row = self.layout.row()
@@ -75,7 +76,24 @@ class SCN_OT_AddConfigSetting(bpy.types.Operator):
 
     def execute(self, context):
         added = bpy.context.scene.scn_config.add()
-        added.file_index = bpy.context.scene.scn_config_setting_index
+        context.scene.scn_config_setting_index = len(context.scene.scn_config) - 1
+
+        return {'FINISHED'}
+
+class SCN_OT_DeleteConfigSetting(bpy.types.Operator):
+    bl_idname = "scn.delete_config_setting"
+    bl_label = "Delete setting from config"
+
+    @classmethod
+    def poll(cls, context):
+        return context.scene.scm_files
+
+    def execute(self, context):
+        config = context.scene.scn_config
+        setting_index = context.scene.scn_config_setting_index
+
+        config.remove(setting_index)
+        context.scene.scn_config_setting_index = min(max(0, setting_index - 1), len(config) - 1)
 
         return {'FINISHED'}
 

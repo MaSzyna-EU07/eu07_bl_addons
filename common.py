@@ -57,3 +57,5 @@ def get_path_from_material(material):
                 return eu07_tools.utils.shorten_asset_path(link_node.image.filepath)
 
     return "none"
+
+
