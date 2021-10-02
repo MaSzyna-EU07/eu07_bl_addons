@@ -69,6 +69,8 @@ class SCN_PT_SceneryConfig(bpy.types.Panel):
             value_row = self.layout.row()
             value_row.prop(item, "value")
 
+        docs = self.layout.operator("wm.url_open", text="Config documentation", icon='INFO')
+        docs.url = "https://wiki.eu07.pl/index.php/Plik_konfiguracyjny_EU07.INI"
 
 class SCN_OT_AddConfigSetting(bpy.types.Operator):
     bl_idname = "scn.add_config_setting"
