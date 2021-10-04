@@ -1,8 +1,8 @@
 bl_info = {
-    "name": "EU07 Train Simulator modeling tools",
-    "description": "Editing tools for EU07 Train Simulator assets",
+    "name": "'MaSzyna' Train Simulator developer tools",
+    "description": "Tools for 'MaSzyna' Train Simulator assets - models, scenes, materials",
     "author": "Balaclava vel krzysiuup",
-    "version": (0, 0, 0),
+    "version": (2021, 10, 4),
     "blender": (2, 80, 0),
     "category": "Import/Export"
 }
@@ -10,20 +10,11 @@ bl_info = {
 import sys, os
 sys.path.append(os.path.dirname(__file__))
 
-from . import t3d
-from . import e3d
-from . import scn
-from . import mat
-from . import preferences
-
-
-
-# def menu_materialslot(self, context):
-#     self.layout.operator(CopyMaterialsToSelectedOperator.bl_idname, text="Copy To Selected")
+from . import common, t3d, e3d, scn, mat
 
 
 def register():
-    preferences.register()
+    common.register()
     t3d.register()
     e3d.register()
     scn.register()
@@ -31,7 +22,7 @@ def register():
 
 
 def unregister():
-    preferences.unregister()
+    common.unregister()
     t3d.unregister()
     e3d.unregister()
     scn.unregister()

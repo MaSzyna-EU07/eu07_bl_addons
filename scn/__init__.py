@@ -7,7 +7,6 @@ from .basemaps import BasemapPanel, LoadBasemapOperator, BasemapProperties
 from .scenery_object import SCNObjectProperties, SCNObjectPropertiesPanel, CopyMaterialsToSelectedOperator
 from .tree_utils import AddTreeOperator
 from .scenery_tools_panel import SCNToolsPanel
-from .scm_files import SCMFile, SCN_UL_SCMFiles, SCN_PT_SCMFiles, LIST_OT_AddSCMFile, LIST_OT_DeleteSCMFile, LIST_OT_AssignToSCMFile, LIST_OT_SelectAssignedToSCM
 from .sectorizer import SCN_OT_LoadSectors
 from .config import SCNConfig, SCN_PT_SceneryConfig, SCN_UL_SceneryConfig, SCN_OT_AddConfigSetting, SCN_OT_DeleteConfigSetting
 
@@ -32,14 +31,6 @@ classes = (
 
     AddTreeOperator,
 
-    SCN_UL_SCMFiles,
-    SCN_PT_SCMFiles,
-    SCMFile,
-    LIST_OT_AddSCMFile,
-    LIST_OT_DeleteSCMFile,
-    LIST_OT_AssignToSCMFile,
-    LIST_OT_SelectAssignedToSCM,
-
     SCNConfig,
     SCN_PT_SceneryConfig,
     SCN_OT_AddConfigSetting,
@@ -63,10 +54,6 @@ def register():
         bpy.utils.register_class(c)
 
     bpy.types.Object.scn_properties = PointerProperty(type=SCNObjectProperties)
-
-    bpy.types.Scene.scm_files = CollectionProperty(type=SCMFile)
-    bpy.types.Scene.scm_file_index = IntProperty(min=0)
-    bpy.types.Scene.scm_file_index_counter = IntProperty(min=0)
 
     bpy.types.Scene.scn_config = CollectionProperty(type=SCNConfig)
     bpy.types.Scene.scn_config_setting_index = IntProperty(min=0)

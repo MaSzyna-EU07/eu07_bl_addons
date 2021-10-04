@@ -1,25 +1,7 @@
-from pathlib import Path
-
-import bpy
 import eu07_tools
-from eu07_tools.utils import AssetSearcher
-import preferences
+import pathlib
 
-
-class EU07UtilsPanel(bpy.types.Panel):
-    bl_idname = "SCENE_PT_eu07utils"
-    bl_label = "Utilities"
-    bl_space_type = "VIEW_3D"
-    bl_region_type = "UI"
-    bl_category = "[EU07] Utility"
-
-    def draw(self, context):
-        scene = context.scene
-
-        box = self.layout.box()
-        box.operator("import_material.mat", text="Import Material")
-
-
+from common import preferences
 
 def get_root(abspath=""):
     try:
@@ -32,15 +14,19 @@ def get_root(abspath=""):
     return root
 
 
+def uilist_safe_index_after_delete(uilist, index):
+    return min(max(0, index - 1), len(uilist) - 1)
+
+
 def get_qualified_material_name(abspath):
     root = get_root(abspath)
-    return str(Path(abspath).relative_to(root))
+    return str(pathlib.Path(abspath).relative_to(root))
 
 
 def get_path_from_material(material):
     if material:
         if material.get("is_eu07_mat") and material["is_eu07_mat"] == "true":
-            path = Path(material.name)
+            path = pathlib.Path(material.name)
             if "textures" in path.parts:
                 return str(path.relative_to("textures").with_suffix(""))
 
@@ -57,5 +43,3 @@ def get_path_from_material(material):
                 return eu07_tools.utils.shorten_asset_path(link_node.image.filepath)
 
     return "none"
-
-

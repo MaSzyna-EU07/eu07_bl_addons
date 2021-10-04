@@ -6,8 +6,7 @@ import bmesh
 import eu07_tools
 from bpy_extras import view3d_utils
 
-import preferences
-from common import get_path_from_material
+from common import get_path_from_material, preferences
 
 inc_names = [
     "ljtree.inc",

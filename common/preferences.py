@@ -1,12 +1,13 @@
 import bpy
 from bpy.props import StringProperty
 
+
 def get_preferences():
     return bpy.context.preferences.addons['eu07_bl_addons'].preferences
 
 
 class EU07AddonPreferences(bpy.types.AddonPreferences):
-    bl_idname = __package__
+    bl_idname = "eu07_bl_addons"
 
     root: StringProperty(
         name="Root path",
@@ -23,10 +24,15 @@ class EU07AddonPreferences(bpy.types.AddonPreferences):
         self.layout.prop(self, "trees_material_regex")
 
 
+classes = (
+    EU07AddonPreferences,
+)
 
 def register():
-    bpy.utils.register_class(EU07AddonPreferences)
+    for cls in classes:
+        bpy.utils.register_class(cls)
 
 
 def unregister():
-    bpy.utils.unregister_class(EU07AddonPreferences)
+    for cls in classes:
+        bpy.utils.unregister_class(cls)

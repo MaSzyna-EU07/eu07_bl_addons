@@ -6,8 +6,8 @@ from bpy.props import StringProperty, BoolProperty
 from bpy_extras.io_utils import ExportHelper
 import eu07_tools
 
-from common import get_root
-from scn import tree_utils, memcell, sound, camera, terrain, trajectory_tools, scm_files, firstinit,config
+from common import get_root, includes
+from scn import tree_utils, memcell, sound, camera, terrain, trajectory_tools, firstinit, config
 
 
 class SCNExporter(bpy.types.Operator, ExportHelper):
@@ -28,19 +28,19 @@ class SCNExporter(bpy.types.Operator, ExportHelper):
 
         scenery_dir = pathlib.Path(get_root(), "scenery")
 
-        includes = []
+        include_elements = []
         outfiles = {}
-        for scm in context.scene.scm_files:
-            out_path = (scenery_dir / scm.file_path)
+        for include in context.scene.eu07_includes:
+            out_path = (scenery_dir / include.file_path)
             out_dir = out_path.parent
             out_dir.mkdir(parents=True, exist_ok=True)
-            outfiles[scm.file_index] = self._open_for_writing(out_path)
+            outfiles[includes.get_include_index(include)] = self._open_for_writing(out_path)
 
-            include = eu07_tools.scn.create_element("include")
-            include.path = scm.file_path
-            includes.append(include)
+            include_element = eu07_tools.scn.create_element("include")
+            include_element.path = include.file_path
+            include_elements.append(include_element)
 
-        outfiles[scm_files.MAIN_FILE_INDEX] = self._open_for_writing(self.filepath)
+        outfiles[includes.NULL_INDEX] = self._open_for_writing(self.filepath)
 
         outputs = {}
         for scm_id, outfile in outfiles.items():
@@ -49,10 +49,10 @@ class SCNExporter(bpy.types.Operator, ExportHelper):
 
             outputs[scm_id] = eu07_tools.scn.SCNOutput(outfile)
 
-        outputs[scm_files.MAIN_FILE_INDEX].dump_element(config.get_config_as_element())
-        outputs[scm_files.MAIN_FILE_INDEX].dump_from_iterable(includes)
-        outfiles[scm_files.MAIN_FILE_INDEX].write("\n")
-        outfiles[scm_files.MAIN_FILE_INDEX].write(firstinit.get_firstinit())
+        outputs[includes.NULL_INDEX].dump_element(config.get_config_as_element())
+        outputs[includes.NULL_INDEX].dump_from_iterable(includes)
+        outfiles[includes.NULL_INDEX].write("\n")
+        outfiles[includes.NULL_INDEX].write(firstinit.get_firstinit())
 
         if self.use_selection:
             objects = [o for o in bpy.data.objects if o.select_get()]

@@ -57,7 +57,7 @@ class BasemapPanel(bpy.types.Panel):
         row.prop(scene.eu07_properties, "basemap_puwg_x", text="X")
         row.prop(scene.eu07_properties, "basemap_puwg_y", text="Y")
 
-        # self.layout.prop(scene.eu07_properties, "basemap_use_cursor", text="Load in 3D cursor area")
+        # self.layout.prop(scene.properties.py, "basemap_use_cursor", text="Load in 3D cursor area")
         self.layout.prop(scene.eu07_properties, "basemap_limit", text="Loading radius limit")
 
         self.layout.prop(scene.eu07_properties, "basemap_type", text="Map type")

@@ -11,15 +11,16 @@ from scn.terrain import TerrainBuilder
 from scn import trajectory_tools
 from scn.sectorizer import Sectorizer
 from mat import HelperMATImporter
+from common import includes
 import scn
 
 class SceneryBuilder:
-    def __init__(self, config, scm_id=-1):
+    def __init__(self, config, include_index=-1):
         self._config = config
         self._trajectory_builder = TrajectoryBuilder()
         self._terrain_builder = TerrainBuilder(config)
         self._decoration_builder = DecorationsBuilder(config)
-        self._scm_id = scm_id
+        self._include_index = include_index
 
     def run(self, data):
         for element in data:
@@ -32,14 +33,12 @@ class SceneryBuilder:
 
             if element.type == "include":
                 if element.path.endswith(".scm"):
-                    scm_id = scn.scm_files.add_scm_file()
-                    bpy.context.scene.scm_file_index = scm_id
+                    include = includes.add_include()
 
-                    current_scm = scn.scm_files.get_current_scm()
-                    current_scm.file_path = element.path
-                    current_scm.name = pathlib.Path(element.path).stem
+                    include.file_path = element.path
+                    include.name = pathlib.Path(element.path).stem
 
-                    sb = SceneryBuilder(self._config, scm_id)
+                    sb = SceneryBuilder(self._config, includes.get_include_index(include))
 
                     assearch = self._config["asset_searcher"]
 
@@ -49,7 +48,7 @@ class SceneryBuilder:
                         scn_input = eu07_tools.scn.load(infile)
                         sb.run(scn_input)
 
-                    bpy.context.scene.scm_file_index = -1
+                    bpy.context.scene.eu07_active_include_index = -1
 
                 for tree_inc_name in scn.tree_utils.inc_names:
                     if tree_inc_name in element.path.lower():
@@ -66,7 +65,7 @@ class SceneryBuilder:
                         scn.tree_utils.set_tree_material(tree_instance, material)
 
                         Sectorizer.auto_put(tree_instance)
-                        tree_instance.scn_properties.scm_file_id = self._scm_id
+                        tree_instance.eu07_include_index = self._include_index
                         break
 
             if element.type == "node:triangles":
@@ -105,11 +104,11 @@ class SceneryBuilder:
 
                     obj = trajectory_straight
 
-                obj.scn_properties.scm_file_id = self._scm_id
+                obj.eu07_include_index = self._include_index
 
         self.init_switches()
         obj = self._terrain_builder.finish()
-        obj.scn_properties.scm_file_id = self._scm_id
+        obj.eu07_include_index = self._include_index
 
     def init_switches(self):
         for o in bpy.data.objects:
