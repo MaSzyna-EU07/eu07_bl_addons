@@ -75,7 +75,7 @@ class SceneryBuilder:
             if element.type == "node:track":
                 if element.subtype in "normal road river":
                     trajectory = self._trajectory_builder.build_trajectory(element)
-                    self._trajectory_builder.create_spline(trajectory, element.p1, element.cv1, element.p2, element.cv2)
+                    self._trajectory_builder.create_spline(trajectory, element.p1, element.cv1, element.p2, element.cv2, element.p1_roll, element.p2_roll)
                     profile = trajectory_tools.create_profile_instance(
                         element.subtype, element.geometry_params, element.width, 6 # TODO: Get size from mat, then from track
                     )

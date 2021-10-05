@@ -42,8 +42,8 @@ class TrajectoryBuilder:
         trajectory.scn_properties.trajectory_environment = node_track.environment
         trajectory.scn_properties.trajectory_visible = node_track.is_visible
         trajectory.scn_properties.trajectory_mapping_length = node_track.mapping_length
-        trajectory.scn_properties.trajectory_p1_roll = node_track.p1_roll
-        trajectory.scn_properties.trajectory_p2_roll = node_track.p2_roll
+        # trajectory.scn_properties.trajectory_p1_roll = node_track.p1_roll
+        # trajectory.scn_properties.trajectory_p2_roll = node_track.p2_roll
         trajectory.scn_properties.trajectory_event0 = node_track.event0
         trajectory.scn_properties.trajectory_event1 = node_track.event1
         trajectory.scn_properties.trajectory_event2 = node_track.event2
@@ -62,7 +62,7 @@ class TrajectoryBuilder:
 
         return trajectory
 
-    def create_spline(self, obj, p1, cv1, p2, cv2):
+    def create_spline(self, obj, p1, cv1, p2, cv2, p1_roll, p2_roll):
         spline = obj.data.splines.new('BEZIER')
         spline.use_smooth = False
 

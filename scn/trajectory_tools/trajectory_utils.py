@@ -1,3 +1,4 @@
+import math
 
 import bpy
 
@@ -71,6 +72,8 @@ def create_element_from_track(track_object):
     node.cv1 = curve_data[1]
     node.cv2 = curve_data[2]
     node.p2 = curve_data[3]
+    node.p1_roll = math.degrees(track_object.data.splines[0].bezier_points[0].tilt)
+    node.p2_roll = math.degrees(track_object.data.splines[0].bezier_points[1].tilt)
 
     if (node.is_junction):
 
@@ -83,6 +86,8 @@ def create_element_from_track(track_object):
         node.cv3 = curve_data[1]
         node.cv4 = curve_data[2]
         node.p4 = curve_data[3]
+        node.p3_roll = math.degrees(junction_track_object.data.splines[0].bezier_points[0].tilt)
+        node.p4_roll = math.degrees(junction_track_object.data.splines[0].bezier_points[1].tilt)
 
         node.map1 = get_path_from_material(mesh.material_slots[0].material)
         node.map2 = get_path_from_material(junction_mesh.material_slots[0].material)

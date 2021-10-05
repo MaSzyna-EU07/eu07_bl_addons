@@ -398,10 +398,10 @@ class SCNObjectPropertiesPanel(bpy.types.Panel):
                 visible_r.prop(self.obj.scn_properties, "trajectory_visible")
 
                 p1_roll_r = self.layout.row()
-                p1_roll_r.prop(self.obj.scn_properties, "trajectory_p1_roll")
+                p1_roll_r.prop(self.obj.data.splines[0].bezier_points[0], "tilt", text="P1 roll")
 
                 p2_roll_r = self.layout.row()
-                p2_roll_r.prop(self.obj.scn_properties, "trajectory_p2_roll")
+                p2_roll_r.prop(self.obj.data.splines[0].bezier_points[1], "tilt", text="P2 roll")
 
                 event0_r = self.layout.row()
                 event0_r.prop(self.obj.scn_properties, "trajectory_event0")
