@@ -1,6 +1,6 @@
 import abc
 import math
-from pathlib import Path
+import pathlib
 import collections
 
 import bmesh
@@ -8,19 +8,15 @@ import bpy
 from bpy_extras.io_utils import ImportHelper
 from bpy.props import StringProperty, BoolProperty
 import eu07_tools
+from common import includes
 
 from mat import HelperMATImporter
 from common import get_root
 
 
-
-
-
-def import_model(elements, collection, config):
+def import_model(elements, config, include_identifier=includes.NULL_IDENTIFIER):
     imported = []
-
     for element in elements:
-
         if element.element_type == "submodel":
             if (
                 (element.type == "Mesh" and not config.import_meshes) or
@@ -30,21 +26,22 @@ def import_model(elements, collection, config):
                 continue
 
             obj = _build_object(element, config)
-            collection.objects.link(obj)
+            obj.eu07_include_identifier = include_identifier
+            bpy.context.scene.collection.objects.link(obj)
             imported.append(obj)
 
         elif element.element_type == "include" and config.load_includes:
-            full_path = config.asset_searcher.models.find(element.path)
+            full_path = pathlib.Path(config.asset_searcher.models.find(element.path))
 
-            if Path(full_path).exists():
-                inc_collection = bpy.data.collections.new(
-                    f"include {' '.join([element.path, *element.parameters])} end"
-                )
-                collection.children.link(inc_collection)
+            if full_path.exists():
+                include = includes.add_include()
+                include.file_path = str(full_path.relative_to(get_root()))
+                include.name = str(pathlib.Path(include.file_path).with_suffix("").stem)
             
                 with open(full_path, "r", encoding="latin-1") as inc_file:
                     inc_elements = eu07_tools.t3d.load(inc_file)
-                    import_model(inc_elements, inc_collection, config)
+                    inc_objects = import_model(inc_elements, config, include.identifier)
+                    imported.extend(inc_objects)
 
             else:
                 config.report_func({"WARNING"}, f"Can't find included file: {element.path}")

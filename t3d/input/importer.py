@@ -79,6 +79,8 @@ class T3DImporter(bpy.types.Operator, ImportHelper):
             Path(self.filepath).parent
         )
 
+        asset_searcher.models.remove_extension(".e3d")
+
         config = Config(
             self.report, root, skins, asset_searcher,
             self.load_includes, self.import_meshes, self.import_spots, self.import_stars,
@@ -89,7 +91,7 @@ class T3DImporter(bpy.types.Operator, ImportHelper):
 
         with open(self.filepath, "r", encoding="latin-1") as file:
             elements = eu07_tools.t3d.load(file)
-            imported = import_model(elements, collection, config)
+            imported = import_model(elements, config)
 
             if self.merge_all:
                 name = str(Path(self.filepath).with_suffix("").relative_to(root))
