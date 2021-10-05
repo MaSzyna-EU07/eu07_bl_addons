@@ -15,12 +15,12 @@ from common import includes
 import scn
 
 class SceneryBuilder:
-    def __init__(self, config, include_index=-1):
+    def __init__(self, config, include_identifier=-1):
         self._config = config
         self._trajectory_builder = TrajectoryBuilder()
         self._terrain_builder = TerrainBuilder(config)
         self._decoration_builder = DecorationsBuilder(config)
-        self._include_index = include_index
+        self._include_identifier = include_identifier
 
     def run(self, data):
         for element in data:
@@ -38,7 +38,7 @@ class SceneryBuilder:
                     include.file_path = element.path
                     include.name = pathlib.Path(element.path).stem
 
-                    sb = SceneryBuilder(self._config, includes.get_include_index(include))
+                    sb = SceneryBuilder(self._config, include.identifier)
 
                     assearch = self._config["asset_searcher"]
 
@@ -47,8 +47,6 @@ class SceneryBuilder:
                     with open(abspath, encoding='latin-1') as infile:
                         scn_input = eu07_tools.scn.load(infile)
                         sb.run(scn_input)
-
-                    bpy.context.scene.eu07_active_include_index = -1
 
                 for tree_inc_name in scn.tree_utils.inc_names:
                     if tree_inc_name in element.path.lower():
@@ -65,7 +63,7 @@ class SceneryBuilder:
                         scn.tree_utils.set_tree_material(tree_instance, material)
 
                         Sectorizer.auto_put(tree_instance)
-                        tree_instance.eu07_include_index = self._include_index
+                        tree_instance.eu07_include_identifier = self._include_identifier
                         break
 
             if element.type == "node:triangles":
@@ -104,11 +102,11 @@ class SceneryBuilder:
 
                     obj = trajectory_straight
 
-                obj.eu07_include_index = self._include_index
+                obj.eu07_include_identifier = self._include_identifier
 
         self.init_switches()
         obj = self._terrain_builder.finish()
-        obj.eu07_include_index = self._include_index
+        obj.eu07_include_identifier = self._include_identifier
 
     def init_switches(self):
         for o in bpy.data.objects:

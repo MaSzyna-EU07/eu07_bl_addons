@@ -1,7 +1,7 @@
 import bpy
 from common.utils import uilist_safe_index_after_delete
 
-NULL_INDEX = -1
+NULL_IDENTIFIER = -1
 
 
 def get_active_include():
@@ -16,15 +16,21 @@ def get_active_include():
 def get_include_index(include):
     scene = bpy.context.scene
     for i, include_candidate in enumerate(scene.eu07_includes):
-        if include_candidate is include:
+        if include_candidate.identifier == include.identifier:
             return i
 
     return -1
 
 
 def add_include():
+    if not bpy.context.scene.eu07_includes:
+        bpy.context.scene.eu07_include_identifier_counter = 0
+
     added = bpy.context.scene.eu07_includes.add()
+    added.identifier = bpy.context.scene.eu07_include_identifier_counter
     bpy.context.scene.eu07_active_include_index = get_include_index(added)
+
+    bpy.context.scene.eu07_include_identifier_counter += 1
 
     return added
 
@@ -32,24 +38,24 @@ def add_include():
 def delete_include(include):
     scene = bpy.context.scene
     include_index = get_include_index(include)
-    if include_index != NULL_INDEX:
+    if include_index != NULL_IDENTIFIER:
         scene.eu07_includes.remove(include_index)
 
     scene.eu07_active_include_index = uilist_safe_index_after_delete(scene.eu07_includes, include_index)
 
     for obj in bpy.data.objects:
-        if obj.eu07_include_index == get_include_index(include):
-            obj.eu07_include_index = NULL_INDEX
+        if obj.eu07_include_identifier == get_include_index(include):
+            obj.eu07_include_identifier = NULL_IDENTIFIER
 
 
 def assign_to_include(obj, include):
     scene = bpy.context.scene
-    obj.eu07_include_index = scene.eu07_includes.find(include)
+    obj.eu07_include_identifier = scene.eu07_includes.find(include)
 
 
 def iter_included_objects(include):
     for obj in bpy.data.objects:
-        if obj.eu07_include_index == get_include_index(include):
+        if obj.eu07_include_identifier == get_include_index(include):
             yield obj
 
 
@@ -62,6 +68,8 @@ class EU07Include(bpy.types.PropertyGroup):
         name="Path",
         description="Path to .scm file, relative to scenery directory",
     )
+
+    identifier: bpy.props.IntProperty(min=0)
 
 
 class EU07_UL_Includes(bpy.types.UIList):
@@ -159,7 +167,7 @@ class EU07_OT_SelectIncluded(bpy.types.Operator):
         include = get_active_include()
 
         for obj in context.visible_objects:
-            if obj.eu07_include_index == get_include_index(include):
+            if obj.eu07_include_identifier == get_include_index(include):
                 obj.select_set(True)
 
         return {'FINISHED'}
@@ -182,7 +190,8 @@ def register():
 
         bpy.types.Scene.eu07_includes = bpy.props.CollectionProperty(type=EU07Include)
         bpy.types.Scene.eu07_active_include_index = bpy.props.IntProperty(min=0)
-        bpy.types.Object.eu07_include_index = bpy.props.IntProperty(min=-1)
+        bpy.types.Scene.eu07_include_identifier_counter = bpy.props.IntProperty(min=0)
+        bpy.types.Object.eu07_include_identifier = bpy.props.IntProperty(min=-1)
 
 
 def unregister():

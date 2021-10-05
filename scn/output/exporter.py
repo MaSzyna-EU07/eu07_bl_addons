@@ -34,25 +34,25 @@ class SCNExporter(bpy.types.Operator, ExportHelper):
             out_path = (scenery_dir / include.file_path)
             out_dir = out_path.parent
             out_dir.mkdir(parents=True, exist_ok=True)
-            outfiles[includes.get_include_index(include)] = self._open_for_writing(out_path)
+            outfiles[include.identifier] = self._open_for_writing(out_path)
 
             include_element = eu07_tools.scn.create_element("include")
             include_element.path = include.file_path
             include_elements.append(include_element)
 
-        outfiles[includes.NULL_INDEX] = self._open_for_writing(self.filepath)
+        outfiles[includes.NULL_IDENTIFIER] = self._open_for_writing(self.filepath)
 
         outputs = {}
-        for scm_id, outfile in outfiles.items():
+        for include_identifier, outfile in outfiles.items():
             export_date = datetime.now().strftime("%d/%m/%Y %H:%M")
             outfile.write(f"// Exported from BlendSCN Editor {export_date}\n\n")
 
-            outputs[scm_id] = eu07_tools.scn.SCNOutput(outfile)
+            outputs[include_identifier] = eu07_tools.scn.SCNOutput(outfile)
 
-        outputs[includes.NULL_INDEX].dump_element(config.get_config_as_element())
-        outputs[includes.NULL_INDEX].dump_from_iterable(includes)
-        outfiles[includes.NULL_INDEX].write("\n")
-        outfiles[includes.NULL_INDEX].write(firstinit.get_firstinit())
+        outputs[includes.NULL_IDENTIFIER].dump_element(config.get_config_as_element())
+        outputs[includes.NULL_IDENTIFIER].dump_from_iterable(include_elements)
+        outfiles[includes.NULL_IDENTIFIER].write("\n")
+        outfiles[includes.NULL_IDENTIFIER].write(firstinit.get_firstinit())
 
         if self.use_selection:
             objects = [o for o in bpy.data.objects if o.select_get()]
@@ -60,7 +60,7 @@ class SCNExporter(bpy.types.Operator, ExportHelper):
             objects = bpy.data.objects
 
         for obj in objects:
-            output = outputs.get(obj.scn_properties.scm_file_id)
+            output = outputs.get(obj.eu07_include_identifier)
 
             if obj.scn_properties.type_ == "node:triangles":
                 output.dump_from_iterable(terrain.create_node_triangles_from_mesh(obj))
