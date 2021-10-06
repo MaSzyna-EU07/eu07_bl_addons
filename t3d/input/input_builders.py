@@ -31,9 +31,9 @@ def import_model(elements, config, include_identifier=includes.NULL_IDENTIFIER):
             imported.append(obj)
 
         elif element.element_type == "include" and config.load_includes:
-            full_path = pathlib.Path(config.asset_searcher.models.find(element.path))
-
-            if full_path.exists():
+            full_path = config.asset_searcher.models.find(element.path)
+            if full_path:
+                full_path = pathlib.Path(full_path)
                 include = includes.add_include()
                 include.file_path = str(full_path.relative_to(get_root()))
                 include.name = str(pathlib.Path(include.file_path).with_suffix("").stem)
@@ -174,7 +174,8 @@ class MeshInputBuilder(SubmodelInputBuilder):
 
         else:
             abspath = self._config.asset_searcher.textures.find(map_)
-            self.obj.active_material = HelperMATImporter.import_material_from_abspath(abspath)
+            if abspath:
+                self.obj.active_material = HelperMATImporter.import_material_from_abspath(abspath)
 
 
     def set_geometry(self, submodel):

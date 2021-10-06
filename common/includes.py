@@ -74,7 +74,7 @@ class EU07Include(bpy.types.PropertyGroup):
 
 class EU07_UL_Includes(bpy.types.UIList):
     def draw_item(self, context, layout, data, item, icon, active_data, active_propname, index):
-        custom_icon = 'FILE_TEXT'
+        custom_icon = 'FILE_TICK'
 
         if self.layout_type in {'DEFAULT', 'COMPACT'}:
             layout.label(text=f"{item.name}", icon=custom_icon)
