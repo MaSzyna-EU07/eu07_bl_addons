@@ -10,6 +10,9 @@ def get_active_setting():
 
 
 def get_config_as_element():
+    if not bpy.context.scene.scn_config:
+        return None
+
     element = eu07_tools.scn.create_element("config")
 
     element.content = "\n".join(

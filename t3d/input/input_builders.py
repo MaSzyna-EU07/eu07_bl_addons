@@ -14,7 +14,7 @@ from mat import HelperMATImporter
 from common import get_root
 
 
-def import_model(elements, config, include_identifier=includes.NULL_IDENTIFIER):
+def import_model(elements, config, include_identifier=includes.MASTER_IDENTIFIER):
     imported = []
     for element in elements:
         if element.element_type == "submodel":

@@ -1,7 +1,7 @@
 import bpy
 from common.utils import uilist_safe_index_after_delete
 
-NULL_IDENTIFIER = -1
+MASTER_IDENTIFIER = -1
 
 
 def get_active_include():
@@ -38,14 +38,14 @@ def add_include():
 def delete_include(include):
     scene = bpy.context.scene
     include_index = get_include_index(include)
-    if include_index != NULL_IDENTIFIER:
+    if include_index != MASTER_IDENTIFIER:
         scene.eu07_includes.remove(include_index)
 
     scene.eu07_active_include_index = uilist_safe_index_after_delete(scene.eu07_includes, include_index)
 
     for obj in bpy.data.objects:
         if obj.eu07_include_identifier == get_include_index(include):
-            obj.eu07_include_identifier = NULL_IDENTIFIER
+            obj.eu07_include_identifier = MASTER_IDENTIFIER
 
 
 def assign_to_include(obj, include):

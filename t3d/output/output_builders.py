@@ -10,24 +10,13 @@ from common import get_path_from_material, get_root
 
 
 
-def export_model(collection, file, config):
-    objects = HierarchyMaker(collection).make_hierarchy()
+def export_model(objects, file, config):
+    objects = HierarchyMaker(objects).make_hierarchy()
 
     if config.use_selection:
         t3d = [_build_submodel(o, config) for o in objects if o.select_get()]
     else:
         t3d = [_build_submodel(o, config) for o in objects]
-
-    for subcollection in collection.children:
-        if subcollection.name.startswith("include"):
-            path, *parameters = subcollection.name.split(" ")[1:-1]
-            include = eu07_tools.t3d.create_include(path, parameters)
-            t3d.append(include)
-
-            if config.export_include_collections:
-                outpath = Path(config.root, subcollection.name.replace("\\", "/").split(" ")[1])
-                with open(outpath, "w+", encoding="windows-1250", newline="\r\n") as inc_file:
-                    export_model(subcollection, inc_file, config)
 
     eu07_tools.t3d.dump(t3d, file)
 

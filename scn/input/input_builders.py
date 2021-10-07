@@ -35,8 +35,9 @@ class SceneryBuilder:
                 if element.path.endswith(".scm"):
                     include = includes.add_include()
 
-                    include.file_path = element.path
-                    include.name = pathlib.Path(element.path).stem
+                    filepath = pathlib.Path("scenery", element.path)
+                    include.name = filepath.stem
+                    include.file_path = str(filepath)
 
                     sb = SceneryBuilder(self._config, include.identifier)
 
@@ -90,9 +91,9 @@ class SceneryBuilder:
 
                 elif element.subtype in "switch":
                     trajectory_straight = self._trajectory_builder.build_trajectory(element)
-                    self._trajectory_builder.create_spline(trajectory_straight, element.p1, element.cv1, element.p2, element.cv2)
+                    self._trajectory_builder.create_spline(trajectory_straight, element.p1, element.cv1, element.p2, element.cv2, element.p1_roll, element.p2_roll)
                     trajectory_side = self._trajectory_builder.build_trajectory(element)
-                    self._trajectory_builder.create_spline(trajectory_side, element.p3, element.cv3, element.p4, element.cv4)
+                    self._trajectory_builder.create_spline(trajectory_side, element.p3, element.cv3, element.p4, element.cv4, element.p1_roll, element.p2_roll)
 
                     Sectorizer.auto_put(trajectory_straight)
                     Sectorizer.auto_put(trajectory_side)

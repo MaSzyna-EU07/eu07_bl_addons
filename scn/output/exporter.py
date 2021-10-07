@@ -6,7 +6,8 @@ from bpy.props import StringProperty, BoolProperty
 from bpy_extras.io_utils import ExportHelper
 import eu07_tools
 
-from common import get_root, includes
+from common.include_export_manager import IncludeExportManager
+from common import utils
 from scn import tree_utils, memcell, sound, camera, terrain, trajectory_tools, firstinit, config
 
 
@@ -25,34 +26,23 @@ class SCNExporter(bpy.types.Operator, ExportHelper):
     )
 
     def execute(self, context):
+        export_manager = IncludeExportManager(bpy.context.scene.eu07_includes)
+        export_manager.create_write_buffers()
+        export_manager.create_outputs(eu07_tools.scn.SCNOutput)
 
-        scenery_dir = pathlib.Path(get_root(), "scenery")
+        for buffer in export_manager.buffers:
+            export_date = datetime.now().strftime("%d/%m/%Y %H:%M")
+            buffer.write(f"// Exported from BlendSCN Editor {export_date}\n\n")
 
-        include_elements = []
-        outfiles = {}
-        for include in context.scene.eu07_includes:
-            out_path = (scenery_dir / include.file_path)
-            out_dir = out_path.parent
-            out_dir.mkdir(parents=True, exist_ok=True)
-            outfiles[include.identifier] = self._open_for_writing(out_path)
+        export_manager.master_output.dump_element(config.get_config_as_element())
 
+        for include in bpy.context.scene.eu07_includes:
             include_element = eu07_tools.scn.create_element("include")
             include_element.path = include.file_path
-            include_elements.append(include_element)
 
-        outfiles[includes.NULL_IDENTIFIER] = self._open_for_writing(self.filepath)
+            export_manager.master_output.dump_element(include_element)
 
-        outputs = {}
-        for include_identifier, outfile in outfiles.items():
-            export_date = datetime.now().strftime("%d/%m/%Y %H:%M")
-            outfile.write(f"// Exported from BlendSCN Editor {export_date}\n\n")
-
-            outputs[include_identifier] = eu07_tools.scn.SCNOutput(outfile)
-
-        outputs[includes.NULL_IDENTIFIER].dump_element(config.get_config_as_element())
-        outputs[includes.NULL_IDENTIFIER].dump_from_iterable(include_elements)
-        outfiles[includes.NULL_IDENTIFIER].write("\n")
-        outfiles[includes.NULL_IDENTIFIER].write(firstinit.get_firstinit())
+        export_manager.master_buffer.write("\n")
 
         if self.use_selection:
             objects = [o for o in bpy.data.objects if o.select_get()]
@@ -60,24 +50,20 @@ class SCNExporter(bpy.types.Operator, ExportHelper):
             objects = bpy.data.objects
 
         for obj in objects:
-            output = outputs.get(obj.eu07_include_identifier)
+            output = export_manager.get_output(obj.eu07_include_identifier)
 
             if obj.scn_properties.type_ == "node:triangles":
                 output.dump_from_iterable(terrain.create_node_triangles_from_mesh(obj))
 
             else:
                 element = self._create_element_from_object(obj)
+                output.dump_element(element)
 
-                if element:
-                    output.dump_element(element)
+        export_manager.master_buffer.write(firstinit.get_firstinit())
 
-        for outfile in outfiles.values():
-            outfile.close()
+        export_manager.flush_buffers_to_files(utils.get_root(self.filepath), self.filepath)
 
         return {'FINISHED'}
-
-    def _open_for_writing(self, filepath):
-        return open(filepath, mode="w+", encoding="windows-1250", newline="\r\n")
 
     def _create_element_from_object(self, obj):
         element = None
