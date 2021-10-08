@@ -27,20 +27,20 @@ class SCNExporter(bpy.types.Operator, ExportHelper):
 
     def execute(self, context):
         export_manager = IncludeExportManager(bpy.context.scene.eu07_includes)
-        export_manager.create_write_buffers()
+        export_manager.create_buffers()
         export_manager.create_outputs(eu07_tools.scn.SCNOutput)
 
         for buffer in export_manager.buffers:
             export_date = datetime.now().strftime("%d/%m/%Y %H:%M")
             buffer.write(f"// Exported from BlendSCN Editor {export_date}\n\n")
 
-        export_manager.master_output.dump_element(config.get_config_as_element())
+        export_manager.master_output.dump_from_iterable(config.get_config_as_element())
 
         for include in bpy.context.scene.eu07_includes:
             include_element = eu07_tools.scn.create_element("include")
-            include_element.path = include.file_path
+            include_element.path = str(pathlib.Path(include.file_path).relative_to("scenery"))
 
-            export_manager.master_output.dump_element(include_element)
+            export_manager.master_output.dump_from_iterable(include_element)
 
         export_manager.master_buffer.write("\n")
 
@@ -57,7 +57,7 @@ class SCNExporter(bpy.types.Operator, ExportHelper):
 
             else:
                 element = self._create_element_from_object(obj)
-                output.dump_element(element)
+                output.dump_from_iterable(element)
 
         export_manager.master_buffer.write(firstinit.get_firstinit())
 

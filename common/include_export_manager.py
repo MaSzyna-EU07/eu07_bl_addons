@@ -11,7 +11,7 @@ class IncludeExportManager:
         self._outputs = dict()
         self._includes_list = includes_list
 
-    def create_write_buffers(self):
+    def create_buffers(self):
         self._buffers[includes.MASTER_IDENTIFIER] = io.StringIO()
 
         for include in self._includes_list:

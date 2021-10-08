@@ -13,6 +13,12 @@ def get_active_include():
     return None
 
 
+def get_include_by_identifier(identifier):
+    for include in bpy.context.scene.eu07_includes:
+        if include.identifier == identifier:
+            return include
+
+
 def get_include_index(include):
     scene = bpy.context.scene
     for i, include_candidate in enumerate(scene.eu07_includes):
