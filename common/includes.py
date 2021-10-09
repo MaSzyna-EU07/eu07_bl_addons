@@ -197,7 +197,7 @@ def register():
         bpy.types.Scene.eu07_includes = bpy.props.CollectionProperty(type=EU07Include)
         bpy.types.Scene.eu07_active_include_index = bpy.props.IntProperty(min=0)
         bpy.types.Scene.eu07_include_identifier_counter = bpy.props.IntProperty(min=0)
-        bpy.types.Object.eu07_include_identifier = bpy.props.IntProperty(min=-1)
+        bpy.types.Object.eu07_include_identifier = bpy.props.IntProperty(min=-1, default=-1)
 
 
 def unregister():

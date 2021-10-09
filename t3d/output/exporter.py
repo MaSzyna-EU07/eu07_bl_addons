@@ -93,7 +93,7 @@ class T3DExporter(bpy.types.Operator, ExportHelper):
 
         stats = pstats.Stats(pr)
         stats.sort_stats("tottime")
-        stats.print_stats()
+        #stats.print_stats()
 
         return {'FINISHED'}
 
@@ -111,12 +111,11 @@ class HierarchyMaker:
         objects = self._filter_objects(objects)
 
         for o in objects:
+            yield o
             if o.parent:
                 yield from self._sort_branch(o)
 
     def _sort_branch(self, first):
-        yield first
-
         children = self._filter_objects(first.children)
         for child in children:
             yield from self._sort_branch(child)
@@ -334,6 +333,9 @@ class FreeSpotLightOutputBuilder(SubmodelOutputBuilder):
 
     def set_diffuse(self):
         self.submodel.diffuse_color = self.obj.data.color * 255
+
+    def set_selfillum(self):
+        self.submodel.selfillum = self.obj.t3d_properties.selfillum_spot
 
     def set_near_atten_start(self):
         self.submodel.near_atten_start = self.obj.t3d_properties.near_atten_start

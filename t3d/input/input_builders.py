@@ -243,6 +243,9 @@ class FreeSpotLightInputBuilder(SubmodelInputBuilder):
     def set_diffuse(self, diffuse):
         self.obj.data.color = [value / 255 for value in diffuse]
 
+    def set_selfillum(self, selfillum):
+        self.obj.t3d_properties.selfillum_spot = selfillum
+
     def set_near_atten_start(self, near_atten_start):
         self.obj.t3d_properties.near_atten_start = near_atten_start
 

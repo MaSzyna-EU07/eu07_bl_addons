@@ -48,6 +48,13 @@ class T3DSubmodelProperties(bpy.types.PropertyGroup):
         max=2,
         step=0.01
     )
+    selfillum_spot: FloatProperty(
+        name='SelfIllum',
+        default=2,
+        min=0,
+        max=2,
+        step=0.01
+    )
     ambient_color: FloatVectorProperty(
         name='Ambient',
         subtype='COLOR',
@@ -153,7 +160,10 @@ class T3DSubmodelPropertiesPanel(bpy.types.Panel):
         anim_r.prop(self.obj.t3d_properties, "anim")
 
         selfillum_r = self.layout.row()
-        selfillum_r.prop(self.obj.t3d_properties, "selfillum")
+        selfillum_r.prop(
+            self.obj.t3d_properties,
+            "selfillum_spot" if self.obj_is_spot else "selfillum"
+        )
 
         if self.obj_is_mesh:
             diffuse_r = self.layout.row()
