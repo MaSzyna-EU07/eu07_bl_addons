@@ -43,3 +43,23 @@ def get_path_from_material(material):
                 return eu07_tools.utils.shorten_asset_path(link_node.image.filepath)
 
     return "none"
+
+
+def join_meshes(objects, name, target_collection = None):
+    mesh = bpy.data.meshes.new(name)
+    merged_obj = bpy.data.objects.new(name, mesh)
+
+    if target_collection:
+        target_collection.objects.link(merged_obj)
+
+    merged_obj.select_set(True)
+
+    for obj in objects:
+        if obj.type == 'MESH':
+            obj.select_set(True)
+
+    bpy.context.view_layer.objects.active = merged_obj
+
+    bpy.ops.object.join()
+
+    return merged_obj

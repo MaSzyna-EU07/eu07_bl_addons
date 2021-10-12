@@ -26,21 +26,19 @@ class T3DExporter(bpy.types.Operator, ExportHelper):
         name="Selection Only",
         default=False
     )
-    export_include_collections: BoolProperty(
-        name="Export include collections",
-        default = True
-    )
     use_modifiers: BoolProperty(
         name="Apply modifiers",
         default=True
     )
     use_indices: BoolProperty(
         name="Export face indices",
-        default=False
+        default=False,
+        options={'HIDDEN'}
     )
     namespace_prefix: StringProperty(
         name="Namespace prefix",
-        default=""
+        default="",
+        options={'HIDDEN'}
     )
 
     def execute(self, context):
@@ -51,7 +49,7 @@ class T3DExporter(bpy.types.Operator, ExportHelper):
 
             Config = collections.namedtuple(
                 "Config",
-                "root use_selection export_include_collections use_modifiers use_indices namespace_prefix"
+                "root use_selection use_modifiers use_indices namespace_prefix"
             )
 
             root = get_root(self.filepath)
@@ -59,7 +57,6 @@ class T3DExporter(bpy.types.Operator, ExportHelper):
             config = Config(
                 root,
                 self.use_selection,
-                self.export_include_collections,
                 self.use_modifiers,
                 self.use_indices,
                 self.namespace_prefix
@@ -251,7 +248,7 @@ class MeshOutputBuilder(SubmodelOutputBuilder):
 
         mesh = None
 
-        if (self.config.use_modifiers):
+        if self.config.use_modifiers:
             depsgraph = bpy.context.evaluated_depsgraph_get()
             obj_eval = self.obj.evaluated_get(depsgraph)
 
@@ -322,7 +319,7 @@ class MeshOutputBuilder(SubmodelOutputBuilder):
 
                 self.submodel.triangles.new(vertices, smooth)
 
-        if (self.config.use_modifiers):
+        if self.config.use_modifiers:
             bpy.data.meshes.remove(mesh)
 
 
