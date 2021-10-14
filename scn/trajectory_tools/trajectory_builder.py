@@ -70,20 +70,13 @@ class TrajectoryBuilder:
         spline.bezier_points[0].co = (0, 0, 0)
         spline.bezier_points[0].handle_left = (0, 0, 0)
         spline.bezier_points[0].handle_right = cv1.swizzled()
-        if cv1 == (0, 0, 0):
-            spline.bezier_points[0].handle_left_type = 'AUTO'
-            spline.bezier_points[0].handle_right_type = 'AUTO'
 
         p2 = p2 - p1
         spline.bezier_points[1].co = p2.swizzled()
         spline.bezier_points[1].handle_right = p2.swizzled()
         spline.bezier_points[1].handle_left = (p2 + cv2).swizzled()
-        if cv2 == (0, 0, 0):
-            spline.bezier_points[1].handle_left_type = 'AUTO'
-            spline.bezier_points[1].handle_right_type = 'AUTO'
 
         return spline
-
 
 
 class TrajectoryProfileGenerator:

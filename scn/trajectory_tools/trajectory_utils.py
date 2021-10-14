@@ -99,24 +99,39 @@ def create_element_from_track(track_object):
 
     return node
 
+
 def extract_curve_data_for_scn(track_object):
     spline = track_object.data.splines[0]
 
-    values = []
+    is_straight = is_track_straight(track_object)
 
     p1 = eu07_tools.utils.swizzle_coords(track_object.matrix_world.translation + spline.bezier_points[0].co)
 
     p2 = eu07_tools.utils.swizzle_coords(track_object.matrix_world.translation + spline.bezier_points[1].co)
 
-    # AUTO type because curve modifier works bad when we set both handles at the same position as vertex, so little cheat there
-    cv1 = spline.bezier_points[0].handle_right if spline.bezier_points[0].handle_right_type != 'AUTO' else (0, 0, 0)
-    cv2 = spline.bezier_points[1].handle_left if spline.bezier_points[1].handle_left_type != 'AUTO' else (0, 0, 0)
+    cv1 = (0, 0, 0) if is_straight else spline.bezier_points[0].handle_right
+    cv2 = (0, 0, 0) if is_straight else spline.bezier_points[1].handle_left
 
-    cv1 = eu07_tools.utils.swizzle_coords(cv1)
-    if spline.bezier_points[1].handle_left_type != 'AUTO':
+    if not is_straight:
+        cv1 = eu07_tools.utils.swizzle_coords(cv1 - spline.bezier_points[0].co)
         cv2 = eu07_tools.utils.swizzle_coords(cv2 - spline.bezier_points[1].co)
 
     return [p1, cv1, cv2, p2]
+
+
+def is_track_straight(track_object):
+    spline = track_object.data.splines[0]
+
+    p1 = spline.bezier_points[0].co
+    cv1 = spline.bezier_points[0].handle_right
+    cv2 = spline.bezier_points[1].handle_left
+
+    ab = (p1 + cv1).magnitude
+    ac = (p1 + cv2).magnitude
+    bc = (cv1 + cv2).magnitude
+
+    return ab == ac + bc
+
 
 def get_neighbour(trajectory, point_index):
     neighbour = trajectory.get(f"neighbour{point_index}")
