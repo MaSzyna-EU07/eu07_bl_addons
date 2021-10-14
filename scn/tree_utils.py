@@ -152,13 +152,21 @@ class AddTreeOperator(bpy.types.Operator):
 
             depsgraph = bpy.context.evaluated_depsgraph_get()
 
-            obj = self.tree_instance
-            while True:
+
+            max_search_iter = 200
+            for i in range(max_search_iter):
                 hit, origin, normal, index, obj, matrix = \
-                    context.scene.ray_cast(depsgraph, origin + direction * 0.0001, direction)
-                if hit and obj is not self.tree_instance:
+                    context.scene.ray_cast(depsgraph, origin + direction * 0.001, direction)
+
+                if hit:
+                    if obj.scn_properties.type_ != "node:triangles":
+                        continue
+
                     self.snapped_loc = origin
                     break
+                else:
+                    break
+
 
             self.execute(context)
         elif event.type == 'LEFTMOUSE':

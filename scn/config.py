@@ -91,7 +91,7 @@ class SCN_OT_DeleteConfigSetting(bpy.types.Operator):
 
     @classmethod
     def poll(cls, context):
-        return context.scene.scm_files
+        return context.scene.scn_config
 
     def execute(self, context):
         config = context.scene.scn_config
