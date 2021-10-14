@@ -2,22 +2,36 @@ import collections
 from pathlib import Path
 
 import bpy
-
-from common.base_model_importer import BaseModelImporter
 from ..common import get_root
 import eu07_tools
 from ..t3d import input as t3d_input_builders
+from bpy.props import (BoolProperty, EnumProperty, FloatProperty,
+                       FloatVectorProperty, IntProperty, StringProperty)
+from bpy_extras.io_utils import ExportHelper, ImportHelper
 
 
-class E3DImporter(BaseModelImporter):
-    bl_idname = "eu07.import_e3d"
+class E3DImport(bpy.types.Operator, ImportHelper):
+    bl_idname = "import_scene.e3d"
     bl_label = "Import E3D"
     filename_ext = ".e3d"
 
-    filter_glob: bpy.props.StringProperty(
+    filter_glob: StringProperty(
         default="*.e3d",
         options={'HIDDEN'}
     )
+    skin_1: StringProperty(
+        name="Skin #1",
+    )
+    skin_2: StringProperty(
+        name="Skin #2",
+    )
+    skin_3: StringProperty(
+        name="Skin #3",
+    )
+    skin_4: StringProperty(
+        name="Skin #4",
+    )
+
 
     def execute(self, context):
         Config = collections.namedtuple("Config", "report_func root skins asset_searcher load_includes")
@@ -47,5 +61,3 @@ class E3DImporter(BaseModelImporter):
             t3d_input_builders.import_model(t3d, collection, config)
 
         return {'FINISHED'}
-
-

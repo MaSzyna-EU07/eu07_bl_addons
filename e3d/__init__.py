@@ -1,15 +1,15 @@
 import bpy
 
-from .input import E3DImporter
+from .input import E3DImport
 
 
 classes = (
-    E3DImporter,
+    E3DImport,
 )
 
 
 def menu_func_import(self, context):
-    self.layout.operator(E3DImporter.bl_idname, text="[EU07] Binary Model (.e3d)")
+    self.layout.operator(E3DImport.bl_idname, text="[EU07] Binary Model (.e3d)")
 
 
 def menu_func_export(self, context):
