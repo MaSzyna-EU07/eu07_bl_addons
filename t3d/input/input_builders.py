@@ -156,6 +156,9 @@ class MeshInputBuilder(SubmodelInputBuilder):
         self.obj.t3d_properties.opacity = opacity
 
     def set_map(self, map_: str):
+        print(self.obj.name)
+        print(map_)
+
         if map_ == "none":
             return
 
@@ -174,6 +177,7 @@ class MeshInputBuilder(SubmodelInputBuilder):
 
         else:
             abspath = self._config.asset_searcher.textures.find(map_)
+            print([abspath])
             if abspath:
                 self.obj.active_material = HelperMATImporter.import_material_from_abspath(abspath)
 

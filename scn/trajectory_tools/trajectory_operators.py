@@ -32,3 +32,29 @@ class UpdateTrajectoryProfileOperator(bpy.types.Operator):
                 trajectory_utils.set_material(trajectory, mat1, 1)
 
         return {'FINISHED'}
+
+
+class AddTrackOperator(bpy.types.Operator):
+    bl_label = "Add Track"
+
+
+    def execute(self, context):
+        return {'FINISHED'}
+
+    def modal(self, context, event):
+        if event.type == 'MOUSEMOVE':
+            self.execute(context)
+        elif event.type == 'LEFTMOUSE':
+
+            return {'FINISHED'}
+        elif event.type in {'RIGHTMOUSE', 'ESC'}:
+            pass
+
+        return {'RUNNING_MODAL'}
+
+    def invoke(self, context, event):
+
+        self.execute(context)
+
+        context.window_manager.modal_handler_add(self)
+        return {'RUNNING_MODAL'}

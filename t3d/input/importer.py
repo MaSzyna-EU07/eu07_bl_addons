@@ -6,7 +6,7 @@ from bpy.props import StringProperty, BoolProperty
 from bpy_extras.io_utils import ImportHelper
 import eu07_tools
 
-from ...common import get_root
+from common.utils import get_root
 from .input_builders import import_model
 
 

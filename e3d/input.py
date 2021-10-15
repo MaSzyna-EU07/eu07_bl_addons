@@ -2,9 +2,9 @@ import collections
 from pathlib import Path
 
 import bpy
-from ..common import get_root
+from common.utils import get_root
 import eu07_tools
-from ..t3d import input as t3d_input_builders
+from t3d.input import input_builders as t3d_input_builders
 from bpy.props import (BoolProperty, EnumProperty, FloatProperty,
                        FloatVectorProperty, IntProperty, StringProperty)
 from bpy_extras.io_utils import ExportHelper, ImportHelper
@@ -31,10 +31,27 @@ class E3DImport(bpy.types.Operator, ImportHelper):
     skin_4: StringProperty(
         name="Skin #4",
     )
+    load_includes: BoolProperty(
+        name="Load included submodels",
+        default=False,
+        options={'HIDDEN'}
+    )
+    import_meshes: BoolProperty(
+        name="Import Meshes",
+        default=True,
+    )
+    import_spots: BoolProperty(
+        name="Import FreeSpotLights",
+        default=True
+    )
+    import_stars: BoolProperty(
+        name="Import Stars",
+        default=True
+    )
 
 
     def execute(self, context):
-        Config = collections.namedtuple("Config", "report_func root skins asset_searcher load_includes")
+        Config = collections.namedtuple("Config", "report_func root skins asset_searcher load_includes import_meshes import_spots import_stars")
 
         skins = {
             "replacableskin": self.skin_1,
@@ -51,13 +68,13 @@ class E3DImport(bpy.types.Operator, ImportHelper):
             Path(self.filepath).parent
         )
 
-        config = Config(self.report, root, skins, asset_searcher, False)
+        config = Config(self.report, root, skins, asset_searcher, False, self.import_meshes, self.import_spots, self.import_stars)
 
         with open(self.filepath, "rb") as infile:
             e3d = eu07_tools.e3d.load(infile)
             t3d = list(eu07_tools.utils.e3d_to_t3d(e3d))
 
             collection = bpy.context.scene.collection
-            t3d_input_builders.import_model(t3d, collection, config)
+            t3d_input_builders.import_model(t3d, config)
 
         return {'FINISHED'}
