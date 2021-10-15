@@ -2,6 +2,7 @@ import bpy
 from bpy.props import EnumProperty, FloatProperty, IntProperty, BoolProperty, StringProperty
 
 import scn
+import scn.trajectory_tools.profile
 
 from . import trajectory_tools
 
@@ -20,7 +21,7 @@ def update_visibility(self, context):
     if obj is None: return
 
     if obj.scn_properties.type_.startswith("node:track"):
-        profile_instance = trajectory_tools.get_profile_instance(obj)
+        profile_instance = scn.trajectory_tools.profile.get_instance(obj)
         profile_instance.hide_set(not context.active_object.scn_properties.trajectory_visible)
 
 
@@ -367,7 +368,7 @@ class SCNObjectPropertiesPanel(bpy.types.Panel):
             if (self.obj.type != 'CURVE'):
                 self.layout.label(text="Trajectory must be a Curve!")
             else:
-                profile_instance = trajectory_tools.get_profile_instance(self.obj)
+                profile_instance = scn.trajectory_tools.profile.get_instance(self.obj)
 
                 width_r = self.layout.row()
                 width_r.prop(self.obj.scn_properties, "trajectory_width")

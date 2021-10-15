@@ -4,9 +4,8 @@ import bpy
 
 import eu07_tools
 from common import get_path_from_material
-from scn.trajectory_tools import trajectory_builder
 
-from scn.sectorizer import Sectorizer
+from scn.trajectory_tools.profile import get_params, get_instance
 
 
 def create(name, location=None):
@@ -65,7 +64,7 @@ def create_element_from_track(track_object):
     node.railprofile = properties.trajectory_railprofile
     node.friction_memcell_name = properties.trajectory_friction_memcell_name
 
-    profile_instance = get_profile_instance(track_object)
+    profile_instance = get_instance(track_object)
 
     curve_data = extract_curve_data_for_scn(track_object)
     node.p1 = curve_data[0]
@@ -94,7 +93,7 @@ def create_element_from_track(track_object):
 
         node.trackbed = get_path_from_material(mesh.material_slots[1].material)
     else:
-        node.geometry_params = get_profile_params(profile_instance)
+        node.geometry_params = get_params(profile_instance)
 
 
     return node
@@ -169,71 +168,9 @@ def get_switch_straight(side_trajectory):
     return side_trajectory.parent
 
 
-def get_profile_params(profile_instance):
-    name_parts = profile_instance.name.split("_")
-    params_strings = name_parts[2].split(";")
-    return [float(p) for p in params_strings]
-
-
-
-def find_profile(track_subtype, profile_params, trajectory_width, mapping_length=6):
-    return bpy.data.objects.get(profile_name(track_subtype, profile_params, trajectory_width, mapping_length))
-
-
-def create_profile_instance(track_subtype, profile_params, trajectory_width, mapping_length=6):
-    name = profile_name(track_subtype, profile_params, trajectory_width, mapping_length)
-    profile = bpy.data.objects.get(name)
-    if profile is None:
-        generator = trajectory_builder.get_trajectory_generator(track_subtype)
-        profile = generator.generate_profile(track_subtype, profile_params, trajectory_width, mapping_length)
-
-    profile = profile.copy()
-
-    return profile
-
-
-def get_profile_instance(trajectory):
-    try:
-        return next((c for c in trajectory.children if c.name.startswith("TrajectoryProfileTemplate")))
-    except StopIteration:
-        return None
-
-
-def copy_profile_instance(source, dest):
-    profile = get_profile_instance(source)
-    print(f"Copying profile from {source.name} to {dest.name}")
-    set_profile_instance(dest, profile.copy())
-
-
-def set_profile_instance(trajectory, new_profile_instance):
-    unset_profile_instance(trajectory)
-
-    Sectorizer.auto_put(new_profile_instance)
-
-    new_profile_instance.parent = trajectory
-    new_profile_instance.location = (0, 0, 0)
-    new_profile_instance.hide_select = True
-    new_profile_instance.modifiers["Array"].curve = trajectory
-    new_profile_instance.modifiers["Curve"].object = trajectory
-
-
-def unset_profile_instance(trajectory):
-    old_profile_instance = get_profile_instance(trajectory)
-
-    if old_profile_instance is not None:
-
-        is_last_user = old_profile_instance.data.users == 2
-        if is_last_user:
-            # this is problemtaic!
-            original_instance = bpy.data.objects.get(old_profile_instance.data.name)
-            bpy.data.objects.remove(original_instance)
-
-        bpy.data.objects.remove(old_profile_instance)
-
-
 def set_material(trajectory, material, index):
     if material is not None:
-        profile_instance = get_profile_instance(trajectory)
+        profile_instance = get_instance(trajectory)
         if profile_instance is not None:
             profile_instance.material_slots[index].material = material
 
@@ -243,7 +180,7 @@ def set_material(trajectory, material, index):
 
 
 def get_material(trajectory, index):
-    profile_instance = get_profile_instance(trajectory)
+    profile_instance = get_instance(trajectory)
 
     if profile_instance is not None:
         return profile_instance.material_slots[index].material
@@ -251,5 +188,3 @@ def get_material(trajectory, index):
     return None
 
 
-def profile_name(track_subtype, profile_params, trajectory_width, mapping_length):
-    return f"TrajectoryProfileTemplate_{track_subtype}_{';'.join(str(round(x, 3)) for x in profile_params)}_ML{mapping_length}_{trajectory_width*1000}"

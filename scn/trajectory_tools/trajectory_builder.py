@@ -3,6 +3,7 @@ import math
 import bmesh
 import bpy
 import eu07_tools
+import scn.trajectory_tools.profile
 
 from . import trajectory_utils
 
@@ -42,8 +43,8 @@ class TrajectoryBuilder:
         trajectory.scn_properties.trajectory_environment = node_track.environment
         trajectory.scn_properties.trajectory_visible = node_track.is_visible
         trajectory.scn_properties.trajectory_mapping_length = node_track.mapping_length
-        # trajectory.scn_properties.trajectory_p1_roll = node_track.p1_roll
-        # trajectory.scn_properties.trajectory_p2_roll = node_track.p2_roll
+        # trajectory_tools.scn_properties.trajectory_p1_roll = node_track.p1_roll
+        # trajectory_tools.scn_properties.trajectory_p2_roll = node_track.p2_roll
         trajectory.scn_properties.trajectory_event0 = node_track.event0
         trajectory.scn_properties.trajectory_event1 = node_track.event1
         trajectory.scn_properties.trajectory_event2 = node_track.event2
@@ -87,7 +88,7 @@ class TrajectoryProfileGenerator:
         self.typename = ""
 
     def generate_profile(self, track_subtype, profile_params, trajectory_width, mapping_length=6):
-        name = trajectory_utils.profile_name(track_subtype, profile_params, trajectory_width, mapping_length)
+        name = scn.trajectory_tools.profile.profile_name(track_subtype, profile_params, trajectory_width, mapping_length)
         self.object = bpy.data.objects.new(name, bpy.data.meshes.new(name))
         collection = bpy.data.collections.get("Templates") or bpy.data.collections.new("Templates")
         collection.objects.link(self.object)

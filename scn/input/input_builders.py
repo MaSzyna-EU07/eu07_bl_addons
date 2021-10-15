@@ -4,6 +4,7 @@ import pathlib
 import bpy
 import mathutils
 import eu07_tools
+import scn.trajectory_tools.profile
 
 from scn.decorations import DecorationsBuilder
 from scn.trajectory_tools.trajectory_builder import TrajectoryBuilder
@@ -77,12 +78,12 @@ class SceneryBuilder:
                 if element.subtype in "normal road river":
                     trajectory = self._trajectory_builder.build_trajectory(element)
                     self._trajectory_builder.create_spline(trajectory, element.p1, element.cv1, element.p2, element.cv2, element.p1_roll, element.p2_roll)
-                    profile = trajectory_tools.create_profile_instance(
+                    profile = scn.trajectory_tools.profile.create_instance(
                         element.subtype, element.geometry_params, element.width, 6 # TODO: Get size from mat, then from track
                     )
 
                     Sectorizer.auto_put(trajectory)
-                    trajectory_tools.set_profile_instance(trajectory, profile)
+                    scn.trajectory_tools.profile.set_instance(trajectory, profile)
 
                     trajectory_tools.set_material(trajectory, HelperMATImporter.import_material_from_relpath(element.map1), 0)
                     trajectory_tools.set_material(trajectory, HelperMATImporter.import_material_from_relpath(element.map2), 1)
@@ -127,8 +128,8 @@ class SceneryBuilder:
                         if neighbour is not None:
                             print("found neighbour")
                             ballast_mat = trajectory_tools.get_material(neighbour, 1)
-                            trajectory_tools.copy_profile_instance(neighbour, trajectory_straight)
-                            trajectory_tools.copy_profile_instance(neighbour, trajectory_side)
+                            trajectory_tools.profile.copy_instance_between(neighbour, trajectory_straight)
+                            trajectory_tools.profile.copy_instance_between(neighbour, trajectory_side)
 
                             trajectory_tools.set_material(trajectory_straight, ballast_mat, 1)
                             trajectory_tools.set_material(trajectory_side, ballast_mat, 1)
