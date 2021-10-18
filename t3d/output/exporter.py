@@ -111,12 +111,12 @@ class HierarchyMaker:
         objects = self._filter_objects(objects)
 
         for o in objects:
-            yield o
-            if o.parent:
+            if not o.parent:
                 yield from self._sort_branch(o)
 
     def _sort_branch(self, first):
         children = self._filter_objects(first.children)
+        yield first
         for child in children:
             yield from self._sort_branch(child)
 

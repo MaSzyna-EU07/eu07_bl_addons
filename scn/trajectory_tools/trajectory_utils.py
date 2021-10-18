@@ -9,19 +9,23 @@ from scn.trajectory_tools.profile import get_params, get_instance
 
 
 def create(name, location=None):
-    trajectory = bpy.data.objects.new(name, bpy.data.curves.new(name, 'CURVE'))
-    trajectory.data.dimensions = "3D"
-    trajectory.data.use_stretch = True
-    trajectory.data.use_deform_bounds = True
+    curve = bpy.data.objects.new(name, bpy.data.curves.new(name, 'CURVE'))
+    trajectory = setup_trajectory(curve)
+
     if location is not None:
         trajectory.location = location
 
-    spline = trajectory.data.splines.new('BEZIER')
-    spline.use_smooth = False
-
-    spline.bezier_points.add(1)
-
     return trajectory
+
+
+def setup_trajectory(curve):
+    curve.data.dimensions = "3D"
+    curve.data.use_stretch = True
+    curve.data.use_deform_bounds = True
+
+    spline = curve.data.splines.new('BEZIER')
+    spline.use_smooth = False
+    spline.bezier_points.add(1)
 
 
 def create_element_from_track(track_object):
