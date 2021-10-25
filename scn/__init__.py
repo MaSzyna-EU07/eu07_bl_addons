@@ -36,8 +36,6 @@ classes = (
     SCN_OT_AddConfigSetting,
     SCN_UL_SceneryConfig,
     SCN_OT_DeleteConfigSetting,
-
-    SCN_OT_LoadSectors,
 )
 
 
@@ -50,6 +48,8 @@ def menu_func_export(self, context):
 
 
 def register():
+    sectorizer.register()
+
     for c in classes:
         bpy.utils.register_class(c)
 

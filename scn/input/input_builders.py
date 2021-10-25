@@ -117,19 +117,16 @@ class SceneryBuilder:
                 if trajectory.scn_properties.type_ == "node:track:switch" and trajectory.parent is None:
                     trajectory_straight = trajectory
                     trajectory_side = trajectory_tools.get_switch_side(trajectory_straight)
-                    print(trajectory_straight.name)
                     for i in range(4):
                         part_trajectory = trajectory_straight if i < 1 else trajectory_side
 
                         point_index = i - 1 if i > 1 else i + 1
-                        print(point_index)
 
                         neighbour = trajectory_tools.get_neighbour(part_trajectory, point_index)
                         if neighbour is not None:
-                            print("found neighbour")
                             ballast_mat = trajectory_tools.get_material(neighbour, 1)
                             trajectory_tools.profile.copy_instance_between(neighbour, trajectory_straight)
-                            trajectory_tools.profile.copy_instance_between(neighbour, trajectory_side)
+                            trajectory_tools.profile.copy_instance_between(trajectory_straight, trajectory_side)
 
                             trajectory_tools.set_material(trajectory_straight, ballast_mat, 1)
                             trajectory_tools.set_material(trajectory_side, ballast_mat, 1)

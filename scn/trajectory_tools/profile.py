@@ -35,20 +35,22 @@ def get_instance(trajectory):
 
 def copy_instance_between(source, dest):
     profile = get_instance(source)
-    print(f"Copying profile from {source.name} to {dest.name}")
     set_instance(dest, profile.copy())
 
 
 def set_instance(trajectory, new_profile_instance):
     unset_instance(trajectory)
 
-    Sectorizer.auto_put(new_profile_instance)
-
     new_profile_instance.parent = trajectory
     new_profile_instance.location = (0, 0, 0)
     new_profile_instance.hide_select = True
     new_profile_instance.modifiers["Array"].curve = trajectory
     new_profile_instance.modifiers["Curve"].object = trajectory
+
+    Sectorizer.insert_into_sector(
+        new_profile_instance,
+        Sectorizer.get_sector_by_location(trajectory.location)
+    )
 
 
 def unset_instance(trajectory):
