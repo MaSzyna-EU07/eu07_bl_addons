@@ -9,6 +9,7 @@ from .tree_utils import AddTreeOperator
 from .scenery_tools_panel import SCNToolsPanel
 from .sectorizer import SCN_OT_LoadSectors
 from .config import SCNConfig, SCN_PT_SceneryConfig, SCN_UL_SceneryConfig, SCN_OT_AddConfigSetting, SCN_OT_DeleteConfigSetting
+from .trajectory_tools.trajectory_operators import AddTrackOperator
 
 from . import sound
 from . import camera
@@ -30,6 +31,8 @@ classes = (
     CopyMaterialsToSelectedOperator,
 
     AddTreeOperator,
+
+    AddTrackOperator,
 
     SCNConfig,
     SCN_PT_SceneryConfig,

@@ -11,3 +11,5 @@ class SCNToolsPanel(bpy.types.Panel):
     def draw(self, context):
         add_tree_row = self.layout.row()
         add_tree_row.operator('eu07.add_tree')
+        add_track_row = self.layout.row()
+        add_track_row.operator('scn.add_track')

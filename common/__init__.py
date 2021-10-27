@@ -13,8 +13,6 @@ def unregister():
     preferences.unregister()
 
 
-# TODO: Move this stuff to better places
-
 
 
 

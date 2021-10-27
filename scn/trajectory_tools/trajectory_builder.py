@@ -93,7 +93,7 @@ class TrajectoryProfileGenerator:
         collection = bpy.data.collections.get("Templates") or bpy.data.collections.new("Templates")
         collection.objects.link(self.object)
 
-        for i in range(2):
+        for i in range(2 - len(self.object.material_slots)):
             self.object.data.materials.append(None)
             self.object.material_slots[i].link = 'OBJECT'
 
