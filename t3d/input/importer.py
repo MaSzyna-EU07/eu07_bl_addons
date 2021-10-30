@@ -1,113 +1,107 @@
-import collections
-from pathlib import Path
+import pathlib
 
 import bpy
-from bpy.props import StringProperty, BoolProperty
-from bpy_extras.io_utils import ImportHelper
 import eu07_tools
 
 from common.utils import get_root
-from .input_builders import import_model
+from common import includes
+from t3d.input import input_builders
 
 
-class T3DImporter(bpy.types.Operator, ImportHelper):
-    bl_idname = "import_scene.t3d"
-    bl_label = "Import T3D"
-    filename_ext = ".t3d"
+# TODO: Move to utils
+def merge_objects_to_master(objects, master):
+    bpy.ops.object.select_all(action='DESELECT')
 
-    filter_glob: StringProperty(
-        default="*.t3d",
-        options={'HIDDEN'}
-    )
-    skin_1: StringProperty(
-        name="Skin #1",
-    )
-    skin_2: StringProperty(
-        name="Skin #2",
-    )
-    skin_3: StringProperty(
-        name="Skin #3",
-    )
-    skin_4: StringProperty(
-        name="Skin #4",
-    )
-    load_includes: BoolProperty(
-        name="Load included submodels",
-        default=True,
-    )
-    import_meshes: BoolProperty(
-        name="Import Meshes",
-        default=True,
-    )
-    import_spots: BoolProperty(
-        name="Import FreeSpotLights",
-        default=True
-    )
-    import_stars: BoolProperty(
-        name="Import Stars",
-        default=True
-    )
-    merge_all: BoolProperty(
-        name="Merge to single mesh",
-        default=False,
-        options={'HIDDEN'}
-    )
-    link_merged_object: BoolProperty(
-        name="Link merged object to scene collection",
-        default=True,
-        options={'HIDDEN'}
-    )
+    master.select_set(True)
+    bpy.context.view_layer.objects.active = master
 
-    def execute(self, context):
-        Config = collections.namedtuple(
-            "Config",
-            "report_func root skins asset_searcher load_includes import_meshes import_spots import_stars merge_all"
-        )
+    for obj in objects:
+        obj.select_set(True)
 
-        skins = {
-            "replacableskin": self.skin_1,
-            "-1": self.skin_1,
-            "-2": self.skin_2,
-            "-3": self.skin_3,
-            "-4": self.skin_4,
-        }
+    bpy.ops.object.join()
 
-        root = get_root(self.filepath)
 
-        asset_searcher = eu07_tools.utils.AssetSearcher(
-            root,
-            Path(self.filepath).parent
-        )
+class T3DImporter:
+    def __init__(self):
+        self.load_includes = True
+        self.import_meshes = True
+        self.import_spots = True
+        self.import_stars = True
+        self.merge_to_single_mesh = False
+        self.asset_searcher = eu07_tools.utils.AssetSearcher(get_root())
+        self.include_identifier = includes.MASTER_IDENTIFIER
 
-        asset_searcher.models.remove_extension(".e3d")
-
-        config = Config(
-            self.report, root, skins, asset_searcher,
-            self.load_includes, self.import_meshes, self.import_spots, self.import_stars,
-            self.merge_all
-        )
-
-        collection = bpy.context.scene.collection
-
+    def import_from_filepath(self, filepath):
         with open(self.filepath, "r", encoding="latin-1") as file:
-            elements = eu07_tools.t3d.load(file)
-            imported = import_model(elements, config)
+            return self.import_from_file(file)
 
-            if self.merge_all:
-                name = str(Path(self.filepath).with_suffix("").relative_to(root))
-                named_mesh = bpy.data.meshes.new(name)
-                named_obj = bpy.data.objects.new(name, named_mesh)
-                if self.link_merged_object:
-                    bpy.context.scene.collection.objects.link(named_obj)
+    def import_from_file(self, file):
+        elements = eu07_tools.t3d.load(file)
+        return self.import_elements(elements)
 
-                named_obj.select_set(True)
+    def import_from_elements(self, elements):
+        objects = []
 
-                for imported_object in imported:
-                    if imported_object.type == 'MESH':
-                        imported_object.select_set(True)
+        for element in elements:
+            if element.element_type == "submodel":
+                obj = self.import_from_submodel_element(element)
+                objects.append(obj)
 
-                context.view_layer.objects.active = ob = named_obj
+            elif element.element_type == "include" and self.load_includes:
+                included_objects = self.import_from_include_element(element)
+                objects.extend(included_objects)
 
-                bpy.ops.object.join()
+        return objects
 
-        return {'FINISHED'}
+    def import_from_include_element(self, element):
+        inc_path = self.asset_searcher.models.find(element.path)
+        if inc_path:
+            include = includes.add_include()
+
+            full_path = pathlib.Path(inc_path)
+            include.file_path = str(full_path.relative_to(self.asset_searcher.root))
+            include.name = str(pathlib.Path(include.file_path).with_suffix("").stem)
+
+            self.include_identifier = include.identifier
+            objects = self.import_from_filepath(inc_path)
+            self.include_identifier = includes.MASTER_IDENTIFIER
+
+            return objects
+
+        return []
+
+    def import_from_submodel_element(self, element):
+        builder = input_builders.get_builder(element.type)
+
+        builder.create_element(element.name)
+        builder.set_parent(element.parent_name)
+        builder.set_anim(element.anim)
+        builder.set_diffuse(element.diffuse_color)
+        builder.set_selfillum(element.selfillum)
+        builder.set_max_distance(element.max_distance)
+        builder.set_min_distance(element.min_distance)
+        builder.set_transform(element.transform)
+
+        if element.type == 'Mesh':
+            builder.set_ambient(element.ambient_color)
+            builder.set_specular(element.specular_color)
+            builder.set_wire(element.wire)
+            builder.set_wire_size(element.wire_size)
+            builder.set_opacity(element.opacity)
+            builder.set_map(element.map, self.asset_searcher)
+            builder.set_geometry(element)
+
+        elif element.type == 'FreeSpotLight':
+            builder.set_near_atten_start(element.near_atten_start)
+            builder.set_near_atten_end(element.near_atten_end)
+            builder.set_use_near_atten(element.use_near_atten)
+            builder.set_far_atten_decay_type(element.far_atten_decay_type)
+            builder.set_far_decay_radius(element.far_decay_radius)
+            builder.set_falloff_angle(element.falloff_angle)
+            builder.set_hotspot_angle(element.hotspot_angle)
+
+        elif element.type == 'Stars':
+            builder.set_geometry(element.stars)
+
+        return builder.obj
+

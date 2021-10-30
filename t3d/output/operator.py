@@ -13,7 +13,7 @@ from common import get_path_from_material, get_root, includes
 from common.include_export_manager import IncludeExportManager
 
 
-class T3DExporter(bpy.types.Operator, ExportHelper):
+class T3DExportOperator(bpy.types.Operator, ExportHelper):
     bl_idname = "export_scene.t3d"
     bl_label = "Export T3D"
     filename_ext = ".t3d"

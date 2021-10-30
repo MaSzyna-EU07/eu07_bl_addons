@@ -1,1 +1,1 @@
-from .importer import T3DImporter
+from .operator import T3DImportOperator

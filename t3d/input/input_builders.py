@@ -86,7 +86,7 @@ def _build_object(submodel, config):
     return builder.obj
         
 
-def _get_builder(type_, config):
+def _get_builder(type_):
     if type_ == 'Mesh':
         cls = MeshInputBuilder
     elif type_ == 'FreeSpotLight':
@@ -96,13 +96,10 @@ def _get_builder(type_, config):
     else:
         raise ValueError('Unrecognized submodel type: {0}'.format(type_))
 
-    return cls(config)
+    return cls()
 
 
 class SubmodelInputBuilder(abc.ABC):
-    def __init__(self, config):
-        self._config = config
-
     def create_submodel(self, name):
         self.obj = None
 
@@ -133,9 +130,6 @@ class SubmodelInputBuilder(abc.ABC):
         ]
 
 class MeshInputBuilder(SubmodelInputBuilder):
-    def __init__(self, config):
-        super().__init__(config)
-
     def create_submodel(self, name: str):
         mesh = bpy.data.meshes.new(name)
         self.obj = bpy.data.objects.new(name, mesh)
@@ -155,10 +149,7 @@ class MeshInputBuilder(SubmodelInputBuilder):
     def set_opacity(self, opacity):
         self.obj.t3d_properties.opacity = opacity
 
-    def set_map(self, map_: str):
-        print(self.obj.name)
-        print(map_)
-
+    def set_map(self, map_, asset_searcher):
         if map_ == "none":
             return
 
@@ -172,12 +163,13 @@ class MeshInputBuilder(SubmodelInputBuilder):
 
             repl_mat_name = f"Replacableskin {map_}"
             self.obj.active_material = bpy.data.materials.get(
-                repl_mat_name, bpy.data.materials.new(repl_mat_name)
+                repl_mat_name,
+                bpy.data.materials.new(repl_mat_name)
             )
 
         else:
-            abspath = self._config.asset_searcher.textures.find(map_)
-            print([abspath])
+            abspath = asset_searcher.textures.find(map_)
+
             if abspath:
                 self.obj.active_material = HelperMATImporter.import_material_from_abspath(abspath)
 
@@ -273,9 +265,6 @@ class FreeSpotLightInputBuilder(SubmodelInputBuilder):
 
 
 class StarsInputBuilder(SubmodelInputBuilder):
-    def __init__(self, config):
-        super().__init__(config)
-
     def create_submodel(self, name: str):
         self.obj = bpy.data.objects.new(name, None)
 
