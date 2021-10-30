@@ -1,43 +1,27 @@
 import pathlib
 
-import bpy
 import eu07_tools
 
-from common.utils import get_root
 from common import includes
 from t3d.input import input_builders
 
 
-# TODO: Move to utils
-def merge_objects_to_master(objects, master):
-    bpy.ops.object.select_all(action='DESELECT')
-
-    master.select_set(True)
-    bpy.context.view_layer.objects.active = master
-
-    for obj in objects:
-        obj.select_set(True)
-
-    bpy.ops.object.join()
-
-
 class T3DImporter:
-    def __init__(self):
+    def __init__(self, asset_searcher):
         self.load_includes = True
         self.import_meshes = True
         self.import_spots = True
         self.import_stars = True
-        self.merge_to_single_mesh = False
-        self.asset_searcher = eu07_tools.utils.AssetSearcher(get_root())
+        self.asset_searcher = asset_searcher
         self.include_identifier = includes.MASTER_IDENTIFIER
 
     def import_from_filepath(self, filepath):
-        with open(self.filepath, "r", encoding="latin-1") as file:
+        with open(filepath, "r", encoding="latin-1") as file:
             return self.import_from_file(file)
 
     def import_from_file(self, file):
         elements = eu07_tools.t3d.load(file)
-        return self.import_elements(elements)
+        return self.import_from_elements(elements)
 
     def import_from_elements(self, elements):
         objects = []
@@ -45,7 +29,9 @@ class T3DImporter:
         for element in elements:
             if element.element_type == "submodel":
                 obj = self.import_from_submodel_element(element)
-                objects.append(obj)
+
+                if obj:
+                    objects.append(obj)
 
             elif element.element_type == "include" and self.load_includes:
                 included_objects = self.import_from_include_element(element)
@@ -53,27 +39,17 @@ class T3DImporter:
 
         return objects
 
-    def import_from_include_element(self, element):
-        inc_path = self.asset_searcher.models.find(element.path)
-        if inc_path:
-            include = includes.add_include()
-
-            full_path = pathlib.Path(inc_path)
-            include.file_path = str(full_path.relative_to(self.asset_searcher.root))
-            include.name = str(pathlib.Path(include.file_path).with_suffix("").stem)
-
-            self.include_identifier = include.identifier
-            objects = self.import_from_filepath(inc_path)
-            self.include_identifier = includes.MASTER_IDENTIFIER
-
-            return objects
-
-        return []
-
     def import_from_submodel_element(self, element):
+        if (
+                (element.type == "Mesh" and not self.import_meshes) or
+                (element.type == "FreeSpotLight" and not self.import_spots) or
+                (element.type == "Stars" and not self.import_stars)
+        ):
+            return None
+
         builder = input_builders.get_builder(element.type)
 
-        builder.create_element(element.name)
+        builder.create_submodel(element.name)
         builder.set_parent(element.parent_name)
         builder.set_anim(element.anim)
         builder.set_diffuse(element.diffuse_color)
@@ -103,5 +79,26 @@ class T3DImporter:
         elif element.type == 'Stars':
             builder.set_geometry(element.stars)
 
-        return builder.obj
+        obj = builder.obj
+        obj.eu07_include_identifier = self.include_identifier
+        return obj
 
+    def import_from_include_element(self, element):
+        inc_path = self.asset_searcher.models.find(element.path)
+        if inc_path:
+            include = includes.add_include()
+
+            full_path = pathlib.Path(inc_path)
+            include.file_path = str(full_path.relative_to(self.asset_searcher.root))
+            include.name = str(pathlib.Path(include.file_path).with_suffix("").stem)
+
+            prev_inc_identifier = self.include_identifier
+            self.include_identifier = include.identifier
+
+            objects = self.import_from_filepath(inc_path)
+
+            self.include_identifier = prev_inc_identifier
+
+            return objects
+
+        return []

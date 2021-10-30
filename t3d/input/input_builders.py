@@ -11,82 +11,9 @@ import eu07_tools
 from common import includes
 
 from mat import HelperMATImporter
-from common import get_root
-
-
-def import_model(elements, config, include_identifier=includes.MASTER_IDENTIFIER):
-    imported = []
-    for element in elements:
-        if element.element_type == "submodel":
-            if (
-                (element.type == "Mesh" and not config.import_meshes) or
-                (element.type == "FreeSpotLight" and not config.import_spots) or
-                (element.type == "Stars" and not config.import_stars)
-            ):
-                continue
-
-            obj = _build_object(element, config)
-            obj.eu07_include_identifier = include_identifier
-            bpy.context.scene.collection.objects.link(obj)
-            imported.append(obj)
-
-        elif element.element_type == "include" and config.load_includes:
-            full_path = config.asset_searcher.models.find(element.path)
-            if full_path:
-                full_path = pathlib.Path(full_path)
-                include = includes.add_include()
-                include.file_path = str(full_path.relative_to(get_root()))
-                include.name = str(pathlib.Path(include.file_path).with_suffix("").stem)
-            
-                with open(full_path, "r", encoding="latin-1") as inc_file:
-                    inc_elements = eu07_tools.t3d.load(inc_file)
-                    inc_objects = import_model(inc_elements, config, include.identifier)
-                    imported.extend(inc_objects)
-
-            else:
-                config.report_func({"WARNING"}, f"Can't find included file: {element.path}")
-
-    return imported
-
-
-def _build_object(submodel, config):
-    builder = _get_builder(submodel.type, config)
-
-    builder.create_submodel(submodel.name)
-    builder.set_parent(submodel.parent_name)
-    builder.set_anim(submodel.anim)
-    builder.set_diffuse(submodel.diffuse_color)
-    builder.set_selfillum(submodel.selfillum)
-    builder.set_max_distance(submodel.max_distance)
-    builder.set_min_distance(submodel.min_distance)
-    builder.set_transform(submodel.transform)
-
-
-    if submodel.type == 'Mesh':
-        builder.set_ambient(submodel.ambient_color)
-        builder.set_specular(submodel.specular_color)
-        builder.set_wire(submodel.wire)
-        builder.set_wire_size(submodel.wire_size)
-        builder.set_opacity(submodel.opacity)
-        builder.set_map(submodel.map)
-        builder.set_geometry(submodel)
-
-    elif submodel.type == 'FreeSpotLight':
-        builder.set_near_atten_start(submodel.near_atten_start)
-        builder.set_near_atten_end(submodel.near_atten_end)
-        builder.set_use_near_atten(submodel.use_near_atten)
-        builder.set_far_atten_decay_type(submodel.far_atten_decay_type)
-        builder.set_far_decay_radius(submodel.far_decay_radius)
-        builder.set_falloff_angle(submodel.falloff_angle)
-        builder.set_hotspot_angle(submodel.hotspot_angle)
-
-    elif submodel.type == 'Stars':
-        builder.set_geometry(submodel.stars)
-
-    return builder.obj
         
 
-def _get_builder(type_):
+def get_builder(type_):
     if type_ == 'Mesh':
         cls = MeshInputBuilder
     elif type_ == 'FreeSpotLight':
