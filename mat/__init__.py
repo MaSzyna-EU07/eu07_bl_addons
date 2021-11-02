@@ -1,14 +1,15 @@
 import bpy
 
-from .input import EU07MaterialImporter, HelperMATImporter
+from .input import MATImportOperator
+from .nodegroup import delete_mat_nodegroup_template, create_mat_nodegroup_template
 
 classes = (
-    EU07MaterialImporter,
+    MATImportOperator,
 )
 
 
 def menu_func_import(self, context):
-    self.layout.operator(EU07MaterialImporter.bl_idname, text="[EU07] Material (.mat)")
+    self.layout.operator(MATImportOperator.bl_idname, text="[EU07] Material (.mat)")
 
 
 def menu_func_export(self, context):
@@ -23,6 +24,8 @@ def register():
     bpy.types.TOPBAR_MT_file_import.append(menu_func_import)
     bpy.types.TOPBAR_MT_file_export.append(menu_func_export)
 
+    create_mat_nodegroup_template()
+
 
 def unregister():
     for c in classes:
@@ -30,3 +33,7 @@ def unregister():
 
     bpy.types.TOPBAR_MT_file_import.remove(menu_func_import)
     bpy.types.TOPBAR_MT_file_export.remove(menu_func_export)
+
+    delete_mat_nodegroup_template()
+
+
