@@ -9,6 +9,7 @@ class MATImporter:
     def __init__(self, asset_searcher):
         self.use_fake_user = False
         self.asset_searcher = asset_searcher
+        self.material = None
 
     def import_from_relpath(self, relpath):
         abspath = self.asset_searcher.textures.find(relpath)
@@ -27,28 +28,30 @@ class MATImporter:
 
     def import_from_mapping(self, mapping):
         # TODO: Naming!
-        material = bpy.data.materials.new("MAT TEST")
-        material.use_backface_culling = True
-        material.blend_method = 'CLIP'
-        material.use_nodes = True
-        material.use_fake_user = self.use_fake_user
+        self.material = bpy.data.materials.new("MAT TEST")
+        self.material.use_backface_culling = True
+        self.material.blend_method = 'CLIP'
+        self.material.use_nodes = True
+        self.material.use_fake_user = self.use_fake_user
+        self._node_tree = self.material.node_tree
 
-        for node in material.node_tree.nodes:
-            material.node_tree.nodes.remove(node)
+        for node in self.material.node_tree.nodes:
+            self.material.node_tree.nodes.remove(node)
 
-        nodegroup = self._nodify_mapping(material.node_tree)
+        nodegroup_wrapper = self._nodify_mapping(mapping)
 
-        material_output = material.node_tree.nodes.new("ShaderNodeOutputMaterial")
+        material_output = self.material.node_tree.nodes.new("ShaderNodeOutputMaterial")
 
-        material.node_tree.links.new(nodegroup.outputs[0], material_output.inputs[0])
+        self.material.node_tree.links.new(nodegroup_wrapper.nodegroup.outputs[0], material_output.inputs[0])
 
     def _nodify_mapping(self, mapping):
         nodegroup = instantiate_mat_nodegroup(self._node_tree)
-        wrapper = NodeGroupWrapper(nodegroup)
+        wrapper = NodeGroupWrapper(nodegroup, self.material.node_tree)
 
         shader_params = []
 
         for key, value in mapping.items():
+
             if key == "shader":
                 wrapper.set_shader_name(value)
 
@@ -88,6 +91,7 @@ class MATImporter:
                 wrapper.set_shadow_rank(value)
 
             elif key in eu07_tools.mat.NESTED_MAPPING_KEYS:
+                print("nested")
                 nested_wrapper = self._nodify_mapping(value)
                 wrapper.set_nested(key, nested_wrapper)
 

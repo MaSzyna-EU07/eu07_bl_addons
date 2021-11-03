@@ -1,16 +1,10 @@
 import abc
 import math
-import pathlib
-import collections
 
 import bmesh
 import bpy
-from bpy_extras.io_utils import ImportHelper
-from bpy.props import StringProperty, BoolProperty
-import eu07_tools
-from common import includes
 
-from mat import HelperMATImporter
+from mat.input import MATImporter
         
 
 def get_builder(type_):
@@ -98,7 +92,7 @@ class MeshInputBuilder(SubmodelInputBuilder):
             abspath = asset_searcher.textures.find(map_)
 
             if abspath:
-                self.obj.active_material = HelperMATImporter.import_material_from_abspath(abspath)
+                self.obj.active_material = MATImporter.import_from_abspath(abspath)
 
 
     def set_geometry(self, submodel):

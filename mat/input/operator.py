@@ -5,26 +5,26 @@ from bpy_extras.io_utils import ImportHelper
 
 import eu07_tools
 from common import get_root
-from mat.input import MATImporter
+from .importer import MATImporter
 
 class MATImportOperator(bpy.types.Operator, ImportHelper):
     bl_idname = "import_material.mat"
     bl_label = "Import material"
 
-    filter_glob: bpy.types.StringProperty(
+    filter_glob: bpy.props.StringProperty(
         default="*.mat;*.tga;*.dds;*.png",
         options={'HIDDEN'}
     )
 
-    files: bpy.types.CollectionProperty(
+    files: bpy.props.CollectionProperty(
         name="File Path",
         type=bpy.types.OperatorFileListElement,
     )
-    directory: bpy.types.StringProperty(
+    directory: bpy.props.StringProperty(
         subtype='DIR_PATH',
     )
 
-    use_fake_user: bpy.types.BoolProperty(
+    use_fake_user: bpy.props.BoolProperty(
         name="Use fake user",
         default=False
     )
