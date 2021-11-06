@@ -3,6 +3,7 @@ import bpy
 import eu07_tools
 
 from mat.nodegroup import NodeGroupWrapper, instantiate_mat_nodegroup
+from common.utils import get_qualified_material_name
 
 
 class MATImporter:
@@ -19,16 +20,17 @@ class MATImporter:
         return None
 
     def import_from_abspath(self, abspath):
+        name = get_qualified_material_name(abspath)
+
         with open(abspath, encoding="latin-1") as file:
-            return self.import_from_file(file)
+            return self.import_from_file(file, name)
 
-    def import_from_file(self, file):
+    def import_from_file(self, file, name="Material"):
         mapping = eu07_tools.mat.load(file)
-        return self.import_from_mapping(mapping)
+        return self.import_from_mapping(mapping, name)
 
-    def import_from_mapping(self, mapping):
-        # TODO: Naming!
-        self.material = bpy.data.materials.new("MAT TEST")
+    def import_from_mapping(self, mapping, name="Material"):
+        self.material = bpy.data.materials.new(name)
         self.material.use_backface_culling = True
         self.material.blend_method = 'CLIP'
         self.material.use_nodes = True
@@ -43,6 +45,8 @@ class MATImporter:
         material_output = self.material.node_tree.nodes.new("ShaderNodeOutputMaterial")
 
         self.material.node_tree.links.new(nodegroup_wrapper.nodegroup.outputs[0], material_output.inputs[0])
+
+        return self.material
 
     def _nodify_mapping(self, mapping):
         nodegroup = instantiate_mat_nodegroup(self._node_tree)

@@ -5,6 +5,8 @@ import bmesh
 import bpy
 
 from mat.input import MATImporter
+from mat import create_material_from_image_path
+from common import get_qualified_material_name
         
 
 def get_builder(type_):
@@ -91,9 +93,15 @@ class MeshInputBuilder(SubmodelInputBuilder):
         else:
             abspath = asset_searcher.textures.find(map_)
 
-            if abspath:
-                self.obj.active_material = MATImporter.import_from_abspath(abspath)
+            material = bpy.data.materials.get(get_qualified_material_name(abspath))
 
+            if not material:
+                if abspath.endswith(".mat"):
+                    material = MATImporter(asset_searcher).import_from_abspath(abspath)
+                else:
+                    material = create_material_from_image_path(abspath)
+
+            self.obj.active_material = material
 
     def set_geometry(self, submodel):
         bm = bmesh.new()

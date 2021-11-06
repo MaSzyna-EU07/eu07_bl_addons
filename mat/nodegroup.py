@@ -116,7 +116,7 @@ class NodeGroupWrapper:
         self.nodegroup.inputs[1].default_value = shader_params
 
     def get_shader_params(self):
-        return self.nodegroup.inputs[1].default_valie
+        return self.nodegroup.inputs[1].default_value
 
     def set_shadow_rank(self, shadow_rank):
         self.nodegroup.inputs[2].default_value = shadow_rank

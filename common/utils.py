@@ -23,7 +23,6 @@ def get_qualified_material_name(abspath):
     return str(pathlib.Path(abspath).relative_to(root))
 
 
-
 def get_path_from_material(material):
     if material:
         if material.get("is_eu07_mat") and material["is_eu07_mat"] == "true":
