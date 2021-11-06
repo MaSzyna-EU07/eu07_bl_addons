@@ -5,7 +5,6 @@ import bmesh
 import bpy
 
 from mat.input import MATImporter
-from mat import create_material_from_image_path
 from common import get_qualified_material_name
         
 
@@ -96,10 +95,7 @@ class MeshInputBuilder(SubmodelInputBuilder):
             material = bpy.data.materials.get(get_qualified_material_name(abspath))
 
             if not material:
-                if abspath.endswith(".mat"):
-                    material = MATImporter(asset_searcher).import_from_abspath(abspath)
-                else:
-                    material = create_material_from_image_path(abspath)
+                material = MATImporter(asset_searcher).import_from_abspath(abspath)
 
             self.obj.active_material = material
 

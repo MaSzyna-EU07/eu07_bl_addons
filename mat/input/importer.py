@@ -1,9 +1,11 @@
+import pathlib
+
 import bpy
 
 import eu07_tools
 
 from mat.nodegroup import NodeGroupWrapper, instantiate_mat_nodegroup
-from common.utils import get_qualified_material_name
+from common.utils import get_qualified_material_name, get_root
 
 
 class MATImporter:
@@ -22,8 +24,14 @@ class MATImporter:
     def import_from_abspath(self, abspath):
         name = get_qualified_material_name(abspath)
 
-        with open(abspath, encoding="latin-1") as file:
-            return self.import_from_file(file, name)
+        if abspath.endswith(".mat"):
+            with open(abspath, encoding="latin-1") as file:
+                return self.import_from_file(file, name)
+        else:
+            mapping = eu07_tools.mat.create_mapping()
+            mapping["texture_diffuse"] = str(pathlib.Path(abspath).relative_to(get_root(abspath)))
+
+            return self.import_from_mapping(mapping, name)
 
     def import_from_file(self, file, name="Material"):
         mapping = eu07_tools.mat.load(file)
@@ -95,7 +103,6 @@ class MATImporter:
                 wrapper.set_shadow_rank(value)
 
             elif key in eu07_tools.mat.NESTED_MAPPING_KEYS:
-                print("nested")
                 nested_wrapper = self._nodify_mapping(value)
                 wrapper.set_nested(key, nested_wrapper)
 

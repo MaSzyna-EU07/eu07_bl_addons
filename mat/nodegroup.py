@@ -148,6 +148,7 @@ class NodeGroupWrapper:
 
     def set_texture_image(self, texture_image, index, alias=""):
         texture_input = self._get_texture_input(index)
+        texture_node = None
         if texture_input.links:
             texture_link = texture_input.links[0]
             texture_node = texture_link.from_node
@@ -164,6 +165,13 @@ class NodeGroupWrapper:
             if index == DIFFUSE_TEXTURE_INDEX:
                 alpha_input_index = self.nodegroup.inputs.find(texture_input.name) + 1
                 self.main_nodetree.links.new(texture_node.outputs[1], self.nodegroup.inputs[alpha_input_index])
+            elif index == NORMAL_TEXTURE_INDEX:
+                texture_image.colorspace_settings.name = "Non-Color"
+
+        if texture_image.filepath.endswith(".dds"):
+            texture_node.texture_mapping.scale = (1, -1, 1)
+        else:
+            texture_node.texture_mapping.scale = (1, 1, 1)
 
     def get_texture_image(self, index):
         texture_input = self._get_texture_input(index)

@@ -2,7 +2,6 @@ import bpy
 
 from .input import MATImportOperator
 from .nodegroup import delete_mat_nodegroup_template, create_mat_nodegroup_template
-from .utils import create_material_from_image_path
 
 classes = (
     MATImportOperator,
