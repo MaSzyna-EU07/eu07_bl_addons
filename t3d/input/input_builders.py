@@ -105,6 +105,8 @@ class MeshInputBuilder(SubmodelInputBuilder):
         custom_normals = []
 
         if submodel.use_indices:
+            self.obj.t3d_properties.use_face_indices = True
+
             for vertex in submodel.vertices:
                 bm_vertex = bm.verts.new(vertex.location)
                 custom_normals.append(vertex.normal)
@@ -134,11 +136,14 @@ class MeshInputBuilder(SubmodelInputBuilder):
 
                 for vertex in triangle.vertices:
                     bm_vertex = bm.verts.new(vertex.location)
+
                     if vertex.use_normal:
-                        bm_vertex.normal = vertex.normal
+                        custom_normals.append(vertex.normal)
                         self.obj.t3d_properties.use_normals = True
 
                     bm_vertices.append(bm_vertex)
+
+                bm.verts.ensure_lookup_table()
 
                 bm_face = bm.faces.new(bm_vertices)
                 bm_face.smooth = (triangle.smooth > 0)
@@ -151,7 +156,7 @@ class MeshInputBuilder(SubmodelInputBuilder):
         bm.to_mesh(self.obj.data)
         bm.free()
 
-        if submodel.use_indices:
+        if custom_normals:
             self.obj.data.use_auto_smooth = True
             self.obj.data.normals_split_custom_set_from_vertices(custom_normals)
 

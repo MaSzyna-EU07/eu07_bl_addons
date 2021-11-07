@@ -17,8 +17,6 @@ class Sectorizer:
         except RuntimeError: # when obj is in collection already
             pass
 
-
-
     @staticmethod
     def auto_put_iterable(objects):
         for obj in objects:

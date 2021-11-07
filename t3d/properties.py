@@ -105,6 +105,9 @@ class T3DSubmodelProperties(bpy.types.PropertyGroup):
         name="Use explicit normals",
         default=False
     )
+    use_face_indices: BoolProperty(
+        name="Use face indices"
+    )
     use_near_atten: BoolProperty(
         name='UseNearAtten',
         default=False,
@@ -192,6 +195,13 @@ class T3DSubmodelPropertiesPanel(bpy.types.Panel):
 
             use_normals_r = self.layout.row()
             use_normals_r.prop(self.obj.t3d_properties, "use_normals")
+
+            use_face_indices_r = self.layout.row()
+            use_face_indices_r.prop(self.obj.t3d_properties, "use_face_indices")
+            if self.obj.t3d_properties.use_normals:
+                use_face_indices_r.enabled = False
+
+
 
         elif (self.obj_is_spot):
             diffuse_r = self.layout.row()
