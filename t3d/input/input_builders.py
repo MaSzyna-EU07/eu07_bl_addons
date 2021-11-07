@@ -206,7 +206,6 @@ class StarsInputBuilder(SubmodelInputBuilder):
                 )
                 star_obj = bpy.data.objects.new(point.name, point)
                 star_obj.parent = self.obj
-                # TODO: Link to parent's collection
                 bpy.context.scene.collection.objects.link(star_obj)
 
                 star_obj.location = star.location

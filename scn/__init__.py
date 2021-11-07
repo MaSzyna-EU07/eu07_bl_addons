@@ -56,10 +56,10 @@ def register():
     for c in classes:
         bpy.utils.register_class(c)
 
-    bpy.types.Object.scn_properties = PointerProperty(type=SCNObjectProperties)
+    bpy.types.Object.scn_properties = bpy.props.PointerProperty(type=SCNObjectProperties)
 
-    bpy.types.Scene.scn_config = CollectionProperty(type=SCNConfig)
-    bpy.types.Scene.scn_config_setting_index = IntProperty(min=0)
+    bpy.types.Scene.scn_config = bpy.props.CollectionProperty(type=SCNConfig)
+    bpy.types.Scene.scn_config_setting_index = bpy.props.IntProperty(min=0)
 
     bpy.types.TOPBAR_MT_file_import.append(menu_func_import)
     bpy.types.TOPBAR_MT_file_export.append(menu_func_export)
