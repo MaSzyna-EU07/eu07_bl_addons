@@ -1,11 +1,12 @@
 import bpy
 
 import eu07_tools
+from common.utils import get_root
 from common import includes
 from common.include_export_manager import IncludeExportManager
 from .hierarchy_maker import HierarchyMaker
 from . import output_builders
-from common.utils import get_root
+
 
 class T3DExporter:
     def __init__(self):

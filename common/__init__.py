@@ -1,7 +1,7 @@
+from .utils import *
 from . import includes
 from . import preferences
 from . import weather
-from common.utils import *
 
 
 def register():
@@ -13,7 +13,7 @@ def register():
 def unregister():
     includes.unregister()
     preferences.unregister()
-    weather.register()
+    weather.unregister()
 
 
 

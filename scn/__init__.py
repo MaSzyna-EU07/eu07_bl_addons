@@ -1,8 +1,8 @@
 import bpy
 from bpy.props import PointerProperty, CollectionProperty, IntProperty
 
-from .input import SCNImporter
 from .output import SCNExporter
+from .input import  SCNImportOperator
 from .basemaps import BasemapPanel, LoadBasemapOperator, BasemapProperties
 from .scenery_object import SCNObjectProperties, SCNObjectPropertiesPanel, CopyMaterialsToSelectedOperator
 from .tree_utils import AddTreeOperator
@@ -11,6 +11,7 @@ from .sectorizer import SCN_OT_LoadSectors
 from .config import SCNConfig, SCN_PT_SceneryConfig, SCN_UL_SceneryConfig, SCN_OT_AddConfigSetting, SCN_OT_DeleteConfigSetting
 from .trajectory_tools.trajectory_operators import AddTrackOperator
 
+
 from . import sound
 from . import camera
 from . import tree_utils
@@ -18,7 +19,7 @@ from . import memcell
 
 
 classes = (
-    SCNImporter,
+    SCNImportOperator,
     SCNExporter,
 
     #BasemapProperties,
@@ -43,7 +44,7 @@ classes = (
 
 
 def menu_func_import(self, context):
-    self.layout.operator(SCNImporter.bl_idname, text="[EU07] Scenery File (.scn, .scm)")
+    self.layout.operator(SCNImportOperator.bl_idname, text="[EU07] Scenery File (.scn, .scm)")
 
 
 def menu_func_export(self, context):

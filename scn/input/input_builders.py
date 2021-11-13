@@ -61,7 +61,7 @@ class SceneryBuilder:
                         tree_instance.location = eu07_tools.utils.swizzle_coords([float(x) for x in element.parameters[1:4]])
                         tree_instance.rotation_euler[2] = math.radians(float(element.parameters[4]))
 
-                        material = MATImporter.import_material_from_relpath(element.parameters[0])
+                        material = MATImporter(assearch).import_material_from_relpath(element.parameters[0])
                         scn.tree_utils.set_tree_material(tree_instance, material)
 
                         Sectorizer.auto_put(tree_instance)
@@ -85,8 +85,8 @@ class SceneryBuilder:
                     Sectorizer.auto_put(trajectory)
                     scn.trajectory_tools.profile.set_instance(trajectory, profile)
 
-                    trajectory_tools.set_material(trajectory, MATImporter.import_material_from_relpath(element.map1), 0)
-                    trajectory_tools.set_material(trajectory, MATImporter.import_material_from_relpath(element.map2), 1)
+                    trajectory_tools.set_material(trajectory, MATImporter(assearch).import_material_from_relpath(element.map1), 0)
+                    trajectory_tools.set_material(trajectory, MATImporter(assearch).import_material_from_relpath(element.map2), 1)
 
                     obj = trajectory
 

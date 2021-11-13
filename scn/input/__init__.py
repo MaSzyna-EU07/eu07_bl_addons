@@ -1,1 +1,1 @@
-from .importer import SCNImporter
+from .operator import SCNImportOperator
