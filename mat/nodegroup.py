@@ -1,6 +1,6 @@
 import bpy
 
-NODE_GROUP_NAME = "[EU07] Material"
+NODE_GROUP_NAME = "[EU07] Material Block"
 MAX_TEXTURES_NUM = 8
 VARIANT_NAMES = [
     "Spring",
