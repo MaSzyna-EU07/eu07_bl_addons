@@ -88,6 +88,7 @@ def instantiate_mat_nodegroup(node_tree):
         NODE_GROUP_NAME,
         create_mat_nodegroup_template()
     )
+    ng.label = NODE_GROUP_NAME
 
     return ng
 

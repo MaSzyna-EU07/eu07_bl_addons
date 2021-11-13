@@ -16,12 +16,13 @@ class MaterialWrapper:
         self._material.node_tree.nodes.new('ShaderNodeOutputMaterial')
 
     def get_main_block(self):
-        for node in self._material.nodes:
-            if node.label == NODE_GROUP_NAME and node.outputs:
+        for node in self._material.node_tree.nodes:
+            if node.label == NODE_GROUP_NAME:
                 output = node.outputs[0]
-                link = output.links[0] if output.links else None
-                if link and link.to_node.bl_idname == 'ShaderNodeOutputMaterial':
-                    return BlockWrapper(node, self)
+
+                is_nested = any([link.to_node.label == NODE_GROUP_NAME for link in output.links])
+                if not is_nested:
+                    return BlockWrapper(node, self, self._material.node_tree)
 
         return None
 
@@ -30,7 +31,6 @@ class MaterialWrapper:
 
 
 class BlockWrapper:
-    # TODO: Not instantiate blockwrapper each time?
 
     def __init__(self, node_group, material_wrapper, material_node_tree):
         self._node_group = node_group
@@ -61,15 +61,15 @@ class BlockWrapper:
 
     def get_sub_block(self, identifier):
         input_socket = self._get_sub_block_input_socket(identifier)
-        if input_socket.links and input_socket.links[0].from_node:
-            return BlockWrapper(input_socket.links[0].from_node)
+        if input_socket and input_socket.links and input_socket.links[0].from_node:
+            return BlockWrapper(input_socket.links[0].from_node, self._material_wrapper, self._material_node_tree)
 
         return None
 
     def _get_sub_block_input_socket(self, identifier):
         FIRST_SUBBLOCK_SOCKET_INDEX = 16
         for input_socket in self._node_group.inputs[FIRST_SUBBLOCK_SOCKET_INDEX:]:
-            if input_socket.name.lower() == identifier.lower():
+            if input_socket and input_socket.name.lower() == identifier.lower():
                 return input_socket
 
     def get_parent_block(self):
