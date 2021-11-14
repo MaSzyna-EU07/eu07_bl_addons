@@ -44,6 +44,7 @@ class MATImporter:
         material_wrapper = MaterialWrapper(self.material)
         material_wrapper.do_basic_setup()
         main_block = self._nodify_mapping(mapping, material_wrapper)
+        # TODO: Set active based on variants
         main_block.make_active()
 
         return self.material
