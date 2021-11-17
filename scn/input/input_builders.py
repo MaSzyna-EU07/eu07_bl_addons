@@ -11,7 +11,7 @@ from scn.trajectory_tools.trajectory_builder import TrajectoryBuilder
 from scn.terrain import TerrainBuilder
 from scn import trajectory_tools
 from scn.sectorizer import Sectorizer
-from mat.input import MATImporter
+from material_tools.input import MATImporter
 from common import includes
 import scn
 

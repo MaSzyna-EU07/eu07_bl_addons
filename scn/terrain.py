@@ -2,8 +2,8 @@ import eu07_tools
 import bpy
 import bmesh
 
-from common import get_path_from_material
-from mat.input import MATImporter
+from material_tools.utils import get_shortpath_from_material
+from material_tools.input import MATImporter
 
 class TerrainBuilder:
     def __init__(self, config):
@@ -78,7 +78,7 @@ def create_node_triangles_from_mesh(terrain_object):
         node = eu07_tools.scn.create_element("node:triangles")
 
         material = mesh.materials[polygon.material_index]
-        node.map = get_path_from_material(material)
+        node.map = get_shortpath_from_material(material)
 
         for loop_index in polygon.loop_indices:
             loop = mesh.loops[loop_index]

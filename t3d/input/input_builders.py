@@ -4,9 +4,9 @@ import math
 import bmesh
 import bpy
 
-from mat.input import MATImporter
-from common import get_qualified_material_name
-        
+from material_tools.input import MATImporter
+from material_tools.utils import get_qualified_material_name
+
 
 def get_builder(type_):
     if type_ == 'Mesh':

@@ -5,7 +5,7 @@ import bmesh
 import bpy
 
 import eu07_tools
-from common import get_path_from_material
+from material_tools.utils import get_shortpath_from_material
 
 
 def get_builder(obj):
@@ -82,7 +82,7 @@ class MeshOutputBuilder(SubmodelOutputBuilder):
             self.submodel.map = self.obj.t3d_properties.replacableskin_id
             return
 
-        self.submodel.map = get_path_from_material(mtl)
+        self.submodel.map = get_shortpath_from_material(mtl)
 
     def set_geometry(self, apply_modifiers):
         mesh = None

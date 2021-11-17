@@ -3,7 +3,7 @@ import math
 import bpy
 
 import eu07_tools
-from common import get_path_from_material
+from material_tools.utils import get_shortpath_from_material
 
 from scn.trajectory_tools.profile import get_params, get_instance
 
@@ -49,8 +49,8 @@ def create_element_from_track(track_object):
     node.damage_flag = properties.trajectory_damage
     node.environment = properties.trajectory_environment
     node.is_visible = properties.trajectory_visible
-    node.map1 = get_path_from_material(mesh.material_slots[0].material)
-    node.map2 = get_path_from_material(mesh.material_slots[1].material)
+    node.map1 = get_shortpath_from_material(mesh.material_slots[0].material)
+    node.map2 = get_shortpath_from_material(mesh.material_slots[1].material)
     node.mapping_length = properties.trajectory_mapping_length
     node.event0 = properties.trajectory_event0
     node.event1 = properties.trajectory_event1
@@ -92,10 +92,10 @@ def create_element_from_track(track_object):
         node.p3_roll = math.degrees(junction_track_object.data.splines[0].bezier_points[0].tilt)
         node.p4_roll = math.degrees(junction_track_object.data.splines[0].bezier_points[1].tilt)
 
-        node.map1 = get_path_from_material(mesh.material_slots[0].material)
-        node.map2 = get_path_from_material(junction_mesh.material_slots[0].material)
+        node.map1 = get_shortpath_from_material(mesh.material_slots[0].material)
+        node.map2 = get_shortpath_from_material(junction_mesh.material_slots[0].material)
 
-        node.trackbed = get_path_from_material(mesh.material_slots[1].material)
+        node.trackbed = get_shortpath_from_material(mesh.material_slots[1].material)
     else:
         node.geometry_params = get_params(profile_instance)
 

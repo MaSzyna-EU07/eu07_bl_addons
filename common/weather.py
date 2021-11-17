@@ -1,6 +1,7 @@
 import bpy
 
-from mat.material_wrapper import MaterialWrapper
+from material_tools.material_wrapper import MaterialWrapper
+from material_tools.utils import is_mat_material
 
 
 class EU07_OT_ApplyWeatherPreview(bpy.types.Operator):
@@ -9,9 +10,10 @@ class EU07_OT_ApplyWeatherPreview(bpy.types.Operator):
 
     def execute(self, context):
         for material in bpy.data.materials:
-            material_wrapper = MaterialWrapper(material)
-            variant_block = self._get_variant_block(material_wrapper)
-            variant_block.make_active()
+            if is_mat_material(material):
+                material_wrapper = MaterialWrapper(material)
+                variant_block = self._get_variant_block(material_wrapper)
+                variant_block.make_active()
 
         return {'FINISHED'}
 

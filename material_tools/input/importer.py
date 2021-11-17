@@ -4,8 +4,9 @@ import bpy
 
 import eu07_tools
 
-from mat.material_wrapper import MaterialWrapper
-from common.utils import get_qualified_material_name, get_root
+
+from material_tools.material_wrapper import MaterialWrapper
+from material_tools import utils
 
 
 class MATImporter:
@@ -22,19 +23,49 @@ class MATImporter:
         return None
 
     def import_from_abspath(self, abspath):
-        name = get_qualified_material_name(abspath)
+        name = utils.get_qualified_material_name(abspath)
 
         if abspath.endswith(".mat"):
             with open(abspath, encoding="latin-1") as file:
                 return self.import_from_file(file, name)
         else:
-            mapping = eu07_tools.mat.create_mapping()
-            mapping["texture_diffuse"] = str(pathlib.Path(abspath).relative_to(get_root(abspath)))
+            return self._import_from_image_abspath(abspath, name)
 
             return self.import_from_mapping(mapping, name)
 
+    def _import_from_image_abspath(self, abspath, name):
+        self.material = bpy.data.materials.new(name)
+        self.material.use_backface_culling = True
+        self.material.blend_method = 'CLIP'
+        self.material.use_nodes = True
+
+        image_node = self.material.node_tree.nodes.new("ShaderNodeTexImage")
+        image_node.image = bpy.data.images.load(abspath, check_existing=True)
+        utils.ensure_correct_image_node_settings(image_node)
+
+        bsdf = self.material.node_tree.nodes.get("Principled BSDF")
+        utils.ensure_correct_principled_bsdf_settings(bsdf)
+
+        color_input_socket = bsdf.inputs[0]
+        alpha_input_socket = bsdf.inputs[19]
+
+        self.material.node_tree.links.new(
+            image_node.outputs[0],
+            color_input_socket
+        )
+
+        self.material.node_tree.links.new(
+            image_node.outputs[1],
+            alpha_input_socket
+        )
+
+        return self.material
+
+
     def import_from_file(self, file, name="Material"):
         mapping = eu07_tools.mat.load(file)
+
+
         return self.import_from_mapping(mapping, name)
 
     def import_from_mapping(self, mapping, name="Material"):

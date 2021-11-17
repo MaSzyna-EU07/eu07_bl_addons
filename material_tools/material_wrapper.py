@@ -1,5 +1,6 @@
 from .nodegroup import NODE_GROUP_NAME, DIFFUSE_TEXTURE_INDEX, NORMAL_TEXTURE_INDEX, MAX_TEXTURES_NUM, instantiate_mat_nodegroup
 
+from .utils import ensure_correct_image_node_settings
 
 class MaterialWrapper:
     def __init__(self, material):
@@ -146,10 +147,7 @@ class BlockWrapper:
             elif index == NORMAL_TEXTURE_INDEX:
                 texture_image.colorspace_settings.name = "Non-Color"
 
-        if texture_image.filepath.endswith(".dds"):
-            texture_node.texture_mapping.scale = (1, -1, 1)
-        else:
-            texture_node.texture_mapping.scale = (1, 1, 1)
+        ensure_correct_image_node_settings(texture_node)
 
     def get_texture_image(self, index):
         texture_input = self._get_texture_input(index)

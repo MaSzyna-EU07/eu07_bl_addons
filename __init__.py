@@ -10,7 +10,7 @@ bl_info = {
 import sys, os
 sys.path.append(os.path.dirname(__file__))
 
-from . import common, t3d, e3d, scn, mat
+from . import common, t3d, e3d, scn, material_tools
 
 
 def register():
@@ -18,7 +18,7 @@ def register():
     t3d.register()
     e3d.register()
     scn.register()
-    mat.register()
+    material_tools.register()
 
 
 def unregister():
@@ -26,7 +26,7 @@ def unregister():
     t3d.unregister()
     e3d.unregister()
     scn.unregister()
-    mat.unregister()
+    material_tools.unregister()
 
 
 if __name__ == "__main__":

@@ -6,7 +6,8 @@ import bmesh
 import eu07_tools
 from bpy_extras import view3d_utils
 
-from common import get_path_from_material, preferences
+from common import preferences
+from material_tools.utils import get_shortpath_from_material
 
 inc_names = [
     "ljtree.inc",
@@ -121,7 +122,7 @@ def filter_trees_materials(regex):
 def create_tree_include(tree_object):
     tree_inc = eu07_tools.scn.create_element("include")
     tree_inc.path = "tree.inc"
-    tree_inc.parameters.append(get_path_from_material(tree_object.active_material))
+    tree_inc.parameters.append(get_shortpath_from_material(tree_object.active_material))
     tree_inc.parameters.extend(eu07_tools.utils.swizzle_coords(tree_object.location))
     tree_inc.parameters.append(math.degrees(tree_object.rotation_euler[2]))
     tree_inc.parameters.extend(get_tree_size(tree_object))
