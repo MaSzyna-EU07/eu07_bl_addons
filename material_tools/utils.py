@@ -18,13 +18,13 @@ def get_shortpath_from_material(material):
                 return str(path.relative_to("textures").with_suffix(""))
 
         elif is_texture_material(material):
-            node = get_node_tree_output_connection()
+            node = get_node_tree_output_connection(material.node_tree)
+            if node:
+                color_input_socket = node.inputs[0]
 
-            color_input_socket = node.inputs[0]
-
-            if color_input_socket.links:
-                image_node = color_input_socket.links[0].from_node
-                return eu07_tools.utils.shorten_asset_path(image_node.image.filepath)
+                if color_input_socket.links:
+                    image_node = color_input_socket.links[0].from_node
+                    return eu07_tools.utils.shorten_asset_path(image_node.image.filepath)
 
     return "none"
 
@@ -32,13 +32,15 @@ def get_shortpath_from_material(material):
 def is_texture_material(material):
     if material.use_nodes:
         node = get_node_tree_output_connection(material.node_tree)
-        return _is_bsdf_node(node)
+        if node:
+            return _is_bsdf_node(node)
 
 
 def is_mat_material(material):
     if material.use_nodes:
         node = get_node_tree_output_connection(material.node_tree)
-        return node.label == NODE_GROUP_NAME
+        if node:
+            return node.label == NODE_GROUP_NAME
 
 
 def get_node_tree_output_connection(node_tree):

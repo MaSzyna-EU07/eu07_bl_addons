@@ -12,10 +12,9 @@ class MATImportOperator(bpy.types.Operator, ImportHelper):
     bl_label = "Import material"
 
     filter_glob: bpy.props.StringProperty(
-        default="*.mat;*.tga;*.dds;*.png",
+        default="*.mat",
         options={'HIDDEN'}
     )
-
     files: bpy.props.CollectionProperty(
         name="File Path",
         type=bpy.types.OperatorFileListElement,
@@ -23,7 +22,6 @@ class MATImportOperator(bpy.types.Operator, ImportHelper):
     directory: bpy.props.StringProperty(
         subtype='DIR_PATH',
     )
-
     use_fake_user: bpy.props.BoolProperty(
         name="Use fake user",
         default=False
