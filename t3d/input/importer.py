@@ -47,7 +47,7 @@ class T3DImporter:
         ):
             return None
 
-        builder = input_builders.get_builder(element.type)
+        builder = input_builders.get_builder(element)
 
         builder.create_submodel(element.name)
         builder.set_parent(element.parent_name)

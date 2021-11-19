@@ -8,15 +8,20 @@ from material_tools.input import MATImporter
 from material_tools.utils import get_qualified_material_name
 
 
-def get_builder(type_):
-    if type_ == 'Mesh':
+def get_builder(element):
+    if element is None:
+        return None
+
+    if element.type == 'Mesh':
         cls = MeshInputBuilder
-    elif type_ == 'FreeSpotLight':
+        if element.has_geometry:
+            cls = BananMeshInputBuilder
+    elif element.type == 'FreeSpotLight':
         cls = FreeSpotLightInputBuilder
-    elif type_ == 'Stars':
+    elif element.type == 'Stars':
         cls = StarsInputBuilder
     else:
-        raise ValueError('Unrecognized submodel type: {0}'.format(type_))
+        raise ValueError('Unrecognized submodel type: {0}'.format(element.type_))
 
     return cls()
 
@@ -159,6 +164,17 @@ class MeshInputBuilder(SubmodelInputBuilder):
         if custom_normals:
             self.obj.data.use_auto_smooth = True
             self.obj.data.normals_split_custom_set_from_vertices(custom_normals)
+
+
+class BananMeshInputBuilder(MeshInputBuilder):
+    def create_submodel(self, name):
+        self.obj = bpy.data.objects.new(name, None)
+
+    def set_map(self, map_, asset_searcher):
+        pass
+
+    def set_geometry(self, submodel):
+        pass
 
 
 class FreeSpotLightInputBuilder(SubmodelInputBuilder):
