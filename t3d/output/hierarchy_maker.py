@@ -20,6 +20,7 @@ class HierarchyMaker:
             is_stars_container = (o.type == 'EMPTY' and o.empty_display_type == "PLAIN_AXES")
             has_star_child = (any(c.type == "LIGHT" and c.data.type == "POINT" for c in o.children))
             is_stars = is_stars_container and has_star_child
+            is_banan = o.type == 'EMPTY' and o.empty_display_type != 'IMAGE' and not has_star_child
 
-            if is_mesh or is_freespotlight or is_stars:
+            if is_mesh or is_freespotlight or is_stars or is_banan:
                 yield o

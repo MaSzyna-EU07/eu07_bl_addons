@@ -9,16 +9,23 @@ from material_tools.utils import get_shortpath_from_material
 
 
 def get_builder(obj):
-    if obj.type == 'MESH':
-        c = MeshOutputBuilder
-    elif obj.type == 'LIGHT' and obj.data.type == 'SPOT':
-        c = FreeSpotLightOutputBuilder
-    elif obj.type == 'EMPTY' and obj.empty_display_type == "PLAIN_AXES":
-        c = StarsOutputBuilder
-    else:
-        return None
+    cls = None
 
-    return c(obj)
+    if obj.type == 'MESH':
+        cls = MeshOutputBuilder
+    elif obj.type == 'LIGHT' and obj.data.type == 'SPOT':
+        cls = FreeSpotLightOutputBuilder
+    elif obj.type == 'EMPTY':
+        for child in obj.children:
+            if child.type == 'LIGHT' and child.data.type == 'POINT':
+                cls = StarsOutputBuilder
+
+        not_stars = cls is None
+
+        if not_stars:
+            cls = BananMeshOutputBuilder
+
+    return cls(obj) if cls else None
 
 
 class SubmodelOutputBuilder(abc.ABC):
@@ -160,6 +167,18 @@ class MeshOutputBuilder(SubmodelOutputBuilder):
 
         if apply_modifiers:
             bpy.data.meshes.remove(mesh)
+
+
+class BananMeshOutputBuilder(MeshOutputBuilder):
+    def __init__(self, obj):
+        super().__init__(obj)
+
+    def set_map(self):
+        self.submodel.map = "none"
+
+    def set_geometry(self, apply_modifiers):
+        # "Banan" is a mesh without geometry, so no implementation here
+        pass
 
 
 class FreeSpotLightOutputBuilder(SubmodelOutputBuilder):

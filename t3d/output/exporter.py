@@ -42,6 +42,8 @@ class T3DExporter:
 
     def _create_submodel_to_export(self, obj):
         builder = output_builders.get_builder(obj)
+        if not builder:
+            return None
 
         builder.set_parent()
         builder.set_diffuse()
