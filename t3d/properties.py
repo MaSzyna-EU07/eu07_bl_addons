@@ -43,15 +43,15 @@ class T3DSubmodelProperties(bpy.types.PropertyGroup):
     )
     selfillum: FloatProperty(
         name='SelfIllum',
-        default=0,
-        min=0,
+        default=-1,
+        min=-1,
         max=2,
         step=0.01
     )
     selfillum_spot: FloatProperty(
         name='SelfIllum',
         default=2,
-        min=0,
+        min=-1,
         max=2,
         step=0.01
     )
