@@ -65,7 +65,10 @@ class T3DImporter:
             builder.set_wire_size(element.wire_size)
             builder.set_opacity(element.opacity)
             builder.set_map(element.map, self.asset_searcher)
-            builder.set_geometry(element)
+            if element.use_indices:
+                builder.set_indexed_geometry(element.vertices, element.indices, element.num_indices)
+            else:
+                builder.set_triangles_geometry(element.triangles)
 
         elif element.type == 'FreeSpotLight':
             builder.set_near_atten_start(element.near_atten_start)

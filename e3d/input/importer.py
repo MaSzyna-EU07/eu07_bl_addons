@@ -37,7 +37,7 @@ class E3DImporter:
         ):
             return None
 
-        builder = input_builders.get_builder(submodel.type)
+        builder = input_builders.get_builder(submodel)
 
         builder.create_submodel(submodel.name)
         builder.set_parent(submodel.parent_name)
@@ -53,7 +53,7 @@ class E3DImporter:
             #builder.set_specular(submodel.specular_color[:3])
             builder.set_wire_size(submodel.wire_size)
             builder.set_map(submodel.map, self.asset_searcher)
-            #builder.set_geometry(submodel)
+            builder.set_vertices_geometry(submodel.vertices, submodel.num_verts)
 
         elif submodel.type == 'FreeSpotLight':
             builder.set_near_atten_start(submodel.near_atten_start)
