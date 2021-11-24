@@ -42,15 +42,16 @@ class E3DImporter:
         builder.create_submodel(submodel.name)
         builder.set_parent(submodel.parent_name)
         builder.set_anim(submodel.anim)
-        #builder.set_diffuse(submodel.diffuse_color[:3])
+        # All colors are multiplied, because in E3D there are in range 0-1, while in T3D in range 0-255
+        builder.set_diffuse(submodel.diffuse_color[:3] * 255)
         builder.set_selfillum(submodel.selfillum)
         builder.set_max_distance(submodel.max_distance)
         builder.set_min_distance(submodel.min_distance)
         builder.set_transform(submodel.transform)
 
         if submodel.type == 'Mesh':
-            #builder.set_ambient(submodel.ambient_color[:3])
-            #builder.set_specular(submodel.specular_color[:3])
+            builder.set_ambient(submodel.ambient_color[:3] * 255)
+            builder.set_specular(submodel.specular_color[:3] * 255)
             builder.set_wire_size(submodel.wire_size)
             builder.set_map(submodel.map, self.asset_searcher)
             builder.set_vertices_geometry(submodel.vertices, submodel.num_verts)
@@ -66,6 +67,11 @@ class E3DImporter:
 
         elif submodel.type == 'Stars':
             builder.set_geometry(submodel.stars)
+
+        # Coordinate swizzling, temporary here, should be moved to builder?
+        builder.obj.location = eu07_tools.utils.swizzle_coords(builder.obj.location)
+        builder.obj.rotation_euler = eu07_tools.utils.swizzle_coords(builder.obj.rotation_euler)
+        builder.obj.scale = eu07_tools.utils.swizzle_coords(builder.obj.scale)
 
         return builder.obj
 
