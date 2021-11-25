@@ -16,7 +16,6 @@ def get_builder(element):
 
     if element.type == 'Mesh':
         cls = MeshInputBuilder
-        print(element, element.has_geometry)
         if not element.has_geometry:
             cls = BananMeshInputBuilder
     elif element.type == 'FreeSpotLight':
@@ -91,11 +90,11 @@ class MeshInputBuilder(SubmodelInputBuilder):
 
             self.obj.t3d_properties.replacableskin_id = map_
 
-            repl_mat_name = f"Replacableskin {map_}"
-            self.obj.active_material = bpy.data.materials.get(
-                repl_mat_name,
-                bpy.data.materials.new(repl_mat_name)
-            )
+            repl_mat_name = f"replacableskin({map_})"
+            if repl_mat_name in bpy.data.materials:
+                self.obj.active_material = bpy.data.materials[repl_mat_name]
+            else:
+                self.obj.active_material = bpy.data.materials.new(repl_mat_name)
 
         else:
             abspath = asset_searcher.textures.find(map_)

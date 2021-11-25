@@ -15,26 +15,28 @@ class MATImporter:
         self.asset_searcher = asset_searcher
         self.material = None
 
-    def import_from_relpath(self, relpath):
+    def import_from_relpath(self, relpath, material=None):
         abspath = self.asset_searcher.textures.find(relpath)
         if abspath:
-            return self.import_from_abspath(abspath)
+            return self.import_from_abspath(abspath, material)
 
         return None
 
-    def import_from_abspath(self, abspath):
+    def import_from_abspath(self, abspath, material=None):
         name = utils.get_qualified_material_name(abspath)
 
         if abspath.endswith(".mat"):
             with open(abspath, encoding="latin-1") as file:
-                return self.import_from_file(file, name)
+                return self.import_from_file(file, name, material)
         else:
-            return self._import_from_image_abspath(abspath, name)
+            return self._import_from_image_abspath(abspath, name, material)
 
-            return self.import_from_mapping(mapping, name)
+            return self.import_from_mapping(mapping, name, material)
 
-    def _import_from_image_abspath(self, abspath, name):
-        self.material = bpy.data.materials.new(name)
+    def _import_from_image_abspath(self, abspath, name, material=None):
+        if material:
+            material.name = name
+        self.material = material or bpy.data.materials.new(name)
         self.material.use_backface_culling = True
         self.material.blend_method = 'CLIP'
         self.material.use_nodes = True
@@ -62,14 +64,13 @@ class MATImporter:
         return self.material
 
 
-    def import_from_file(self, file, name="Material"):
+    def import_from_file(self, file, name="Material", material=None):
         mapping = eu07_tools.mat.load(file)
 
+        return self._import_from_mapping(mapping, name, material)
 
-        return self.import_from_mapping(mapping, name)
-
-    def import_from_mapping(self, mapping, name="Material"):
-        self.material = bpy.data.materials.new(name)
+    def _import_from_mapping(self, mapping, name="Material", material=None):
+        self.material = material or bpy.data.materials.new(name)
         self.material.use_fake_user = self.use_fake_user
 
         material_wrapper = MaterialWrapper(self.material)

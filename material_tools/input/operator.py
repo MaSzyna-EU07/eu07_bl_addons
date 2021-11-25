@@ -7,12 +7,12 @@ import eu07_tools
 from common import get_root
 from .importer import MATImporter
 
-class MATImportOperator(bpy.types.Operator, ImportHelper):
-    bl_idname = "import_material.mat"
+class EU07_OT_MaterialImport(bpy.types.Operator, ImportHelper):
+    bl_idname = "eu07.import_material"
     bl_label = "Import material"
 
     filter_glob: bpy.props.StringProperty(
-        default="*.mat",
+        default="*.mat;*.tga;*.dds;*.png;*.bmp",
         options={'HIDDEN'}
     )
     files: bpy.props.CollectionProperty(
@@ -26,10 +26,16 @@ class MATImportOperator(bpy.types.Operator, ImportHelper):
         name="Use fake user",
         default=False
     )
+    import_into_active: bpy.props.BoolProperty(
+        name="Import into active",
+        default=False
+    )
 
     filename_ext = ""
 
     def execute(self, context):
+        active_material = bpy.context.active_object.active_material if self.import_into_active else None
+
         directory = self.directory
         for file_elem in self.files:
             filepath = str(Path(directory, file_elem.name))
@@ -37,7 +43,7 @@ class MATImportOperator(bpy.types.Operator, ImportHelper):
                 get_root(filepath), Path(filepath).parent
             )
             importer = MATImporter(asset_searcher)
-            importer.import_from_abspath(filepath)
+            importer.import_from_abspath(filepath, active_material)
             importer.use_fake_user = self.use_fake_user
 
         return {'FINISHED'}

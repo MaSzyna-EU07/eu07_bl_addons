@@ -1,15 +1,17 @@
 import bpy
 
-from .input import MATImportOperator
+from .input import EU07_OT_MaterialImport
+from .panel import EU07_PT_MaterialToolsPanel
 from .nodegroup import delete_mat_nodegroup_template, create_mat_nodegroup_template
 
 classes = (
-    MATImportOperator,
+    EU07_PT_MaterialToolsPanel,
+    EU07_OT_MaterialImport,
 )
 
 
 def menu_func_import(self, context):
-    self.layout.operator(MATImportOperator.bl_idname, text="[EU07] Material (.mat)")
+    self.layout.operator(EU07_OT_MaterialImport.bl_idname, text="[EU07] Material (.mat)")
 
 
 def menu_func_export(self, context):
