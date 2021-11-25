@@ -56,7 +56,11 @@ def delete_include(include):
 
 def assign_to_include(obj, include):
     scene = bpy.context.scene
-    obj.eu07_include_identifier = scene.eu07_includes.find(include)
+    obj.eu07_include_identifier = include.identifier
+
+
+def unassign_from_include(obj):
+    obj.eu07_include_identifier = MASTER_IDENTIFIER
 
 
 def iter_included_objects(include):
@@ -104,10 +108,13 @@ class EU07_PT_Includes(bpy.types.Panel):
             bpy.context.scene, "eu07_includes",
             bpy.context.scene, "eu07_active_include_index"
         )
+        addrem_col = list_row.column()
+        addrem_col.operator("eu07.add_include", icon="ADD", text="")
+        addrem_col.operator("eu07.delete_include", icon="REMOVE", text="")
+
         ops_row = self.layout.row()
-        ops_row.operator("eu07.add_include", text="Add")
-        ops_row.operator("eu07.delete_include", text="Remove")
         ops_row.operator("eu07.assign_to_include", text="Assign")
+        ops_row.operator("eu07.unassign_from_include", text="Unassign")
         ops_row.operator("eu07.select_included", text="Select")
 
         item = get_active_include()
@@ -161,6 +168,21 @@ class EU07_OT_AssignToInclude(bpy.types.Operator):
         return {'FINISHED'}
 
 
+class EU07_OT_UnassignFromInclude(bpy.types.Operator):
+    bl_idname = "eu07.unassign_from_include"
+    bl_label = "Unassign object from this include"
+
+    @classmethod
+    def poll(cls, context):
+        return context.scene.eu07_includes
+
+    def execute(self, context):
+        for obj in context.selected_objects:
+            unassign_from_include(obj)
+
+        return {'FINISHED'}
+
+
 class EU07_OT_SelectIncluded(bpy.types.Operator):
     bl_idname = "eu07.select_included"
     bl_label = "Select objects assigned to Include"
@@ -186,6 +208,7 @@ classes = (
     EU07_OT_AddInclude,
     EU07_OT_DeleteInclude,
     EU07_OT_AssignToInclude,
+    EU07_OT_UnassignFromInclude,
     EU07_OT_SelectIncluded
 )
 
