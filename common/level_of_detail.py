@@ -8,34 +8,47 @@ class EU07_OT_LevelOfDetailPreview(bpy.types.Operator):
 
     def invoke(self, context, event):
         self.hidden_objects = set()
+        self._prev_active = None
         context.window_manager.modal_handler_add(self)
         return {'RUNNING_MODAL'}
 
     def modal(self, context, event):
-        viewport_position = view3d_utils.region_2d_to_origin_3d(
-            context.region, context.space_data.region_3d, (0.5, 0.5)
-        )
+        viewport_position = bpy.context.space_data.region_3d.perspective_matrix.translation
 
         header_text = "LOD Preview: "
 
         for obj in bpy.context.scene.objects:
             distance_view_to_obj = abs((obj.location - viewport_position).magnitude)
 
-            if bpy.context.active_object is obj:
-                header_text += f"Distance to Active: {distance_view_to_obj}"
-
             min_distance = obj.t3d_properties.min_distance
             max_distance = obj.t3d_properties.max_distance
+
+            if bpy.context.active_object is obj or self._prev_active is obj:
+                header_text += f"Distance to Active ({obj.name}): {round(distance_view_to_obj, 1)}m"
+                header_text += f" | Visibility range: <{min_distance}; {max_distance}>"
 
             if max_distance == -1:
                 max_distance = 99999
 
-            obj.hide_viewport = (
+            hide = (
                     not (min_distance < distance_view_to_obj < max_distance)
             )
 
-            if obj.hide_viewport:
+            if hide:
+                if obj is bpy.context.active_object and not obj.hide_viewport:
+                    self._prev_active = obj
+                obj.hide_viewport = True
                 self.hidden_objects.add(obj)
+            else:
+                if obj is self._prev_active and obj.hide_viewport:
+                    obj.hide_viewport = False
+                    obj.select_set(True)
+                    bpy.context.view_layer.objects.active = self._prev_active
+                    self._prev_active = None
+                obj.hide_viewport = False
+
+            if obj.parent and obj.parent.hide_viewport:
+                obj.hide_viewport = True
 
         bpy.context.area.header_text_set(header_text)
 
@@ -55,7 +68,6 @@ class EU07_OT_LevelOfDetailPreview(bpy.types.Operator):
             return {'PASS_THROUGH'}
         else:
             return {'RUNNING_MODAL'}
-
 
 classes = (
     EU07_OT_LevelOfDetailPreview,

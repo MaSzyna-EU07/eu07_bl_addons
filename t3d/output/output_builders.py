@@ -115,7 +115,7 @@ class MeshOutputBuilder(SubmodelOutputBuilder):
         if self.obj.t3d_properties.use_face_indices:
             self.submodel.use_indices = True
             mesh.calc_normals_split()
-            mesh.calc_tangents()
+            mesh.calc_tangents(uv_layer.name)
 
             for poly in mesh.polygons:
                 indices = []
