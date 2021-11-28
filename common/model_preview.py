@@ -6,6 +6,7 @@ import eu07_tools
 import bpy
 
 from .utils import get_root
+from .preferences import get_preferences
 
 
 MODEL_FILENAME = "blender_preview.t3d"
@@ -48,7 +49,8 @@ class EU07_OT_ModelPreview(bpy.types.Operator):
         cwd = os.getcwd()
         os.chdir(root)
 
-        args = [*settings.executable.split(" "), "-s", SCENERY_FILENAME]
+        addon_preferences = get_preferences()
+        args = [*addon_preferences.executable.split(" "), "-s", SCENERY_FILENAME]
 
         subprocess.Popen(args)
 
@@ -58,11 +60,6 @@ class EU07_OT_ModelPreview(bpy.types.Operator):
 
 
 class ModelPreviewSettings(bpy.types.PropertyGroup):
-    executable: bpy.props.StringProperty(
-        name="Executable",
-        default="eu07.exe",
-    )
-
     angles: bpy.props.FloatVectorProperty(
         size=3,
         default=(0, 0, 0)
@@ -101,7 +98,9 @@ class EU07_PT_ModelPreview(bpy.types.Panel):
 
         settings = bpy.context.scene.eu07_model_preview
 
-        self.layout.prop(settings, "executable")
+        addon_preferences = get_preferences()
+
+        self.layout.prop(addon_preferences, "executable")
         #self.layout.prop(settings, "use_skins")
         lightbox = self.layout.box()
         lightbox.label(text="Lights")

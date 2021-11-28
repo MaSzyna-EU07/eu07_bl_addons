@@ -19,6 +19,11 @@ class EU07AddonPreferences(bpy.types.AddonPreferences):
         default="tree|drzewo|plant"
     )
 
+    executable: bpy.props.StringProperty(
+        name="Preview Executable",
+        default="eu07.exe",
+    )
+
     def draw(self, context):
         self.layout.prop(self, "root")
         self.layout.prop(self, "trees_material_regex")
