@@ -35,5 +35,5 @@ def run_model_preview(model_abspath):
 
     cwd = os.getcwd()
     os.chdir(root)
-    subprocess.run(preview_args)
+    subprocess.Popen(preview_args)
     os.chdir(cwd)
