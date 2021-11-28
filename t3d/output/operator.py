@@ -3,7 +3,6 @@ from bpy.props import StringProperty, BoolProperty
 from bpy_extras.io_utils import ExportHelper
 
 from .exporter import T3DExporter
-from common.model_preview import run_model_preview
 
 
 class EU07_OT_ExportT3D(bpy.types.Operator, ExportHelper):
@@ -23,10 +22,6 @@ class EU07_OT_ExportT3D(bpy.types.Operator, ExportHelper):
         name="Apply modifiers",
         default=True
     )
-    run_preview: BoolProperty(
-        name="Run preview",
-        default=False
-    )
 
     def execute(self, context):
         exporter = T3DExporter()
@@ -34,9 +29,6 @@ class EU07_OT_ExportT3D(bpy.types.Operator, ExportHelper):
         exporter.apply_modifiers = self.apply_modifiers
 
         exporter.export_to_file(self.filepath)
-
-        if self.run_preview:
-            run_model_preview(self.filepath)
 
         return {'FINISHED'}
 

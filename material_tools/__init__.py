@@ -1,5 +1,6 @@
 import bpy
 
+from . import utils
 from .input import EU07_OT_MaterialImport
 from .panel import EU07_PT_MaterialToolsPanel
 from .nodegroup import delete_mat_nodegroup_template, create_mat_nodegroup_template

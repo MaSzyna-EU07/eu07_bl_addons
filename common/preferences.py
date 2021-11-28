@@ -19,15 +19,9 @@ class EU07AddonPreferences(bpy.types.AddonPreferences):
         default="tree|drzewo|plant"
     )
 
-    preview_command: StringProperty(
-        name="Preview CMD/Bash command",
-        default="eu07.exe -s blender_export_preview.scn"
-    )
-
     def draw(self, context):
         self.layout.prop(self, "root")
         self.layout.prop(self, "trees_material_regex")
-        self.layout.prop(self, "preview_command")
 
 
 classes = (
