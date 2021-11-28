@@ -21,7 +21,7 @@ class EU07AddonPreferences(bpy.types.AddonPreferences):
 
     preview_command: StringProperty(
         name="Preview CMD/Bash command",
-        default="eu07.exe -s preview.scn"
+        default="eu07.exe -s blender_export_preview.scn"
     )
 
     def draw(self, context):

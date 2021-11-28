@@ -57,6 +57,7 @@ class EU07_OT_LevelOfDetailPreview(bpy.types.Operator):
             "MOUSE" in event.type
         )
 
+        print(event.type)
         if event.type == 'ESC':
             bpy.context.area.header_text_set("")
 

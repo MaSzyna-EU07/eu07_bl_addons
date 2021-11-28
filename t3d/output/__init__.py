@@ -1,1 +1,1 @@
-from .operator import T3DExportOperator
+from .operator import EU07_OT_ExportT3D
