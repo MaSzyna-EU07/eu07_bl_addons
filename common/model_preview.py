@@ -1,3 +1,4 @@
+import math
 import pathlib
 import os
 import subprocess
@@ -5,8 +6,10 @@ import subprocess
 import eu07_tools
 import bpy
 
-from .utils import get_root
+from .utils import get_root, get_viewport_camera_location, get_viewport_camera_rotation
 from .preferences import get_preferences
+
+from scn.camera import compensate_camera_angles
 
 
 MODEL_FILENAME = "blender_preview.t3d"
@@ -23,6 +26,7 @@ class EU07_OT_ModelPreview(bpy.types.Operator):
         root = get_root()
 
         model_outpath = str(pathlib.Path(root, "models", MODEL_FILENAME))
+        # TODO: DO NOT EXPORT INCLUDES TO SEPARATE FILES - MERGE ALL INTO ONE FILE!
         bpy.ops.export_scene.t3d(filepath=model_outpath)
 
         scn_elements = []
@@ -40,6 +44,22 @@ class EU07_OT_ModelPreview(bpy.types.Operator):
         node_model.rotation = eu07_tools.utils.swizzle_coords(settings.angles)
 
         scn_elements.append(node_model)
+
+        camera = eu07_tools.scn.create_element("camera")
+
+        camera.location = eu07_tools.utils.swizzle_coords(get_viewport_camera_location())
+
+        camera_rotation = get_viewport_camera_rotation()
+        degrees = [math.degrees(x) for x in camera_rotation]
+        swizzled = [
+            degrees[1],
+            degrees[2] + 90,
+            degrees[0]
+        ]
+
+        camera.rotation = swizzled
+
+        scn_elements.append(camera)
 
         scn_path = pathlib.Path(root, "scenery", SCENERY_FILENAME)
         with open(scn_path, "w", encoding="windows-1250", newline="\r\n") as outfile:
@@ -94,7 +114,7 @@ class EU07_PT_ModelPreview(bpy.types.Panel):
     bl_category = "[EU07] Toolbox"
 
     def draw(self, context):
-        self.layout.operator("eu07.model_preview")
+        self.layout.operator("eu07.model_preview", icon="PLAY", text="Run Preview")
 
         settings = bpy.context.scene.eu07_model_preview
 

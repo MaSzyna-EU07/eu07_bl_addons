@@ -7,6 +7,7 @@ import eu07_tools
 from bpy_extras import view3d_utils
 
 from common import preferences
+from common.utils import get_viewport_camera_location
 from material_tools.utils import get_shortpath_from_material
 
 inc_names = [
@@ -148,7 +149,7 @@ class AddTreeOperator(bpy.types.Operator):
             region_data = context.space_data.region_3d
             self.mouse_pos = event.mouse_region_x, event.mouse_region_y
 
-            origin = view3d_utils.region_2d_to_origin_3d(region, region_data, self.mouse_pos)
+            origin = get_viewport_camera_location()
             direction = view3d_utils.region_2d_to_vector_3d(region, region_data, self.mouse_pos)
 
             depsgraph = bpy.context.evaluated_depsgraph_get()
