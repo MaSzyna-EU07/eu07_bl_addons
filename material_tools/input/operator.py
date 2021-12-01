@@ -28,8 +28,15 @@ class EU07_OT_MaterialImport(bpy.types.Operator, ImportHelper):
     )
     import_into_active: bpy.props.BoolProperty(
         name="Import into active",
-        default=False
+        default=False,
+        options={'HIDDEN'}
     )
+    set_new_as_active: bpy.props.BoolProperty(
+        name="Set new as active",
+        default=True,
+        options={'HIDDEN'}
+    )
+
 
     filename_ext = ""
 
@@ -43,7 +50,11 @@ class EU07_OT_MaterialImport(bpy.types.Operator, ImportHelper):
                 get_root(filepath), Path(filepath).parent
             )
             importer = MATImporter(asset_searcher)
-            importer.import_from_abspath(filepath, active_material)
+            material = importer.import_from_abspath(filepath, active_material)
             importer.use_fake_user = self.use_fake_user
+
+            if not self.import_into_active and self.set_new_as_active:
+                if context.active_object:
+                    context.active_object.active_material = material
 
         return {'FINISHED'}

@@ -8,8 +8,9 @@ class EU07_OT_BroadcastSkin(bpy.types.Operator):
     @classmethod
     def poll(cls, context):
         return (
-            context.active_object.t3d_properties.replacableskin_id != "None" and
-            context.active_object.active_material
+            context.active_object and
+            context.active_object.active_material and
+            context.active_object.t3d_properties.replacableskin_id != "None"
         )
 
     def execute(self, context):
