@@ -7,7 +7,11 @@ from .nodegroup import NODE_GROUP_NAME
 
 def get_qualified_material_name(abspath):
     root = common.utils.get_root(abspath)
-    return str(pathlib.Path(abspath).relative_to(root).with_suffix(""))
+
+    try:
+        return str(pathlib.Path(abspath).relative_to(root).with_suffix(""))
+    except ValueError:
+        return ""
 
 
 def get_shortpath_from_material(material):

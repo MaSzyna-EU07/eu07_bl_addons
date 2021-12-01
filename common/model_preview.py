@@ -26,8 +26,7 @@ class EU07_OT_ModelPreview(bpy.types.Operator):
         root = get_root()
 
         model_outpath = str(pathlib.Path(root, "models", MODEL_FILENAME))
-        # TODO: DO NOT EXPORT INCLUDES TO SEPARATE FILES - MERGE ALL INTO ONE FILE!
-        bpy.ops.export_scene.t3d(filepath=model_outpath)
+        bpy.ops.export_scene.t3d(filepath=model_outpath, aggregate_includes=True)
 
         scn_elements = []
 

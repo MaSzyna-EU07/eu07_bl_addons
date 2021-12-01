@@ -22,11 +22,16 @@ class EU07_OT_ExportT3D(bpy.types.Operator, ExportHelper):
         name="Apply modifiers",
         default=True
     )
+    aggregate_includes: BoolProperty(
+        name="Aggregate includes",
+        default=False
+    )
 
     def execute(self, context):
         exporter = T3DExporter()
         exporter.use_selection = self.use_selection
         exporter.apply_modifiers = self.apply_modifiers
+        exporter.aggregate_includes = self.aggregate_includes
 
         exporter.export_to_file(self.filepath)
 

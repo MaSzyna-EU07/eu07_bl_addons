@@ -6,7 +6,7 @@ from bpy.props import StringProperty, BoolProperty
 from bpy_extras.io_utils import ExportHelper
 import eu07_tools
 
-from common.include_export_manager import IncludeExportManager
+from common.export_manager import ExportManager
 from common import utils
 from scn import tree_utils, memcell, sound, camera, terrain, trajectory_tools, firstinit, config
 
@@ -26,7 +26,7 @@ class SCNExporter(bpy.types.Operator, ExportHelper):
     )
 
     def execute(self, context):
-        export_manager = IncludeExportManager(bpy.context.scene.eu07_includes)
+        export_manager = ExportManager(bpy.context.scene.eu07_includes)
         export_manager.create_buffers()
         export_manager.create_outputs(eu07_tools.scn.SCNOutput)
 

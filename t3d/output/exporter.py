@@ -3,7 +3,7 @@ import bpy
 import eu07_tools
 from common.utils import get_root
 from common import includes
-from common.include_export_manager import IncludeExportManager
+from common.export_manager import ExportManager
 from .hierarchy_maker import HierarchyMaker
 from . import output_builders
 
@@ -12,9 +12,10 @@ class T3DExporter:
     def __init__(self):
         self.use_selection = False
         self.apply_modifiers = True
+        self.aggregate_includes = False
 
     def export_to_file(self, filepath):
-        export_manager = IncludeExportManager(bpy.context.scene.eu07_includes)
+        export_manager = ExportManager(bpy.context.scene.eu07_includes, self.aggregate_includes)
         export_manager.create_buffers()
         export_manager.create_outputs(eu07_tools.t3d.T3DOutput)
 
@@ -24,7 +25,7 @@ class T3DExporter:
         identifiers_written_includes = set()
 
         for obj in objects_to_export:
-            if obj.eu07_include_identifier != includes.MASTER_IDENTIFIER:
+            if not self.aggregate_includes and (obj.eu07_include_identifier != includes.MASTER_IDENTIFIER):
                 if obj.eu07_include_identifier not in identifiers_written_includes:
                     include = includes.get_include_by_identifier(obj.eu07_include_identifier)
                     include_element = eu07_tools.t3d.create_include(include.file_path, [])
@@ -33,7 +34,9 @@ class T3DExporter:
 
                     identifiers_written_includes.add(obj.eu07_include_identifier)
 
-            output = export_manager.get_output(obj.eu07_include_identifier)
+            identifier = includes.MASTER_IDENTIFIER if self.aggregate_includes else obj.eu07_include_identifier
+
+            output = export_manager.get_output(identifier)
             submodel = self._create_submodel_to_export(obj)
 
             output.dump_element(submodel)

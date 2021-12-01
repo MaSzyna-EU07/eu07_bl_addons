@@ -5,23 +5,26 @@ from common import includes
 from common import utils
 
 
-class IncludeExportManager:
-    def __init__(self, includes_list):
+class ExportManager:
+    def __init__(self, includes_list, aggregate_includes=False):
         self._buffers = dict()
         self._outputs = dict()
         self._includes_list = includes_list
+        self.aggregate_includes = aggregate_includes
 
     def create_buffers(self):
         self._buffers[includes.MASTER_IDENTIFIER] = io.StringIO()
 
-        for include in self._includes_list:
-            self._buffers[include.identifier] = io.StringIO()
+        if not self.aggregate_includes:
+            for include in self._includes_list:
+                self._buffers[include.identifier] = io.StringIO()
 
     def create_outputs(self, output_cls):
         self._outputs[includes.MASTER_IDENTIFIER] = output_cls(self._buffers[includes.MASTER_IDENTIFIER])
 
-        for identifier, buffer in self._buffers.items():
-            self._outputs[identifier] = output_cls(buffer)
+        if not self.aggregate_includes:
+            for identifier, buffer in self._buffers.items():
+                self._outputs[identifier] = output_cls(buffer)
 
     def flush_buffers_to_files(self, root, main_filepath):
         root = pathlib.Path(root)

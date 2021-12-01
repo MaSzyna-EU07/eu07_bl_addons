@@ -99,12 +99,13 @@ class MeshInputBuilder(SubmodelInputBuilder):
         else:
             abspath = asset_searcher.textures.find(map_)
 
-            material = bpy.data.materials.get(get_qualified_material_name(abspath))
+            if abspath:
+                material = bpy.data.materials.get(get_qualified_material_name(abspath))
 
-            if not material:
-                material = MATImporter(asset_searcher).import_from_abspath(abspath)
+                if not material:
+                    material = MATImporter(asset_searcher).import_from_abspath(abspath)
 
-            self.obj.active_material = material
+                self.obj.active_material = material
 
 # TODO: Move geometry methods to class and make it polymorphic
 
@@ -168,14 +169,16 @@ class MeshInputBuilder(SubmodelInputBuilder):
             for vertex_index, loop in enumerate(bm_face.loops):
                 loop[uv_layer].uv = triangle.vertices[vertex_index].mapping
 
+        # if custom_normals:
+        #     self.obj.data.use_auto_smooth = True
+        #     self.obj.data.normals_split_custom_set_from_vertices(custom_normals)
+
         bmesh.ops.remove_doubles(bm, verts=bm.verts, dist=0.00001)
 
         bm.to_mesh(self.obj.data)
         bm.free()
 
-        if custom_normals:
-            self.obj.data.use_auto_smooth = True
-            self.obj.data.normals_split_custom_set_from_vertices(custom_normals)
+
 
     def set_indexed_geometry(self, vertices, indices, num_indices):
         bm = bmesh.new()
