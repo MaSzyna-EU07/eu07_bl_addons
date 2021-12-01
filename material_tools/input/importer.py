@@ -14,6 +14,7 @@ class MATImporter:
         self.use_fake_user = False
         self.asset_searcher = asset_searcher
         self.material = None
+        self.allow_duplicates = False
 
     def import_from_relpath(self, relpath, material=None):
         abspath = self.asset_searcher.textures.find(relpath)
@@ -34,8 +35,13 @@ class MATImporter:
             return self.import_from_mapping(mapping, name, material)
 
     def _import_from_image_abspath(self, abspath, name, material=None):
+        existing = bpy.data.materials.get(name)
+        if existing:
+            return existing
+
         if material:
             material.name = name
+
         self.material = material or bpy.data.materials.new(name)
         self.material.use_backface_culling = True
         self.material.blend_method = 'CLIP'
@@ -70,7 +76,12 @@ class MATImporter:
         return self._import_from_mapping(mapping, name, material)
 
     def _import_from_mapping(self, mapping, name="Material", material=None):
+        existing = bpy.data.materials.get(name)
+        if existing:
+            return existing
+
         self.material = material or bpy.data.materials.new(name)
+        self.material.name = name
         self.material.use_fake_user = self.use_fake_user
 
         material_wrapper = MaterialWrapper(self.material)
