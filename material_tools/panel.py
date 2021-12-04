@@ -11,6 +11,7 @@ class EU07_PT_MaterialToolsPanel(bpy.types.Panel):
 
         import_op = self.layout.operator("eu07.import_material", text="New Material", icon="PLUS")
         import_op.import_into_active = False
+        import_op.set_new_as_active = True
 
         import_op_repl = self.layout.operator("eu07.import_material", text="Replace Material", icon="OVERLAY")
         import_op_repl.import_into_active = True

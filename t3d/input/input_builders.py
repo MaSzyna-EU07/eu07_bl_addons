@@ -148,6 +148,7 @@ class MeshInputBuilder(SubmodelInputBuilder):
         bm = bmesh.new()
         uv_layer = bm.loops.layers.uv.new()
         custom_normals = []
+        smoothing_group_layer = bm.faces.layers.int.new("SmoothingGroup")
 
         for triangle in triangles:
             bm_vertices = []
@@ -165,6 +166,9 @@ class MeshInputBuilder(SubmodelInputBuilder):
 
             bm_face = bm.faces.new(bm_vertices)
             bm_face.smooth = (triangle.smooth > 0)
+            bm_face[smoothing_group_layer] = triangle.smooth
+
+            # bm.faces.ensure_lookup_table()
 
             for vertex_index, loop in enumerate(bm_face.loops):
                 loop[uv_layer].uv = triangle.vertices[vertex_index].mapping
@@ -175,7 +179,26 @@ class MeshInputBuilder(SubmodelInputBuilder):
 
         bmesh.ops.remove_doubles(bm, verts=bm.verts, dist=0.00001)
 
+        for edge in bm.edges:
+            if len(edge.link_faces) > 1:
+
+                masks = (
+                    edge.link_faces[0][smoothing_group_layer],
+                    edge.link_faces[1][smoothing_group_layer]
+                )
+
+                edge.smooth = masks[0] == masks[1]
+
+                print(
+                    masks,
+                    edge.smooth
+                )
+
         bm.to_mesh(self.obj.data)
+
+        self.obj.data.use_auto_smooth = True
+        self.obj.data.auto_smooth_angle = 180
+
         bm.free()
 
 

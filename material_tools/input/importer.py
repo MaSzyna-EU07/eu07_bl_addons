@@ -55,7 +55,7 @@ class MATImporter:
         utils.ensure_correct_principled_bsdf_settings(bsdf)
 
         color_input_socket = bsdf.inputs[0]
-        alpha_input_socket = bsdf.inputs[19]
+        alpha_input_socket = bsdf.inputs[21]
 
         self.material.node_tree.links.new(
             image_node.outputs[0],

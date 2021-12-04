@@ -33,7 +33,7 @@ class EU07_OT_MaterialImport(bpy.types.Operator, ImportHelper):
     )
     set_new_as_active: bpy.props.BoolProperty(
         name="Set new as active",
-        default=True,
+        default=False,
         options={'HIDDEN'}
     )
 

@@ -70,7 +70,7 @@ def create_mat_nodegroup_template():
                 alpha_socket.max_value = 1
                 alpha_socket.default_value = 1
 
-                ng.links.new(ng_input.outputs[8], bsdf.inputs[19])
+                ng.links.new(ng_input.outputs[8], bsdf.inputs[21])
             elif texture_index == NORMAL_TEXTURE_INDEX:
                 texture_socket.name = "Normal Map"
                 texture_socket.default_value = (0.5, 0.5, 1, 1)
