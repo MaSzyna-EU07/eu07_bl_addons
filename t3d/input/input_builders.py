@@ -1,6 +1,7 @@
 import abc
 import math
 import mathutils
+import collections
 import eu07_tools
 
 import bmesh
@@ -107,135 +108,42 @@ class MeshInputBuilder(SubmodelInputBuilder):
 
                 self.obj.active_material = material
 
-# TODO: Move geometry methods to class and make it polymorphic
-
-    def set_vertices_geometry(self, vertices, num_verts):
+    def set_geometry(self, geometry):
         bm = bmesh.new()
         uv_layer = bm.loops.layers.uv.new()
-        custom_normals = []
-
-        for i in range(num_verts // 3):
-            triangle_verts = vertices[i*3:i*3+3]
-
-            bm_vertices = []
-
-            for vertex in triangle_verts:
-                bm_vertex = bm.verts.new(vertex.location)
-                custom_normals.append(vertex.normal)
-                self.obj.t3d_properties.use_normals = True
-                bm_vertices.append(bm_vertex)
-                bm_vertex.co = bm_vertex.co @ (
-                    mathutils.Matrix.Rotation(math.radians(-90), 4, 'X') @
-                    mathutils.Matrix.Rotation(math.radians(180), 4, 'Z')
-                )
-
-            bm.verts.ensure_lookup_table()
-
-            bm_face = bm.faces.new(bm_vertices)
-
-            for vertex_index, loop in enumerate(bm_face.loops):
-                loop[uv_layer].uv = triangle_verts[vertex_index].mapping
-
-        bmesh.ops.remove_doubles(bm, verts=bm.verts, dist=0.00001)
-
-        bm.to_mesh(self.obj.data)
-        bm.free()
-
-        #self.obj.data.use_auto_smooth = True
-        #self.obj.data.normals_split_custom_set_from_vertices(custom_normals)
-
-    def set_triangles_geometry(self, triangles):
-        bm = bmesh.new()
-        uv_layer = bm.loops.layers.uv.new()
-        custom_normals = []
-        smoothing_group_layer = bm.faces.layers.int.new("SmoothingGroup")
-
-        for triangle in triangles:
-            bm_vertices = []
-
-            for vertex in triangle.vertices:
-                bm_vertex = bm.verts.new(vertex.location)
-
-                if vertex.use_normal:
-                    custom_normals.append(vertex.normal)
-                    self.obj.t3d_properties.use_normals = True
-
-                bm_vertices.append(bm_vertex)
-
-            bm.verts.ensure_lookup_table()
-
-            bm_face = bm.faces.new(bm_vertices)
-            bm_face.smooth = (triangle.smooth > 0)
-            bm_face[smoothing_group_layer] = triangle.smooth
-
-            # bm.faces.ensure_lookup_table()
-
-            for vertex_index, loop in enumerate(bm_face.loops):
-                loop[uv_layer].uv = triangle.vertices[vertex_index].mapping
-
-        # if custom_normals:
-        #     self.obj.data.use_auto_smooth = True
-        #     self.obj.data.normals_split_custom_set_from_vertices(custom_normals)
-
-        bmesh.ops.remove_doubles(bm, verts=bm.verts, dist=0.00001)
-
-        for edge in bm.edges:
-            if len(edge.link_faces) > 1:
-
-                masks = (
-                    edge.link_faces[0][smoothing_group_layer],
-                    edge.link_faces[1][smoothing_group_layer]
-                )
-
-                edge.smooth = masks[0] == masks[1]
-
-                print(
-                    masks,
-                    edge.smooth
-                )
-
-        bm.to_mesh(self.obj.data)
-
-        self.obj.data.use_auto_smooth = True
-        self.obj.data.auto_smooth_angle = 180
-
-        bm.free()
-
-
-
-    def set_indexed_geometry(self, vertices, indices, num_indices):
-        bm = bmesh.new()
-        uv_layer = bm.loops.layers.uv.new()
-        custom_normals = []
 
         self.obj.t3d_properties.use_face_indices = True
 
-        for vertex in vertices:
+        for vertex in geometry.vertices:
             bm_vertex = bm.verts.new(vertex.location)
-            custom_normals.append(vertex.normal)
 
         bm.verts.ensure_lookup_table()
 
-        num_triangles = num_indices // 3
+        num_triangles = geometry.num_indices // 3
 
+        custom_normals = []
         for i in range(num_triangles):
             bm_verts = []
             uvs = []
 
-            for index in indices[i*3:i*3+3]:
+            for index in geometry.tri_indices[i*3:i*3+3]:
                 bm_verts.append(bm.verts[index])
 
-                vertex = vertices[index]
+                vertex = geometry.vertices[index]
                 uvs.append(vertex.mapping)
+
+                custom_normals.append(geometry.vertices[index].normal)
 
             bm_face = bm.faces.new(bm_verts)
 
             for vertex_index, loop in enumerate(bm_face.loops):
                 loop[uv_layer].uv = uvs[vertex_index]
 
-        if custom_normals:
-            self.obj.data.use_auto_smooth = True
-            self.obj.data.normals_split_custom_set_from_vertices(custom_normals)
+        bm.to_mesh(self.obj.data)
+        bm.free()
+
+        self.obj.data.use_auto_smooth = True
+        self.obj.data.normals_split_custom_set(custom_normals)
 
 
 
@@ -246,15 +154,8 @@ class BananMeshInputBuilder(MeshInputBuilder):
     def set_map(self, map_, asset_searcher):
         pass
 
-    def set_vertices_geometry(self, vertices, num_verts):
+    def set_geometry(self, geometry):
         pass
-
-    def set_triangles_geometry(self, triangles):
-        pass
-
-    def set_indexed_geometry(self, vertices, indices, num_indices):
-        pass
-
 
 class FreeSpotLightInputBuilder(SubmodelInputBuilder):
     def create_submodel(self, name: str):
