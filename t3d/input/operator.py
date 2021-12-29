@@ -9,6 +9,8 @@ from common.utils import get_root
 
 from t3d.input.importer import T3DImporter
 
+import cProfile
+
 
 class T3DImportOperator(bpy.types.Operator, ImportHelper):
     bl_idname = "import_scene.t3d"
@@ -48,7 +50,10 @@ class T3DImportOperator(bpy.types.Operator, ImportHelper):
         importer.import_spots = self.import_spots
         importer.import_stars = self.import_stars
 
-        objects = importer.import_from_filepath(self.filepath)
+        with cProfile.Profile() as pr:
+            objects = importer.import_from_filepath(self.filepath)
+
+        pr.print_stats()
 
         for obj in objects:
             bpy.context.scene.collection.objects.link(obj)

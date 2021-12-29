@@ -134,9 +134,12 @@ class VertexStorageSectored:
         print("finding vertex", vertex)
         sector = self.get_sector(vertex.location)
         for vertex_index, vertex_candidate in sector.items():
-            if vertex_candidate == vertex:
-                print("found", vertex_index)
-                return vertex_index
+            print("...")
+            if self._compare_vectors(vertex_candidate.location, vertex.location):
+                if (self._compare_vectors(vertex_candidate.normal, vertex.normal) and
+                    self._compare_vectors(vertex_candidate.mapping, vertex.mapping)):
+                    print("found", vertex_index)
+                    return vertex_index
 
         raise KeyError(f"{vertex} not exists in given sector {sector}")
 
@@ -144,4 +147,8 @@ class VertexStorageSectored:
         sector_key = tuple(math.copysign(1, v) for v in vector)
         print("sector", sector_key)
         return self._vertices_sectors[sector_key]
+
+    def _compare_vectors(self, vec1, vec2, threshold=0.00001):
+        vec = vec1 - vec2
+        return all(abs(x) < threshold for x in vec)
 
