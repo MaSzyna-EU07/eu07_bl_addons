@@ -65,8 +65,8 @@ def ensure_correct_image_node_settings(image_node):
 
 
 def ensure_correct_principled_bsdf_settings(bsdf):
-    bsdf.inputs[5].default_value = 0 # Specular
-    bsdf.inputs[7].default_value = 1 # Roughness
+    bsdf.inputs[7].default_value = 0 # Specular
+    bsdf.inputs[9].default_value = 1 # Roughness
 
 
 def _is_bsdf_node(node):

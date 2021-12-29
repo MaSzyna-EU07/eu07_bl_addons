@@ -45,6 +45,7 @@ class GeometryProcessor:
                     #         triangle.smooth, vertex.location,
                     #         triangles, tris_normals, triangle_index
                     #     )
+                    #     triangle.smooth = -1
 
                 try:
                     vertex_index = verts_storage.find(vertex)
@@ -73,7 +74,7 @@ class GeometryProcessor:
                 continue
 
             for local_vertex_index, vertex in enumerate(triangle.vertices):
-                if vertex.location == location:
+                if _compare_vectors(vertex.location, location):
                     normal = normal + tris_normals[triangle_index]
                     common_verts_identifiers.append((triangle_index, local_vertex_index))
 
@@ -103,17 +104,7 @@ class GeometryProcessor:
 
 class VertexStorageSectored:
     def __init__(self):
-        self._vertices_sectors = {
-            (1, 1, 1): {},
-            (1, -1, 1): {},
-            (-1, -1, 1): {},
-            (-1, 1, 1): {},
-
-            (1, 1, -1): {},
-            (1, -1, -1): {},
-            (-1, -1, -1): {},
-            (-1, 1, -1): {},
-        }
+        self._vertices_sectors = {}
         self.vertices = []
         self.num_verts = 0
 
@@ -135,20 +126,27 @@ class VertexStorageSectored:
         sector = self.get_sector(vertex.location)
         for vertex_index, vertex_candidate in sector.items():
             print("...")
-            if self._compare_vectors(vertex_candidate.location, vertex.location):
-                if (self._compare_vectors(vertex_candidate.normal, vertex.normal) and
-                    self._compare_vectors(vertex_candidate.mapping, vertex.mapping)):
-                    print("found", vertex_index)
-                    return vertex_index
+            if _compare_vectors(vertex_candidate.location, vertex.location):
+                if _compare_vectors(vertex_candidate.normal, vertex.normal):
+                    if _compare_vectors(vertex_candidate.mapping, vertex.mapping):
+                        print("found", vertex_index)
+                        return vertex_index
 
         raise KeyError(f"{vertex} not exists in given sector {sector}")
 
     def get_sector(self, vector):
-        sector_key = tuple(math.copysign(1, v) for v in vector)
-        print("sector", sector_key)
-        return self._vertices_sectors[sector_key]
+        sector_key = tuple(round(v, ndigits=2) for v in vector)
+        sector = self._vertices_sectors.get(sector_key)
 
-    def _compare_vectors(self, vec1, vec2, threshold=0.00001):
-        vec = vec1 - vec2
-        return all(abs(x) < threshold for x in vec)
+        print("sector", sector_key)
+
+        if not sector:
+            sector = self._vertices_sectors[sector_key] = {}
+
+        return sector
+
+
+def _compare_vectors(vec1, vec2, threshold=0.00001):
+    vec = vec1 - vec2
+    return all(abs(x) < threshold for x in vec)
 

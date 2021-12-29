@@ -26,8 +26,8 @@ def create_mat_nodegroup_template():
         ng.outputs.new("NodeSocketShader", "Output")
 
         bsdf = ng.nodes.new("ShaderNodeBsdfPrincipled")
-        bsdf.inputs[5].default_value = 0 # specular
-        bsdf.inputs[7].default_value = 1 # roughness
+        bsdf.inputs[7].default_value = 0 # specular
+        bsdf.inputs[9].default_value = 1 # roughness
         ng.links.new(bsdf.outputs[0], ng_output.inputs[0])
         normal_map_node = ng.nodes.new("ShaderNodeNormalMap")
         ng.links.new(normal_map_node.outputs[0], bsdf.inputs[20])
