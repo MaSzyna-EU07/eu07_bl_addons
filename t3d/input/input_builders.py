@@ -134,6 +134,8 @@ class MeshInputBuilder(SubmodelInputBuilder):
 
                 custom_normals.append(geometry.vertices[index].normal)
 
+                print(geometry.vertices[index].normal)
+
             bm_face = bm.faces.new(bm_verts)
 
             for vertex_index, loop in enumerate(bm_face.loops):

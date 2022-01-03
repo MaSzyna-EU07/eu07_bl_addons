@@ -165,8 +165,7 @@ class MeshOutputBuilder(SubmodelOutputBuilder):
 
                 self.submodel.triangles.new(vertices, smooth)
 
-        if apply_modifiers:
-            bpy.data.meshes.remove(mesh)
+        bpy.data.meshes.remove(mesh)
 
 
 class BananMeshOutputBuilder(MeshOutputBuilder):
