@@ -114,38 +114,32 @@ class MeshInputBuilder(SubmodelInputBuilder):
 
         self.obj.t3d_properties.use_face_indices = True
 
-        for vertex in geometry.vertices:
-            bm_vertex = bm.verts.new(vertex.location)
+        for location in geometry.locations:
+            bm_vertex = bm.verts.new(location)
 
         bm.verts.ensure_lookup_table()
 
         num_triangles = geometry.num_indices // 3
 
-        custom_normals = []
         for i in range(num_triangles):
             bm_verts = []
-            uvs = []
 
-            for index in geometry.tri_indices[i*3:i*3+3]:
+            for index in geometry.indices[i*3:i*3+3]:
                 bm_verts.append(bm.verts[index])
 
-                vertex = geometry.vertices[index]
-                uvs.append(vertex.mapping)
-
-                custom_normals.append(geometry.vertices[index].normal)
-
-                print(geometry.vertices[index].normal)
-
-            bm_face = bm.faces.new(bm_verts)
+            try:
+                bm_face = bm.faces.new(bm_verts)
+            except ValueError:
+                del geometry.per_face_vertex_normals[i * 3: i * 3 + 3]
 
             for vertex_index, loop in enumerate(bm_face.loops):
-                loop[uv_layer].uv = uvs[vertex_index]
+                loop[uv_layer].uv = geometry.per_face_uvs[i * 3 + vertex_index]
 
         bm.to_mesh(self.obj.data)
         bm.free()
 
         self.obj.data.use_auto_smooth = True
-        self.obj.data.normals_split_custom_set(custom_normals)
+        self.obj.data.normals_split_custom_set(geometry.per_face_vertex_normals)
 
 
 

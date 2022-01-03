@@ -6,11 +6,12 @@ import eu07_tools
 
 
 class Geometry:
-    def __init__(self, vertices, num_vertices, tri_indices, num_indices):
-        self.vertices = vertices
-        self.num_vertices = num_vertices
-        self.tri_indices = tri_indices
+    def __init__(self, num_indices, indices, locations, normals, uvs):
         self.num_indices = num_indices
+        self.indices = indices
+        self.locations = locations
+        self.per_face_vertex_normals = normals
+        self.per_face_uvs = uvs
 
     @classmethod
     def from_legacy_t3d(cls, triangles):
@@ -30,7 +31,7 @@ class Geometry:
 class GeometryProcessor:
 
     def process_legacy_t3d(self, triangles):
-        self.raw_verts_storage = VertexStorageSectored()
+        self.verts_storage = VertexStorageSectored()
         tris_normals = []
         self.smooth_groups = []
 
@@ -43,7 +44,7 @@ class GeometryProcessor:
             self.smooth_groups.append(triangle.smooth)
 
             for vertex in triangle.vertices:
-                self.raw_verts_storage.push(vertex)
+                self.verts_storage.push(vertex)
 
         # Calculating per-face vertex normals
         per_face_vertex_normals = []
@@ -52,12 +53,11 @@ class GeometryProcessor:
             triangle_normal = tris_normals[triangle_index]
 
             for local_vert_index, vertex in enumerate(triangle.vertices):
-                vertex_index = triangle_index * local_vert_index
+                vertex_index = triangle_index * 3 + local_vert_index
 
                 try:
                     per_face_vertex_normals.append(self.precalculated_smooth_normals[vertex_index])
                 except KeyError:
-
                     if triangle.smooth == -1:
                         per_face_vertex_normals.append(vertex.normal)
 
@@ -71,7 +71,33 @@ class GeometryProcessor:
                         for shared_index in shared_indices:
                             self.precalculated_smooth_normals[shared_index] = normal
 
-        return [], 0, [], 0
+        # Removing duplicated vertices & indexing
+        unique_verts_storage = VertexStorageSectored()
+        unique_per_face_vertex_normals = []
+        unique_per_face_uvs = []
+        indexed_geometry = []
+        num_indices = 0
+
+        for triangle_index, triangle in enumerate(triangles):
+            for local_vert_index, vertex in enumerate(triangle.vertices):
+                global_vert_index = triangle_index * 3 + local_vert_index
+
+                try:
+                    vertex_index = unique_verts_storage.find(vertex)
+                    found_vert_triangle_index = vertex_index // 3
+                    if self._are_normals_opposite(tris_normals[triangle_index], tris_normals[found_vert_triangle_index]):
+                        vertex_index = unique_verts_storage.push(vertex)
+                except KeyError:
+                    vertex_index = unique_verts_storage.push(vertex)
+
+                indexed_geometry.append(vertex_index)
+                unique_per_face_vertex_normals.append(per_face_vertex_normals[global_vert_index])
+                unique_per_face_uvs.append(vertex.mapping)
+                num_indices += 1
+
+        locations = [vertex.location for vertex in unique_verts_storage]
+
+        return num_indices, indexed_geometry, locations, unique_per_face_vertex_normals, unique_per_face_uvs
 
     def _calc_triangle_normal(self, triangle):
         edge01 = mathutils.Vector(triangle.vertices[0].location - triangle.vertices[1].location)
@@ -86,25 +112,25 @@ class GeometryProcessor:
         return normal
 
     def _calc_smooth_group_normal(self, vertex, smooth_group):
-        sector = self.raw_verts_storage.get_sector(vertex.location)
+        sector = self.verts_storage.get_sector(vertex.location)
 
         normal = vertex.normal
 
-        for sc_vertex_index, sc_vertex in sector:
+        shared_indices = set()
+        for sc_vertex_index, sc_vertex in sector.items():
             triangle_index = sc_vertex_index // 3
             sc_vertex_smooth_group = self.smooth_groups[triangle_index]
 
-            shared_indices = set()
             if sc_vertex_smooth_group == smooth_group:
                 normal = normal + sc_vertex.normal
 
                 shared_indices.add(sc_vertex_index)
 
-        return normal, shared_indices
+        return mathutils.Vector(normal).normalized(), shared_indices
 
 
     def _are_normals_opposite(self, normal1, normal2):
-        return mathutils.Vector(normal1).dot(normal2) == -1
+        return mathutils.Vector(normal1).dot(normal2) < -0.99
 
 
     def process_e3d(self, vertices_e3d):
@@ -126,15 +152,11 @@ class VertexStorageSectored:
         sector[vertex_index] = vertex
         self.num_verts += 1
 
-        print("add index", vertex_index)
-
         return vertex_index
 
     def find(self, vertex):
-        print("finding vertex", vertex)
         sector = self.get_sector(vertex.location)
         for vertex_index, vertex_candidate in sector.items():
-            print("...")
             if _compare_vectors(vertex_candidate.location, vertex.location):
                 return vertex_index
 
@@ -143,11 +165,12 @@ class VertexStorageSectored:
     def __getitem__(self, index):
         return self.vertices[index]
 
+    def __iter__(self):
+        return iter(self.vertices)
+
     def get_sector(self, vector):
         sector_key = tuple(round(v, ndigits=2) for v in vector)
         sector = self._vertices_sectors.get(sector_key)
-
-        print("sector", sector_key)
 
         if not sector:
             sector = self._vertices_sectors[sector_key] = {}
