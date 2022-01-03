@@ -48,7 +48,7 @@ class GeometryProcessor:
 
         # Calculating per-face vertex normals
         per_face_vertex_normals = []
-        self.precalculated_smooth_normals = {}
+        self.precalculated_normals = {}
         for triangle_index, triangle in enumerate(triangles):
             triangle_normal = self.tris_normals[triangle_index]
 
@@ -56,23 +56,31 @@ class GeometryProcessor:
                 vertex_index = triangle_index * 3 + local_vert_index
 
                 try:
-                    per_face_vertex_normals.append(self.precalculated_smooth_normals[vertex_index])
+                    per_face_vertex_normals.append(self.precalculated_normals[vertex_index])
                 except KeyError:
                     if triangle.smooth == -1:
-                        per_face_vertex_normals.append(vertex.normal)
+                        normal = mathutils.Vector(vertex.normal)
 
                     elif triangle.smooth == 0:
-                        per_face_vertex_normals.append(triangle_normal)
+                        normal = triangle_normal
 
                     else:
                         normal, shared_indices = self._calc_smooth_group_normal(
                             vertex, self.tris_normals[triangle_index], triangle.smooth
                         )
 
-                        per_face_vertex_normals.append(normal)
+                        if normal.length_squared > 0:
+                            normal.normalize()
+                        else:
+                            normal = triangle_normal
 
                         for shared_index in shared_indices:
-                            self.precalculated_smooth_normals[shared_index] = normal
+                            self.precalculated_normals[shared_index] = normal
+
+                    per_face_vertex_normals.append(normal)
+                    self.precalculated_normals[vertex_index] = normal
+
+
 
         # Removing duplicated vertices & indexing
         unique_verts_storage = VertexStorageSectored()
@@ -127,10 +135,11 @@ class GeometryProcessor:
             triangle_index = sc_vertex_index // 3
             sc_vertex_smooth_group = self.smooth_groups[triangle_index]
 
-            if sc_vertex_smooth_group & smooth_group != 0:
-                normal = normal + self.tris_normals[triangle_index]
-
-                shared_indices.add(sc_vertex_index)
+            if sc_vertex_smooth_group & smooth_group:
+                adjacent_normal = self.tris_normals[triangle_index]
+                if not self._are_normals_opposite(adjacent_normal, normal):
+                    normal = normal + adjacent_normal
+                    shared_indices.add(sc_vertex_index)
 
         return mathutils.Vector(normal).normalized(), shared_indices
 
