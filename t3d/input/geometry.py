@@ -32,14 +32,14 @@ class GeometryProcessor:
 
     def process_legacy_t3d(self, triangles):
         self.verts_storage = VertexStorageSectored()
-        tris_normals = []
+        self.tris_normals = []
         self.smooth_groups = []
 
         # Pushing vertices to lookup-optimized storage and calculating triangle normals
         for triangle_index, triangle in enumerate(triangles):
 
             normal = self._calc_triangle_normal(triangle)
-            tris_normals.append(normal)
+            self.tris_normals.append(mathutils.Vector(normal))
 
             self.smooth_groups.append(triangle.smooth)
 
@@ -50,7 +50,7 @@ class GeometryProcessor:
         per_face_vertex_normals = []
         self.precalculated_smooth_normals = {}
         for triangle_index, triangle in enumerate(triangles):
-            triangle_normal = tris_normals[triangle_index]
+            triangle_normal = self.tris_normals[triangle_index]
 
             for local_vert_index, vertex in enumerate(triangle.vertices):
                 vertex_index = triangle_index * 3 + local_vert_index
@@ -65,7 +65,10 @@ class GeometryProcessor:
                         per_face_vertex_normals.append(triangle_normal)
 
                     else:
-                        normal, shared_indices = self._calc_smooth_group_normal(vertex, triangle.smooth)
+                        normal, shared_indices = self._calc_smooth_group_normal(
+                            vertex, self.tris_normals[triangle_index], triangle.smooth
+                        )
+
                         per_face_vertex_normals.append(normal)
 
                         for shared_index in shared_indices:
@@ -85,7 +88,10 @@ class GeometryProcessor:
                 try:
                     vertex_index = unique_verts_storage.find(vertex)
                     found_vert_triangle_index = vertex_index // 3
-                    if self._are_normals_opposite(tris_normals[triangle_index], tris_normals[found_vert_triangle_index]):
+                    if self._are_normals_opposite(
+                            self.tris_normals[triangle_index],
+                            self.tris_normals[found_vert_triangle_index]
+                    ):
                         vertex_index = unique_verts_storage.push(vertex)
                 except KeyError:
                     vertex_index = unique_verts_storage.push(vertex)
@@ -111,18 +117,18 @@ class GeometryProcessor:
 
         return normal
 
-    def _calc_smooth_group_normal(self, vertex, smooth_group):
+    def _calc_smooth_group_normal(self, vertex, initial_normal, smooth_group):
         sector = self.verts_storage.get_sector(vertex.location)
 
-        normal = vertex.normal
+        normal = initial_normal
 
         shared_indices = set()
         for sc_vertex_index, sc_vertex in sector.items():
             triangle_index = sc_vertex_index // 3
             sc_vertex_smooth_group = self.smooth_groups[triangle_index]
 
-            if sc_vertex_smooth_group == smooth_group:
-                normal = normal + sc_vertex.normal
+            if sc_vertex_smooth_group & smooth_group != 0:
+                normal = normal + self.tris_normals[triangle_index]
 
                 shared_indices.add(sc_vertex_index)
 

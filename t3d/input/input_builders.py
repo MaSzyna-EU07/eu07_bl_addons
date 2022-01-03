@@ -127,6 +127,7 @@ class MeshInputBuilder(SubmodelInputBuilder):
             for index in geometry.indices[i*3:i*3+3]:
                 bm_verts.append(bm.verts[index])
 
+            # HACK: Some faces are duplicated, temporary disabled those
             try:
                 bm_face = bm.faces.new(bm_verts)
             except ValueError:
