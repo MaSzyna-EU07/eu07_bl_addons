@@ -91,6 +91,8 @@ class GeometryProcessor:
         indexed_geometry = []
         num_indices = 0
 
+        # TODO: There are situations, where random faces are not connected (or are partially connected) to neighbours
+        # TODO: Bmesh reports that there are faces, that already exists (seems like 3 indices are repeated somewhere)
         for triangle_index, triangle in enumerate(triangles):
             for local_vert_index, vertex in enumerate(triangle.vertices):
                 global_vert_index = triangle_index * 3 + local_vert_index
