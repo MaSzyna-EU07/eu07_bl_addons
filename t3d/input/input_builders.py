@@ -111,6 +111,7 @@ class MeshInputBuilder(SubmodelInputBuilder):
     def set_geometry(self, geometry):
         bm = bmesh.new()
         uv_layer = bm.loops.layers.uv.new()
+        sg_layer = bm.faces.layers.int.new("SmoothGroup")
 
         self.obj.t3d_properties.use_face_indices = True
 
@@ -121,17 +122,21 @@ class MeshInputBuilder(SubmodelInputBuilder):
 
         num_triangles = geometry.num_indices // 3
 
+        custom_normals = []
+
         for i in range(num_triangles):
             bm_verts = []
 
             for index in geometry.indices[i*3:i*3+3]:
                 bm_verts.append(bm.verts[index])
 
-            # HACK: Some faces are duplicated, temporary disabled those
+            # HACK: Some faces are duplicated, but we need to fix it at indexing level, not here
             try:
                 bm_face = bm.faces.new(bm_verts)
+                custom_normals.extend(geometry.per_face_vertex_normals[i * 3: i * 3 + 3])
+                bm_face[sg_layer] = geometry.debug_smooth_groups[i]
             except ValueError:
-                del geometry.per_face_vertex_normals[i * 3: i * 3 + 3]
+                pass
 
             for vertex_index, loop in enumerate(bm_face.loops):
                 loop[uv_layer].uv = geometry.per_face_uvs[i * 3 + vertex_index]
@@ -140,7 +145,7 @@ class MeshInputBuilder(SubmodelInputBuilder):
         bm.free()
 
         self.obj.data.use_auto_smooth = True
-        self.obj.data.normals_split_custom_set(geometry.per_face_vertex_normals)
+        self.obj.data.normals_split_custom_set(custom_normals)
 
 
 

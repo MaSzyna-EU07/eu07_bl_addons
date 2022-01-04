@@ -6,12 +6,13 @@ import eu07_tools
 
 
 class Geometry:
-    def __init__(self, num_indices, indices, locations, normals, uvs):
+    def __init__(self, num_indices, indices, locations, normals, uvs, smooth_groups):
         self.num_indices = num_indices
         self.indices = indices
         self.locations = locations
         self.per_face_vertex_normals = normals
         self.per_face_uvs = uvs
+        self.debug_smooth_groups = smooth_groups
 
     @classmethod
     def from_legacy_t3d(cls, triangles):
@@ -29,15 +30,18 @@ class Geometry:
 
 
 class GeometryProcessor:
-
-    def process_legacy_t3d(self, triangles):
+    def process_legacy_t3d(self, input_triangles):
         self.verts_storage = VertexStorageSectored()
         self.tris_normals = []
         self.smooth_groups = []
+        triangles = []
 
         # Pushing vertices to lookup-optimized storage and calculating triangle normals
-        for triangle_index, triangle in enumerate(triangles):
+        for triangle_index, triangle in enumerate(input_triangles):
+            if _is_degenerate(triangle):
+                continue
 
+            triangles.append(triangle)
             normal = self._calc_triangle_normal(triangle)
             self.tris_normals.append(mathutils.Vector(normal))
 
@@ -60,6 +64,7 @@ class GeometryProcessor:
                 except KeyError:
                     if triangle.smooth == -1:
                         normal = mathutils.Vector(vertex.normal)
+                        normal = normal.normalized() if normal.length_squared > 0 else normal
 
                     elif triangle.smooth == 0:
                         normal = triangle_normal
@@ -69,10 +74,7 @@ class GeometryProcessor:
                             vertex, self.tris_normals[triangle_index], triangle.smooth
                         )
 
-                        if normal.length_squared > 0:
-                            normal.normalize()
-                        else:
-                            normal = triangle_normal
+                        normal = normal.normalized() if normal.length_squared > 0 else triangle_normal
 
                         for shared_index in shared_indices:
                             self.precalculated_normals[shared_index] = normal
@@ -111,7 +113,7 @@ class GeometryProcessor:
 
         locations = [vertex.location for vertex in unique_verts_storage]
 
-        return num_indices, indexed_geometry, locations, unique_per_face_vertex_normals, unique_per_face_uvs
+        return num_indices, indexed_geometry, locations, unique_per_face_vertex_normals, unique_per_face_uvs, self.smooth_groups
 
     def _calc_triangle_normal(self, triangle):
         edge01 = mathutils.Vector(triangle.vertices[0].location - triangle.vertices[1].location)
@@ -132,6 +134,8 @@ class GeometryProcessor:
 
         shared_indices = set()
         for sc_vertex_index, sc_vertex in sector.items():
+            if not _compare_vectors(sc_vertex.location, vertex.location):
+                continue
             triangle_index = sc_vertex_index // 3
             sc_vertex_smooth_group = self.smooth_groups[triangle_index]
 
@@ -197,3 +201,8 @@ def _compare_vectors(vec1, vec2, threshold=0.00001):
     vec = vec1 - vec2
     return all(abs(x) < threshold for x in vec)
 
+def _is_degenerate(triangle):
+    edge1 = mathutils.Vector(triangle.vertices[1].location - triangle.vertices[0].location)
+    edge2 = mathutils.Vector(triangle.vertices[2].location - triangle.vertices[0].location)
+
+    return edge1.cross(edge2).length_squared == 0
