@@ -91,7 +91,7 @@ class GeometryProcessor:
         indexed_geometry = []
         num_indices = 0
 
-        # TODO: There are situations, where random faces are not connected (or are partially connected) to neighbours
+
         # TODO: Bmesh reports that there are faces, that already exists (seems like 3 indices are repeated somewhere)
         for triangle_index, triangle in enumerate(triangles):
             for local_vert_index, vertex in enumerate(triangle.vertices):
@@ -99,14 +99,16 @@ class GeometryProcessor:
 
                 try:
                     vertex_index = unique_verts_storage.find(vertex)
+                except KeyError:
+                    vertex_index = unique_verts_storage.push(vertex)
+                else:
                     found_vert_triangle_index = vertex_index // 3
-                    if self._are_normals_opposite(
+                    # TODO: When this conditional is enabled, random vertices get splitted for some reason
+                    if _are_normals_opposite(
                             self.tris_normals[triangle_index],
                             self.tris_normals[found_vert_triangle_index]
                     ):
                         vertex_index = unique_verts_storage.push(vertex)
-                except KeyError:
-                    vertex_index = unique_verts_storage.push(vertex)
 
                 indexed_geometry.append(vertex_index)
                 unique_per_face_vertex_normals.append(per_face_vertex_normals[global_vert_index])
@@ -143,16 +145,11 @@ class GeometryProcessor:
 
             if sc_vertex_smooth_group & smooth_group:
                 adjacent_normal = self.tris_normals[triangle_index]
-                if not self._are_normals_opposite(adjacent_normal, normal):
+                if not _are_normals_opposite(adjacent_normal, normal):
                     normal = normal + adjacent_normal
                     shared_indices.add(sc_vertex_index)
 
         return mathutils.Vector(normal).normalized(), shared_indices
-
-
-    def _are_normals_opposite(self, normal1, normal2):
-        return mathutils.Vector(normal1).dot(normal2) < -0.99
-
 
     def process_e3d(self, vertices_e3d):
         pass
@@ -208,3 +205,6 @@ def _is_degenerate(triangle):
     edge2 = mathutils.Vector(triangle.vertices[2].location - triangle.vertices[0].location)
 
     return edge1.cross(edge2).length_squared == 0
+
+def _are_normals_opposite(normal1, normal2):
+    return mathutils.Vector(normal1).dot(normal2) < -0.99
