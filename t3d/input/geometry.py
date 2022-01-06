@@ -90,6 +90,7 @@ class GeometryProcessor:
         unique_per_face_uvs = []
         indexed_geometry = []
         num_indices = 0
+        original_indices_map = {}
 
 
         # TODO: Bmesh reports that there are faces, that already exists (seems like 3 indices are repeated somewhere)
@@ -101,14 +102,17 @@ class GeometryProcessor:
                     vertex_index = unique_verts_storage.find(vertex)
                 except KeyError:
                     vertex_index = unique_verts_storage.push(vertex)
+                    original_indices_map[vertex_index] = global_vert_index
                 else:
-                    found_vert_triangle_index = vertex_index // 3
+                    found_vert_triangle_index = original_indices_map[vertex_index] // 3
                     # TODO: When this conditional is enabled, random vertices get splitted for some reason
                     if _are_normals_opposite(
-                            self.tris_normals[triangle_index],
-                            self.tris_normals[found_vert_triangle_index]
+                            self.tris_normals[found_vert_triangle_index],
+                            self.tris_normals[triangle_index]
                     ):
                         vertex_index = unique_verts_storage.push(vertex)
+                        original_indices_map[vertex_index] = global_vert_index
+
 
                 indexed_geometry.append(vertex_index)
                 unique_per_face_vertex_normals.append(per_face_vertex_normals[global_vert_index])
@@ -159,6 +163,7 @@ class VertexStorageSectored:
     def __init__(self):
         self._vertices_sectors = {}
         self.vertices = []
+        self.original_indices = []
         self.num_verts = 0
 
     def push(self, vertex):
