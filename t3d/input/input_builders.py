@@ -130,12 +130,12 @@ class MeshInputBuilder(SubmodelInputBuilder):
             for index in geometry.indices[i*3:i*3+3]:
                 bm_verts.append(bm.verts[index])
 
-            # HACK: Some faces are duplicated, but we need to fix it at indexing level, not here
             try:
                 bm_face = bm.faces.new(bm_verts)
                 custom_normals.extend(geometry.per_face_vertex_normals[i * 3: i * 3 + 3])
                 bm_face[sg_layer] = geometry.debug_smooth_groups[i]
             except ValueError:
+                # face already exists
                 pass
 
             for vertex_index, loop in enumerate(bm_face.loops):

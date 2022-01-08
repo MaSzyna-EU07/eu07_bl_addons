@@ -93,8 +93,8 @@ class GeometryProcessor:
         original_indices_map = {}
 
 
-        # TODO: Bmesh reports that there are faces, that already exists (seems like 3 indices are repeated somewhere)
         for triangle_index, triangle in enumerate(triangles):
+
             for local_vert_index, vertex in enumerate(triangle.vertices):
                 global_vert_index = triangle_index * 3 + local_vert_index
 
@@ -105,14 +105,13 @@ class GeometryProcessor:
                     original_indices_map[vertex_index] = global_vert_index
                 else:
                     found_vert_triangle_index = original_indices_map[vertex_index] // 3
-                    # TODO: When this conditional is enabled, random vertices get splitted for some reason
+
                     if _are_normals_opposite(
                             self.tris_normals[found_vert_triangle_index],
                             self.tris_normals[triangle_index]
                     ):
                         vertex_index = unique_verts_storage.push(vertex)
                         original_indices_map[vertex_index] = global_vert_index
-
 
                 indexed_geometry.append(vertex_index)
                 unique_per_face_vertex_normals.append(per_face_vertex_normals[global_vert_index])
