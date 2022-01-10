@@ -1,9 +1,4 @@
-import math
-
 import mathutils
-
-import eu07_tools
-
 
 class Geometry:
     def __init__(self, num_indices, indices, locations, normals, uvs, smooth_groups):
@@ -82,8 +77,6 @@ class GeometryProcessor:
                     per_face_vertex_normals.append(normal)
                     self.precalculated_normals[vertex_index] = normal
 
-
-
         # Removing duplicated vertices & indexing
         unique_verts_storage = VertexStorageSectored()
         unique_per_face_vertex_normals = []
@@ -91,7 +84,6 @@ class GeometryProcessor:
         indexed_geometry = []
         num_indices = 0
         original_indices_map = {}
-
 
         for triangle_index, triangle in enumerate(triangles):
 
@@ -154,8 +146,8 @@ class GeometryProcessor:
 
         return mathutils.Vector(normal).normalized(), shared_indices
 
-    def process_e3d(self, vertices_e3d):
-        pass
+    def process_e3d(self, triangles_e3d):
+        return self.process_legacy_t3d(triangles_e3d)
 
 
 class VertexStorageSectored:
@@ -204,11 +196,13 @@ def _compare_vectors(vec1, vec2, threshold=0.00001):
     vec = vec1 - vec2
     return all(abs(x) < threshold for x in vec)
 
+
 def _is_degenerate(triangle):
     edge1 = mathutils.Vector(triangle.vertices[1].location - triangle.vertices[0].location)
     edge2 = mathutils.Vector(triangle.vertices[2].location - triangle.vertices[0].location)
 
     return edge1.cross(edge2).length_squared == 0
+
 
 def _are_normals_opposite(normal1, normal2):
     return mathutils.Vector(normal1).dot(normal2) < -0.99

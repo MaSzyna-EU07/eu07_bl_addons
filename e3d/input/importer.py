@@ -1,6 +1,7 @@
 import eu07_tools
 
 from t3d.input import input_builders
+from t3d.input.geometry import Geometry
 
 
 class E3DImporter:
@@ -54,7 +55,9 @@ class E3DImporter:
             builder.set_specular(submodel.specular_color[:3] * 255)
             builder.set_wire_size(submodel.wire_size)
             builder.set_map(submodel.map, self.asset_searcher)
-            builder.set_vertices_geometry(submodel.vertices, submodel.num_verts)
+
+            geometry = Geometry.from_e3d(submodel.get_triangles_iter())
+            builder.set_geometry(geometry)
 
         elif submodel.type == 'FreeSpotLight':
             builder.set_near_atten_start(submodel.near_atten_start)

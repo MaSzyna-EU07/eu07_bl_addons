@@ -134,12 +134,11 @@ class MeshInputBuilder(SubmodelInputBuilder):
                 bm_face = bm.faces.new(bm_verts)
                 custom_normals.extend(geometry.per_face_vertex_normals[i * 3: i * 3 + 3])
                 bm_face[sg_layer] = geometry.debug_smooth_groups[i]
-            except ValueError:
-                # face already exists
+            except ValueError as e:
                 pass
-
-            for vertex_index, loop in enumerate(bm_face.loops):
-                loop[uv_layer].uv = geometry.per_face_uvs[i * 3 + vertex_index]
+            else:
+                for vertex_index, loop in enumerate(bm_face.loops):
+                    loop[uv_layer].uv = geometry.per_face_uvs[i * 3 + vertex_index]
 
         bm.to_mesh(self.obj.data)
         bm.free()
