@@ -8,6 +8,7 @@ import bpy
 
 from .utils import get_root, get_viewport_camera_location, get_viewport_camera_rotation
 from .preferences import get_preferences
+from t3d.animation import eventize_object_animation
 
 from scn.camera import compensate_camera_angles
 
@@ -31,6 +32,7 @@ class EU07_OT_ModelPreview(bpy.types.Operator):
         scn_elements = []
 
         node_model = eu07_tools.scn.create_element("node:model")
+        node_model.name = "model_preview"
         node_model.path = MODEL_FILENAME
 
         if settings.use_skins:
@@ -59,6 +61,20 @@ class EU07_OT_ModelPreview(bpy.types.Operator):
         camera.rotation = swizzled
 
         scn_elements.append(camera)
+
+        launcher = eu07_tools.scn.create_element("node:eventlauncher")
+        launcher.key = "A"
+        launcher.first_event_name = "animator"
+
+        multiple = eu07_tools.scn.create_element("event:multiple")
+        multiple.name = "animator"
+
+        scn_elements.extend([launcher, multiple])
+
+        for obj in bpy.data.objects:
+            anim_events = eventize_object_animation(obj, "model_preview")
+            multiple.events_names.extend(ev.name for ev in anim_events)
+            scn_elements.extend(anim_events)
 
         scn_path = pathlib.Path(root, "scenery", SCENERY_FILENAME)
         with open(scn_path, "w", encoding="windows-1250", newline="\r\n") as outfile:
