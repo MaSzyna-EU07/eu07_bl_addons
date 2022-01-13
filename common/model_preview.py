@@ -8,9 +8,7 @@ import bpy
 
 from .utils import get_root, get_viewport_camera_location, get_viewport_camera_rotation
 from .preferences import get_preferences
-from t3d.animation import eventize_object_animation
-
-from scn.camera import compensate_camera_angles
+from animation_tools import eventize_object_animation
 
 
 MODEL_FILENAME = "blender_preview.t3d"
