@@ -112,58 +112,37 @@ class MeshOutputBuilder(SubmodelOutputBuilder):
         if uv_layer:
             uv_data = uv_layer.data[:]
 
-        if self.obj.t3d_properties.use_face_indices:
-            self.submodel.use_indices = True
-            mesh.calc_normals_split()
-            mesh.calc_tangents(uv_layer.name)
 
-            for poly in mesh.polygons:
-                indices = []
+        smooth_groups = mesh.calc_smooth_groups(use_bitflags=True)[0]
 
-                for loop_index in poly.loop_indices:
-                    loop = mesh.loops[loop_index]
-                    indices.append(loop.vertex_index)
+        use_normals = (
+                self.obj.data.use_auto_smooth or
+                self.obj.t3d_properties.force_normals
+        )
 
-                self.submodel.indices.extend(indices)
-
-            for vertex in mesh.vertices:
-                co = vertex.co
-                normal = vertex.normal
-
-                for loop in mesh.loops:
-                    if loop.vertex_index == vertex.index:
-                        uv = uv_data[loop.index].uv if uv_layer else [0, 0]
-                        tangent = [*loop.tangent, 1]
-
-                vertex = self.submodel.vertices.new([*co, *normal, *uv, *tangent])
-
-        else:
-            smooth_groups = mesh.calc_smooth_groups(use_bitflags=True)[0]
-
-            use_normals = self.obj.t3d_properties.use_normals
-
-            if use_normals:
+        if (self.obj.data.use_auto_smooth and not self.obj.data.has_custom_normals) or \
+            self.obj.t3d_properties.force_normals:
                 mesh.calc_normals_split()
 
-            for poly in mesh.polygons:
-                smooth = 0
-                if use_normals:
-                    smooth = -1
-                elif poly.use_smooth:
-                    smooth = smooth_groups[poly.index]
+        for poly in mesh.polygons:
+            smooth = 0
+            if use_normals:
+                smooth = -1
+            elif poly.use_smooth:
+                smooth = smooth_groups[poly.index]
 
-                vertices = []
+            vertices = []
 
-                for loop_index in poly.loop_indices:
-                    loop = mesh.loops[loop_index]
+            for loop_index in poly.loop_indices:
+                loop = mesh.loops[loop_index]
 
-                    pos = mesh.vertices[loop.vertex_index].co
-                    normal = loop.normal if use_normals else []
-                    uv = uv_data[loop_index].uv if uv_layer else [0, 0]
+                pos = mesh.vertices[loop.vertex_index].co
+                normal = loop.normal if use_normals else []
+                uv = uv_data[loop_index].uv if uv_layer else [0, 0]
 
-                    vertices.append((*pos, *normal, *uv))
+                vertices.append((*pos, *normal, *uv))
 
-                self.submodel.triangles.new(vertices, smooth)
+            self.submodel.triangles.new(vertices, smooth)
 
         bpy.data.meshes.remove(mesh)
 

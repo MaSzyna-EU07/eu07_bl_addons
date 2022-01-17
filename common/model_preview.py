@@ -60,19 +60,19 @@ class EU07_OT_ModelPreview(bpy.types.Operator):
 
         scn_elements.append(camera)
 
-        launcher = eu07_tools.scn.create_element("node:eventlauncher")
-        launcher.key = "A"
-        launcher.first_event_name = "animator"
-
-        multiple = eu07_tools.scn.create_element("event:multiple")
-        multiple.name = "animator"
-
-        scn_elements.extend([launcher, multiple])
-
-        for obj in bpy.data.objects:
-            anim_events = eventize_object_animation(obj, "model_preview")
-            multiple.events_names.extend(ev.name for ev in anim_events)
-            scn_elements.extend(anim_events)
+        # launcher = eu07_tools.scn.create_element("node:eventlauncher")
+        # launcher.key = "A"
+        # launcher.first_event_name = "animator"
+        #
+        # multiple = eu07_tools.scn.create_element("event:multiple")
+        # multiple.name = "animator"
+        #
+        # scn_elements.extend([launcher, multiple])
+        #
+        # for obj in bpy.data.objects:
+        #     anim_events = eventize_object_animation(obj, "model_preview")
+        #     multiple.events_names.extend(ev.name for ev in anim_events)
+        #     scn_elements.extend(anim_events)
 
         scn_path = pathlib.Path(root, "scenery", SCENERY_FILENAME)
         with open(scn_path, "w", encoding="windows-1250", newline="\r\n") as outfile:

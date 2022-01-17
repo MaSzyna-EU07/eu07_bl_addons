@@ -1,9 +1,12 @@
+import math
+
 import bpy
 
 import mathutils
 
 import eu07_tools
 
+#TODO: Un-weird rotation animation
 
 class KeyframeData:
     def __init__(self, animated_property, delay, time_to_next, vector):
@@ -17,7 +20,7 @@ class KeyframeDataStorage:
     def __init__(self):
         self._groups = {
             "location": {},
-            "rotation": {}
+            "rotation_euler": {}
         }
 
     def iter_groups(self):
@@ -84,6 +87,9 @@ def eventize_object_animation(object, model_name):
             if prev_data is None:
                 prev_data = kf_data
                 continue
+
+            if kf_data.animated_property == "rotation_euler":
+                kf_data.vector = mathutils.Vector([math.degrees(x) for x in kf_data.vector])
 
             event = eu07_tools.scn.create_element("event:animation")
             event.delay = prev_data.delay

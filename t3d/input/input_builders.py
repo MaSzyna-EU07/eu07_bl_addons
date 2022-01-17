@@ -113,8 +113,6 @@ class MeshInputBuilder(SubmodelInputBuilder):
         uv_layer = bm.loops.layers.uv.new()
         sg_layer = bm.faces.layers.int.new("SmoothGroup")
 
-        self.obj.t3d_properties.use_face_indices = True
-
         for location in geometry.locations:
             bm_vertex = bm.verts.new(location)
 
