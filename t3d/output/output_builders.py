@@ -109,40 +109,43 @@ class MeshOutputBuilder(SubmodelOutputBuilder):
         bm.free()
 
         uv_layer = mesh.uv_layers.active
-        if uv_layer:
-            uv_data = uv_layer.data[:]
+        if uv_layer is None:
+            uv_layer = mesh.uv_layers.new()
+
+        uv_data = uv_layer.data[:]
+
+        mesh.calc_tangents(uvmap=uv_layer.name)
+        if not mesh.has_custom_normals:
+            mesh.calc_normals_split()
 
 
-        smooth_groups = mesh.calc_smooth_groups(use_bitflags=True)[0]
-
-        use_normals = (
-                self.obj.data.use_auto_smooth or
-                self.obj.t3d_properties.force_normals
-        )
-
-        if (self.obj.data.use_auto_smooth and not self.obj.data.has_custom_normals) or \
-            self.obj.t3d_properties.force_normals:
-                mesh.calc_normals_split()
+        self.submodel.use_indices = True
+        verts_collector = {}
+        vertex_count = 0
 
         for poly in mesh.polygons:
-            smooth = 0
-            if use_normals:
-                smooth = -1
-            elif poly.use_smooth:
-                smooth = smooth_groups[poly.index]
-
-            vertices = []
 
             for loop_index in poly.loop_indices:
                 loop = mesh.loops[loop_index]
 
-                pos = mesh.vertices[loop.vertex_index].co
-                normal = loop.normal if use_normals else []
-                uv = uv_data[loop_index].uv if uv_layer else [0, 0]
+                vert_data = []
+                vert_data.extend(mesh.vertices[loop.vertex_index].co)
+                vert_data.extend(loop.normal)
+                vert_data.extend(uv_data[loop_index].uv if uv_layer else [0, 0])
+                vert_data.extend([*loop.tangent, 1])
 
-                vertices.append((*pos, *normal, *uv))
+                vert_data = tuple([round(x, 5) for x in vert_data])
 
-            self.submodel.triangles.new(vertices, smooth)
+                index = verts_collector.get(vert_data)
+                if index is None:
+                    index = vertex_count
+                    verts_collector[vert_data] = index
+                    vertex_count += 1
+
+                self.submodel.indices.append(index)
+
+        for vert_data, index in verts_collector.items():
+            self.submodel.vertices.new(vert_data)
 
         bpy.data.meshes.remove(mesh)
 
