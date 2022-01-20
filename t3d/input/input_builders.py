@@ -114,6 +114,7 @@ class MeshInputBuilder(SubmodelInputBuilder):
         sg_layer = bm.faces.layers.int.new("SmoothGroup")
 
         for location in geometry.locations:
+            location = mathutils.Vector(location)
             bm_vertex = bm.verts.new(location)
 
         bm.verts.ensure_lookup_table()
@@ -130,7 +131,9 @@ class MeshInputBuilder(SubmodelInputBuilder):
 
             try:
                 bm_face = bm.faces.new(bm_verts)
-                custom_normals.extend(geometry.per_face_vertex_normals[i * 3: i * 3 + 3])
+                for normal in geometry.per_face_vertex_normals[i * 3: i * 3 + 3]:
+                    normal = normal
+                    custom_normals.append(normal)
                 bm_face[sg_layer] = geometry.debug_smooth_groups[i]
             except ValueError as e:
                 pass

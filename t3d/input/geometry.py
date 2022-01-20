@@ -1,4 +1,5 @@
 import mathutils
+import eu07_tools
 
 class Geometry:
     def __init__(self, num_indices, indices, locations, normals, uvs, smooth_groups):
@@ -21,7 +22,16 @@ class Geometry:
 
     @classmethod
     def from_indexed_t3d(cls, vertices, num_verts, tri_indices, num_indices):
-        return cls(vertices, num_verts, tri_indices, num_indices)
+        triangles = []
+        for i in range(num_indices // 3):
+            indices = tri_indices[i*3:i*3+3]
+            verts = [vertices[idx] for idx in indices]
+            triangle = eu07_tools.t3d.MeshTriangle(verts, smooth=-1)
+            triangles.append(triangle)
+
+        geometry_data = GeometryProcessor().process_legacy_t3d(triangles)
+
+        return cls(*geometry_data)
 
 
 class GeometryProcessor:
