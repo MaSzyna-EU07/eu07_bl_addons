@@ -22,6 +22,8 @@ class Geometry:
 
     @classmethod
     def from_indexed_t3d(cls, vertices, num_verts, tri_indices, num_indices):
+        # TODO: This is quick implementation, it adds some overhead with creating MeshTriangle instances.
+        # Geometry processor's methods should be splitted to avoid it.
         triangles = []
         for i in range(num_indices // 3):
             indices = tri_indices[i*3:i*3+3]
