@@ -72,7 +72,7 @@ class E3DImporter:
             builder.set_use_near_atten(submodel.use_near_atten)
             builder.set_far_atten_decay_type(submodel.far_atten_decay_type)
             builder.set_far_decay_radius(submodel.far_decay_radius)
-            builder.set_falloff_angle(submodel.cos_falloff_angle, submodel.cos_hotspot_angle)
+            builder.set_falloff_angle(submodel.cos_falloff_angle)
             builder.set_hotspot_angle(submodel.cos_hotspot_angle)
 
         elif submodel.type == 'Stars':

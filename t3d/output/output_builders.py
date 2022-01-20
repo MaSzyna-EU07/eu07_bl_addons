@@ -189,10 +189,10 @@ class FreeSpotLightOutputBuilder(SubmodelOutputBuilder):
         self.submodel.far_decay_radius = self.obj.data.distance
 
     def set_falloff_angle(self):
-        self.submodel.falloff_angle = math.cos(self.obj.data.spot_size * 0.5)
+        self.submodel.falloff_angle = math.degrees(self.obj.data.spot_size)
 
     def set_hotspot_angle(self):
-        self.submodel.hotspot_angle = math.cos(self.obj.data.spot_size * (1 - self.obj.data.spot_blend) * 0.5)
+        self.submodel.hotspot_angle = math.degrees(self.obj.data.spot_size * (1 - self.obj.data.spot_blend))
 
 
 class StarsOutputBuilder(SubmodelOutputBuilder):

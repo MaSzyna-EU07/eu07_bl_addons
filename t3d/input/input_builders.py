@@ -185,15 +185,24 @@ class FreeSpotLightInputBuilder(SubmodelInputBuilder):
     def set_far_decay_radius(self, far_decay_radius):
         self.obj.data.distance = far_decay_radius
 
-    def set_falloff_angle(self, falloff_angle, hotspot_angle):
-        self.obj.data.spot_blend = (falloff_angle / math.radians(hotspot_angle)) - 1
+    def set_falloff_angle(self, falloff_angle):
+        if self._is_cosinus(falloff_angle):
+            self.obj.data.spot_size = math.acos(falloff_angle) * 2
+        else:
+            self.obj.data.spot_size = math.radians(falloff_angle)
 
+    # NOTE: This should be called only after set_falloff_angle
     def set_hotspot_angle(self, hotspot_angle):
-        self.obj.data.spot_size = math.radians(hotspot_angle)
+        if self._is_cosinus(hotspot_angle):
+            hotspot_angle = math.acos(hotspot_angle) * 2
+            falloff_angle = self.obj.data.spot_size
+        else:
+            falloff_angle = math.degrees(self.obj.data.spot_size)
 
-    def _spot_cos_to_deg(self, cos):
-        return math.degrees(math.acos(cos)) * 2
+        self.obj.data.spot_blend = 1 - hotspot_angle / falloff_angle
 
+    def _is_cosinus(self, spot_angle):
+        return spot_angle <= 1
 
 class StarsInputBuilder(SubmodelInputBuilder):
     def create_submodel(self, name: str):

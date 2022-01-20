@@ -83,7 +83,7 @@ class T3DImporter:
             builder.set_use_near_atten(element.use_near_atten)
             builder.set_far_atten_decay_type(element.far_atten_decay_type)
             builder.set_far_decay_radius(element.far_decay_radius)
-            builder.set_falloff_angle(element.falloff_angle, element.hotspot_angle)
+            builder.set_falloff_angle(element.falloff_angle)
             builder.set_hotspot_angle(element.hotspot_angle)
 
         elif element.type == 'Stars':
