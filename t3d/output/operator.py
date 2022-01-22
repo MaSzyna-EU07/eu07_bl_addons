@@ -26,12 +26,18 @@ class EU07_OT_ExportT3D(bpy.types.Operator, ExportHelper):
         name="Aggregate includes",
         default=False
     )
+    embed_skins: BoolProperty(
+        name="Embed skins",
+        default=False,
+        options={'HIDDEN'}
+    )
 
     def execute(self, context):
         exporter = T3DExporter()
         exporter.use_selection = self.use_selection
         exporter.apply_modifiers = self.apply_modifiers
         exporter.aggregate_includes = self.aggregate_includes
+        exporter.embed_skins = self.embed_skins
 
         exporter.export_to_file(self.filepath)
 

@@ -184,7 +184,7 @@ class T3DSubmodelPropertiesPanel(bpy.types.Panel):
             wiresize_r.prop(self.obj.t3d_properties, "wire_size")
 
             opacity_r = self.layout.row()
-            opacity_r.prop(self.obj.t3d_properties, "opacity")
+            opacity_r.prop(self.obj.t3d_properties, "opacity", text="Opacity")
 
             map_b = self.layout.box()
             replacableskin_r = map_b.row()

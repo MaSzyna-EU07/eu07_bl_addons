@@ -1,5 +1,6 @@
 import math
 
+import bpy
 import eu07_tools
 
 from t3d.input import input_builders

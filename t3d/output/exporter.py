@@ -13,6 +13,7 @@ class T3DExporter:
         self.use_selection = False
         self.apply_modifiers = True
         self.aggregate_includes = False
+        self.embed_skins = False
 
     def export_to_file(self, filepath):
         export_manager = ExportManager(bpy.context.scene.eu07_includes, self.aggregate_includes)
@@ -64,7 +65,7 @@ class T3DExporter:
             builder.set_wire()
             builder.set_wire_size()
             builder.set_opacity()
-            builder.set_map()
+            builder.set_map(self.embed_skins)
             builder.set_geometry(self.apply_modifiers)
         elif submodel_type == "FreeSpotLight":
             builder.set_near_atten_start()

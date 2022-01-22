@@ -82,10 +82,12 @@ class MeshOutputBuilder(SubmodelOutputBuilder):
     def set_opacity(self):
         self.submodel.opacity = self.obj.t3d_properties.opacity
 
-    def set_map(self):
+    def set_map(self, embed_skins=False):
         mtl = self.obj.active_material
 
-        if self.obj.t3d_properties.replacableskin_id != "None":
+        is_replacable = self.obj.t3d_properties.replacableskin_id != "None"
+
+        if is_replacable and not embed_skins:
             self.submodel.map = self.obj.t3d_properties.replacableskin_id
             return
 
@@ -154,7 +156,7 @@ class BananMeshOutputBuilder(MeshOutputBuilder):
     def __init__(self, obj):
         super().__init__(obj)
 
-    def set_map(self):
+    def set_map(self, embed_skins=False):
         self.submodel.map = "none"
 
     def set_geometry(self, apply_modifiers):

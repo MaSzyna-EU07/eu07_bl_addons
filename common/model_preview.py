@@ -14,7 +14,7 @@ from animation_tools import eventize_object_animation
 MODEL_FILENAME = "blender_preview.t3d"
 SCENERY_FILENAME = "blender_preview.scn"
 
-
+# TODO: Dynamic preview (place model with node dynamic)
 class EU07_OT_ModelPreview(bpy.types.Operator):
     bl_idname = "eu07.model_preview"
     bl_label = "Preview model in MaSzyna"
@@ -25,16 +25,13 @@ class EU07_OT_ModelPreview(bpy.types.Operator):
         root = get_root()
 
         model_outpath = str(pathlib.Path(root, "models", MODEL_FILENAME))
-        bpy.ops.export_scene.t3d(filepath=model_outpath, aggregate_includes=True)
+        bpy.ops.export_scene.t3d(filepath=model_outpath, aggregate_includes=True, embed_skins=True)
 
         scn_elements = []
 
         node_model = eu07_tools.scn.create_element("node:model")
         node_model.name = "model_preview"
         node_model.path = MODEL_FILENAME
-
-        if settings.use_skins:
-            pass # TODO: Write skin path
 
         if settings.lights:
             node_model.light_states = [float(state) for state in settings.lights.strip(" ").split(" ")]

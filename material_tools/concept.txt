@@ -1,0 +1,15 @@
+KWESTIA OPACITY POD KĄTEM MODELI
+
+Opacity może być definiowane na dwa sposoby
+1. W submodelu
+2. W materiale
+
+W celu synchronizacji tego co user widzi we viewporcie z tym co zobaczy w szamynie:
+Opacity do submodelu wpisujemy z danych materiału.
+Jeśli alpha blend, to 0,
+Jeśli alpha clip, to próg clipowania
+Jeśli opaque, to 1
+Dodatkowym warunkiem jest podpięta alpha do slotu shadera?
+
+Dodatkowo zdefiniujemy w submodelu pole opacity (fallback) które będzie użyte w przypadku nieprzypisania materiału lub
+opacity zdefiniowanego w materiale.
