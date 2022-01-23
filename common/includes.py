@@ -102,7 +102,7 @@ class EU07_PT_Includes(bpy.types.Panel):
     bl_label = "Includes"
     bl_space_type = "VIEW_3D"
     bl_region_type = "UI"
-    bl_category = "[EU07] Toolbox"
+    bl_category = "[EU07] Developer Tools"
 
     def draw(self, context):
         list_row = self.layout.row()

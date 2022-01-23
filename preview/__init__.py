@@ -6,8 +6,8 @@ import subprocess
 import eu07_tools
 import bpy
 
-from .utils import get_root, get_viewport_camera_location, get_viewport_camera_rotation
-from .preferences import get_preferences
+from common.utils import get_root, get_viewport_camera_location, get_viewport_camera_rotation
+from common.preferences import get_preferences
 from animation_tools import eventize_object_animation
 
 
@@ -15,7 +15,7 @@ MODEL_FILENAME = "blender_preview.t3d"
 SCENERY_FILENAME = "blender_preview.scn"
 
 # TODO: Dynamic preview (place model with node dynamic)
-class EU07_OT_ModelPreview(bpy.types.Operator):
+class EU07_OT_GameEnginePreview(bpy.types.Operator):
     bl_idname = "eu07.model_preview"
     bl_label = "Preview model in MaSzyna"
 
@@ -74,6 +74,17 @@ class EU07_OT_ModelPreview(bpy.types.Operator):
         scn_path = pathlib.Path(root, "scenery", SCENERY_FILENAME)
         with open(scn_path, "w", encoding="windows-1250", newline="\r\n") as outfile:
             outfile.write("//$a\n")
+            if settings.use_ground:
+                outfile.write(
+                    "node -1 0 none triangles grass\n"
+                    "75 0 75 0 1 0 10.4197 -9.4197 end\n"
+                    "-75 0 -75 0 1 0 -9.4197 10.4197 end\n"
+                    "-75 0 75 0 1 0 -9.4197 -9.4197 end\n"
+                    "75 0 75 0 1 0 10.4197 -9.4197 end\n"
+                    "75 0 -75 0 1 0 10.4197 10.4197 end\n"
+                    "-75 0 -75 0 1 0 -9.4197 10.4197\n"
+                    "endtri\n"
+                )
             eu07_tools.scn.dump(scn_elements, outfile)
 
         cwd = os.getcwd()
@@ -115,13 +126,22 @@ class ModelPreviewSettings(bpy.types.PropertyGroup):
         default=True
     )
 
+    use_ground: bpy.props.BoolProperty(
+        name="Use ground",
+        default=True
+    )
 
-class EU07_PT_ModelPreview(bpy.types.Panel):
-    bl_idname = "EU07_PT_ModelPreview"
+
+class EU07_PT_GameEnginePreview(bpy.types.Panel):
+    bl_idname = "EU07_PT_GameEnginePreview"
     bl_label = "Model Preview Settings"
     bl_space_type = "VIEW_3D"
     bl_region_type = "UI"
-    bl_category = "[EU07] Toolbox"
+    bl_category = "[EU07] Developer Tools"
+
+    @classmethod
+    def poll(cls, context):
+        return context.scene.eu07_project_properties.operating_mode == "modelling"
 
     def draw(self, context):
         self.layout.operator("eu07.model_preview", icon="PLAY", text="Run Preview")
@@ -131,18 +151,18 @@ class EU07_PT_ModelPreview(bpy.types.Panel):
         addon_preferences = get_preferences()
 
         self.layout.prop(addon_preferences, "executable")
-        #self.layout.prop(settings, "use_skins")
         lightbox = self.layout.box()
         lightbox.label(text="Lights")
         lightbox.prop(settings, "lights", text="States")
         lightbox.prop(settings, "lightcolors", text="Colors")
         lightbox.prop(settings, "transition")
         self.layout.prop(settings, "angles")
+        self.layout.prop(settings, "use_ground")
 
 
 classes = (
-    EU07_OT_ModelPreview,
-    EU07_PT_ModelPreview,
+    EU07_OT_GameEnginePreview,
+    EU07_PT_GameEnginePreview,
     ModelPreviewSettings,
 )
 

@@ -10,23 +10,27 @@ bl_info = {
 import sys, os
 sys.path.append(os.path.dirname(__file__))
 
-from . import common, t3d, e3d, scn, material_tools
+from . import common, t3d, e3d, scn, material_tools, project, preview
 
 
 def register():
+    project.register()
     common.register()
     t3d.register()
     e3d.register()
     scn.register()
     material_tools.register()
+    preview.register()
 
 
 def unregister():
+    project.register()
     common.unregister()
     t3d.unregister()
     e3d.unregister()
     scn.unregister()
     material_tools.unregister()
+    preview.unregister()
 
 
 if __name__ == "__main__":

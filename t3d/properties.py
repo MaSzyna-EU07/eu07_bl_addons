@@ -101,10 +101,6 @@ class T3DSubmodelProperties(bpy.types.PropertyGroup):
             ('-3', '-3', ''),
             ('-4', '-4', '')]
     )
-    force_normals: BoolProperty(
-        name="Force explicit normals",
-        default=False
-    )
     use_near_atten: BoolProperty(
         name='UseNearAtten',
         default=False,
@@ -189,9 +185,6 @@ class T3DSubmodelPropertiesPanel(bpy.types.Panel):
             map_b = self.layout.box()
             replacableskin_r = map_b.row()
             replacableskin_r.prop(self.obj.t3d_properties, "replacableskin_id")
-
-            force_normals_r = self.layout.row()
-            force_normals_r.prop(self.obj.t3d_properties, "force_normals")
 
         elif (self.obj_is_spot):
             diffuse_r = self.layout.row()
