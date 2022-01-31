@@ -59,7 +59,7 @@ class E3DImporter:
             builder.set_ambient(submodel.ambient_color[:3] * 255)
             builder.set_specular(submodel.specular_color[:3] * 255)
             builder.set_wire_size(submodel.wire_size)
-            builder.set_map(submodel.map, self.asset_searcher)
+            builder.set_map(submodel.map, self.asset_searcher) # TODO: Opacity!!!!
 
             geometry = Geometry.from_e3d(submodel.get_triangles_iter())
             # Because weird rotations are made by EU07.exe during e3d generation,

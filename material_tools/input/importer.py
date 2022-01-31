@@ -30,7 +30,8 @@ class MaterialImporter:
         wrapper.adjust_specularity()
 
         if abspath.endswith(".mat"):
-            self._build_from_mat_file(abspath, wrapper)
+            # TODO: Ugly, opacity should be muted without returning
+            opacity = self._build_from_mat_file(abspath, wrapper, opacity)
         else:
             image = bpy.data.images.load(abspath, check_existing=True)
             wrapper.set_diffuse(image)
@@ -39,13 +40,15 @@ class MaterialImporter:
 
         return material
 
-    def _build_from_mat_file(self, abspath, wrapper):
+    def _build_from_mat_file(self, abspath, wrapper, opacity):
         self.asset_searcher.textures.remove_extension(".mat")
 
         with open(abspath, encoding="latin-1") as matfile:
             mapping = eu07_tools.mat.load(matfile)
 
         for key, value in mapping.items():
+            if key == "opacity":
+                opacity = value # TODO: Test if it works
 
             if key.startswith("texture"):
                 image_path = self.asset_searcher.textures.find(value.path)
@@ -58,6 +61,8 @@ class MaterialImporter:
                     wrapper.set_normalmap(image)
 
         self.asset_searcher.textures.add_extension(".mat")
+
+        return opacity
 
 
 

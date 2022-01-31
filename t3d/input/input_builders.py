@@ -79,7 +79,7 @@ class MeshInputBuilder(SubmodelInputBuilder):
     def set_opacity(self, opacity):
         self.obj.t3d_properties.opacity = opacity
 
-    def set_map(self, map_, asset_searcher):
+    def set_map(self, map_, asset_searcher, opacity):
         if map_ == "none":
             return
 
@@ -104,7 +104,7 @@ class MeshInputBuilder(SubmodelInputBuilder):
                 material = bpy.data.materials.get(get_qualified_material_name(abspath))
 
                 if not material:
-                    material = MaterialImporter(asset_searcher).import_from_abspath(abspath)
+                    material = MaterialImporter(asset_searcher).import_from_abspath(abspath, opacity=opacity)
 
                 self.obj.active_material = material
 
