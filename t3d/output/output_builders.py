@@ -6,6 +6,7 @@ import bpy
 
 import eu07_tools
 from material_tools.utils import get_shortpath_from_material
+from material_tools.wrapper import MaterialWrapper
 
 
 def get_builder(obj):
@@ -81,6 +82,9 @@ class MeshOutputBuilder(SubmodelOutputBuilder):
 
     def set_opacity(self):
         self.submodel.opacity = self.obj.t3d_properties.opacity
+
+        if self.obj.active_material:
+            self.submodel.opacity = MaterialWrapper(self.obj.active_material).get_opacity()
 
     def set_map(self, embed_skins=False):
         mtl = self.obj.active_material
