@@ -7,7 +7,7 @@ import eu07_tools
 import bmesh
 import bpy
 
-from material_tools.input import MATImporter
+from material_tools.input import MaterialImporter
 from material_tools.utils import get_qualified_material_name
 
 
@@ -104,7 +104,7 @@ class MeshInputBuilder(SubmodelInputBuilder):
                 material = bpy.data.materials.get(get_qualified_material_name(abspath))
 
                 if not material:
-                    material = MATImporter(asset_searcher).import_from_abspath(abspath)
+                    material = MaterialImporter(asset_searcher).import_from_abspath(abspath)
 
                 self.obj.active_material = material
 

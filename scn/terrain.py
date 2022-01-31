@@ -3,7 +3,7 @@ import bpy
 import bmesh
 
 from material_tools.utils import get_shortpath_from_material
-from material_tools.input import MATImporter
+from material_tools.input import MaterialImporter
 
 class TerrainBuilder:
     def __init__(self, config):
@@ -50,7 +50,7 @@ class TerrainBuilder:
 
         for map_ in self._maps:
             map_ = map_.split(":")[0]
-            material = MATImporter.import_from_relpath(map_)
+            material = MaterialImporter.import_from_relpath(map_)
 
             self._terrain_object.data.materials.append(material)
 

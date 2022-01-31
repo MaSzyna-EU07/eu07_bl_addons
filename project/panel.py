@@ -11,7 +11,7 @@ class EU07_PT_ProjectProperties(bpy.types.Panel):
         project_properties = context.scene.eu07_project_properties
 
         self.layout.prop(project_properties, "operating_mode")
-        self.layout.prop(project_properties, "root_path")
+        self.layout.prop(project_properties, "environment_path")
 
 
 def register():

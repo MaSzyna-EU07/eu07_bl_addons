@@ -8,7 +8,6 @@ import bpy
 
 from common.utils import get_root, get_viewport_camera_location, get_viewport_camera_rotation
 from common.preferences import get_preferences
-from animation_tools import eventize_object_animation
 
 
 MODEL_FILENAME = "blender_preview.t3d"
@@ -56,20 +55,6 @@ class EU07_OT_GameEnginePreview(bpy.types.Operator):
         camera.rotation = swizzled
 
         scn_elements.append(camera)
-
-        # launcher = eu07_tools.scn.create_element("node:eventlauncher")
-        # launcher.key = "A"
-        # launcher.first_event_name = "animator"
-        #
-        # multiple = eu07_tools.scn.create_element("event:multiple")
-        # multiple.name = "animator"
-        #
-        # scn_elements.extend([launcher, multiple])
-        #
-        # for obj in bpy.data.objects:
-        #     anim_events = eventize_object_animation(obj, "model_preview")
-        #     multiple.events_names.extend(ev.name for ev in anim_events)
-        #     scn_elements.extend(anim_events)
 
         scn_path = pathlib.Path(root, "scenery", SCENERY_FILENAME)
         with open(scn_path, "w", encoding="windows-1250", newline="\r\n") as outfile:

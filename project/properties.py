@@ -12,9 +12,9 @@ class EU07ProjectProperties(bpy.types.PropertyGroup):
         default="modelling",
     )
 
-    root_path: bpy.props.StringProperty(
-        name="Root",
-        description="Root path for this project",
+    environment_path: bpy.props.StringProperty(
+        name="Environment path",
+        description="Environment path for this project",
         subtype='DIR_PATH',
         update=None, # TODO: Reload assets on change?
     )

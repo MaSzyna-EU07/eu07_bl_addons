@@ -5,7 +5,7 @@ from bpy_extras.io_utils import ImportHelper
 
 import eu07_tools
 from common import get_root
-from .importer import MATImporter
+from .importer import MaterialImporter
 
 class EU07_OT_MaterialImport(bpy.types.Operator, ImportHelper):
     bl_idname = "eu07.import_material"
@@ -25,6 +25,12 @@ class EU07_OT_MaterialImport(bpy.types.Operator, ImportHelper):
     use_fake_user: bpy.props.BoolProperty(
         name="Use fake user",
         default=False
+    )
+    opacity: bpy.props.FloatProperty(
+        name="Opacity",
+        min=0,
+        max=1,
+        default=1
     )
     import_into_active: bpy.props.BoolProperty(
         name="Import into active",
@@ -49,8 +55,8 @@ class EU07_OT_MaterialImport(bpy.types.Operator, ImportHelper):
             asset_searcher = eu07_tools.utils.AssetSearcher(
                 get_root(filepath), Path(filepath).parent
             )
-            importer = MATImporter(asset_searcher)
-            material = importer.import_from_abspath(filepath, active_material)
+            importer = MaterialImporter(asset_searcher)
+            material = importer.import_from_abspath(filepath, active_material, self.opacity)
             importer.use_fake_user = self.use_fake_user
 
             if not self.import_into_active and self.set_new_as_active:
