@@ -4,7 +4,7 @@ import os
 import bpy
 from bpy.props import IntProperty, EnumProperty, BoolProperty
 
-from common import get_root
+from common import get_environment_path
 
 
 class BasemapProperties(bpy.types.PropertyGroup):
@@ -91,7 +91,7 @@ class LoadBasemapOperator(bpy.types.Operator):
         limit = bpy.context.scene.eu07_properties.basemap_limit
         cursor_loc = bpy.context.scene.cursor.location
 
-        root = get_root()
+        root = get_environment_path()
         dirpath = Path(root, "gisdata", context.scene.eu07_properties.basemap_type)
 
         for filename in os.listdir(dirpath):

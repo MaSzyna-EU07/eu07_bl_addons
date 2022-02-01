@@ -5,7 +5,7 @@ from bpy.props import StringProperty, BoolProperty
 from bpy_extras.io_utils import ImportHelper
 
 import eu07_tools
-from common.utils import get_root
+from common.utils import get_environment_path
 
 from t3d.input.importer import T3DImporter
 
@@ -39,7 +39,7 @@ class T3DImportOperator(bpy.types.Operator, ImportHelper):
     )
 
     def execute(self, context):
-        root = get_root(self.filepath)
+        root = get_environment_path()
         basedir = pathlib.Path(self.filepath).parent
         asset_searcher = eu07_tools.utils.AssetSearcher(root, basedir)
         asset_searcher.models.remove_extension(".e3d")

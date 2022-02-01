@@ -5,7 +5,7 @@ from bpy.props import StringProperty, BoolProperty, IntProperty
 from bpy_extras.io_utils import ImportHelper
 
 import eu07_tools
-from common import get_root
+from common import get_environment_path
 from scn.input.input_builders import SceneryBuilder
 from scn.sectorizer import Sectorizer
 
@@ -66,7 +66,7 @@ class SCNImportOperator(bpy.types.Operator, ImportHelper):
     )
 
     def execute(self, context):
-        root = get_root(self.filepath)
+        root = get_environment_path()
 
         asset_searcher = eu07_tools.utils.AssetSearcher(
             root, Path(self.filepath).parent

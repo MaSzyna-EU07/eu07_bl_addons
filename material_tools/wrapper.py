@@ -19,11 +19,12 @@ class MaterialWrapper:
         self.material.use_nodes = True
         self._node_tree: bpy.types.NodeTree = self.material.node_tree
 
-    def adjust_specularity(self):
+    def apply_specific_settings(self):
         bsdf = self._get_bsdf_node()
 
         bsdf.inputs[BSDF_SPECULAR_INPUT].default_value = 0
         bsdf.inputs[BSDF_ROUGHNESS_INPUT].default_value = 1
+        self.material.use_backface_culling = True
 
     def set_diffuse(self, image: bpy.types.Image):
         bsdf = self._get_bsdf_node()
@@ -39,6 +40,15 @@ class MaterialWrapper:
             img_node.outputs[IMAGE_ALPHA_OUTPUT],
             bsdf.inputs[BSDF_ALPHA_INPUT]
         )
+
+    def get_diffuse(self):
+        bsdf = self._get_bsdf_node()
+
+        links = bsdf.inputs[BSDF_COLOR_INPUT].links
+        if links:
+            node = links[0].from_node
+            if node.bl_idname == "ShaderNodeTexImage":
+                return node.image
 
     def set_normalmap(self, image: bpy.types.Image):
         image.colorspace_settings.name = 'Non-Color'
@@ -64,19 +74,14 @@ class MaterialWrapper:
     def set_opacity(self, opacity: float):
         if opacity == 1:
             self.material.blend_method = 'OPAQUE'
-        elif opacity == 0:
-            self.material.blend_method = 'BLEND'
         else:
-            self.material.blend_method = 'CLIP'
-            self.material.alpha_threshold = opacity # TODO: Make sure it's ok
+            self.material.blend_method = 'BLEND'
 
     def get_opacity(self) -> float:
         if self.material.blend_method == 'OPAQUE':
             return 1
         elif self.material.blend_method == 'BLEND':
             return 0
-        elif self.material.blend_method == 'CLIP':
-            return self.material.alpha_threshold # TODO: Make sure it's ok
 
         return 1
 
@@ -84,7 +89,7 @@ class MaterialWrapper:
         img_node = self._node_tree.nodes.new('ShaderNodeTexImage')
 
         img_node.image = image
-        img_node.interpolation = 'Closest'
+        img_node.interpolation = 'Linear'
 
         if img_node.image.filepath.endswith(".dds"):
             img_node.texture_mapping.scale[1] = -1

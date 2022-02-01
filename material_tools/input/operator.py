@@ -4,7 +4,7 @@ import bpy
 from bpy_extras.io_utils import ImportHelper
 
 import eu07_tools
-from common import get_root
+from common import get_environment_path
 from .importer import MaterialImporter
 
 class EU07_OT_MaterialImport(bpy.types.Operator, ImportHelper):
@@ -53,7 +53,7 @@ class EU07_OT_MaterialImport(bpy.types.Operator, ImportHelper):
         for file_elem in self.files:
             filepath = str(Path(directory, file_elem.name))
             asset_searcher = eu07_tools.utils.AssetSearcher(
-                get_root(filepath), Path(filepath).parent
+                get_environment_path(), Path(filepath).parent
             )
             importer = MaterialImporter(asset_searcher)
             material = importer.import_from_abspath(filepath, active_material, self.opacity)

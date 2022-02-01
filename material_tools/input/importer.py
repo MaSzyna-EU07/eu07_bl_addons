@@ -2,6 +2,7 @@ import bpy
 
 import eu07_tools
 
+import common
 from material_tools import utils
 from material_tools.wrapper import MaterialWrapper
 
@@ -26,8 +27,10 @@ class MaterialImporter:
         if material is None:
             material = bpy.data.materials.new(name)
 
+        material.eu07_properties.source_path = common.get_source_path(abspath)
+
         wrapper = MaterialWrapper(material)
-        wrapper.adjust_specularity()
+        wrapper.apply_specific_settings()
 
         if abspath.endswith(".mat"):
             # TODO: Ugly, opacity should be muted without returning
@@ -63,6 +66,8 @@ class MaterialImporter:
         self.asset_searcher.textures.add_extension(".mat")
 
         return opacity
+
+
 
 
 

@@ -1,5 +1,7 @@
 import bpy
 
+from common import preferences
+
 
 class EU07ProjectProperties(bpy.types.PropertyGroup):
     operating_mode: bpy.props.EnumProperty(

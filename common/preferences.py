@@ -9,8 +9,8 @@ def get_preferences():
 class EU07AddonPreferences(bpy.types.AddonPreferences):
     bl_idname = "eu07_bl_addons"
 
-    root: StringProperty(
-        name="Root path",
+    default_environment_path: StringProperty(
+        name="Default environment path",
         subtype='FILE_PATH'
     )
 
@@ -25,8 +25,9 @@ class EU07AddonPreferences(bpy.types.AddonPreferences):
     )
 
     def draw(self, context):
-        self.layout.prop(self, "root")
-        self.layout.prop(self, "trees_material_regex")
+        pass
+        #self.layout.prop(self, "default_environment_path")
+        #self.layout.prop(self, "trees_material_regex")
 
 
 classes = (

@@ -61,7 +61,7 @@ class SCNExporter(bpy.types.Operator, ExportHelper):
 
         export_manager.master_buffer.write(firstinit.get_firstinit())
 
-        export_manager.flush_buffers_to_files(utils.get_root(self.filepath), self.filepath)
+        export_manager.flush_buffers_to_files(utils.get_environment_path(), self.filepath)
 
         return {'FINISHED'}
 

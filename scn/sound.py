@@ -2,7 +2,7 @@ import bpy
 
 import eu07_tools
 from scn.sectorizer import Sectorizer
-from common import get_root
+from common import get_environment_path
 
 
 def create_sound_from_element(element):
@@ -10,7 +10,7 @@ def create_sound_from_element(element):
     sound_object = bpy.data.objects.new(element.name, speaker)
     sound_object.location = element.location.swizzled()
 
-    asset_searcher = eu07_tools.utils.AssetSearcher(get_root())
+    asset_searcher = eu07_tools.utils.AssetSearcher(get_environment_path())
 
     sound_object.scn_properties.node_max_distance = element.max_distance
     sound_object.scn_properties.node_min_distance = element.min_distance

@@ -1,4 +1,5 @@
 import math
+import pathlib
 
 from bpy_extras import view3d_utils
 import bpy
@@ -8,16 +9,16 @@ import eu07_tools
 
 from common import preferences
 
-def get_root(abspath=""):
-    try:
-        root = eu07_tools.utils.find_asset_root(abspath)
-    except ValueError:
-        root = preferences.get_preferences().root
-        if not root:
-            raise ValueError(f"Can't find root path for {abspath}")
+def get_environment_path():
+    env_path = bpy.context.scene.eu07_project_properties.environment_path
+    if not env_path:
+        raise ValueError("EU07 Addon Error: Environment path not set in Project Properties")
 
-    return root
+    return env_path
 
+def get_source_path(abspath):
+    env_path = get_environment_path()
+    return str(pathlib.Path(abspath).relative_to(env_path))
 
 def uilist_safe_index_after_delete(uilist, index):
     return min(max(0, index - 1), len(uilist) - 1)

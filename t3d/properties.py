@@ -88,8 +88,8 @@ class T3DSubmodelProperties(bpy.types.PropertyGroup):
     opacity: FloatProperty(
         name='Opacity',
         min=0,
-        max=100,
-        default=100
+        max=1,
+        default=1
     )
     replacableskin_id: EnumProperty(
         name='Skin',
@@ -179,8 +179,12 @@ class T3DSubmodelPropertiesPanel(bpy.types.Panel):
             wiresize_r = wire_b.row()
             wiresize_r.prop(self.obj.t3d_properties, "wire_size")
 
-            opacity_r = self.layout.row()
-            opacity_r.prop(self.obj.t3d_properties, "opacity", text="Opacity")
+            if (
+                self.obj.active_material is None or
+                not self.obj.active_material.eu07_properties.source_path
+            ):
+                opacity_r = self.layout.row()
+                opacity_r.prop(self.obj.t3d_properties, "opacity", text="Opacity (fallback)")
 
             map_b = self.layout.box()
             replacableskin_r = map_b.row()

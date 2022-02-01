@@ -14,8 +14,8 @@ from . import common, t3d, e3d, scn, material_tools, project, preview
 
 
 def register():
-    project.register()
     common.register()
+    project.register()
     t3d.register()
     e3d.register()
     scn.register()
@@ -24,8 +24,8 @@ def register():
 
 
 def unregister():
-    project.register()
     common.unregister()
+    project.register()
     t3d.unregister()
     e3d.unregister()
     scn.unregister()

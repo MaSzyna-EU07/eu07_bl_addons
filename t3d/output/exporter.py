@@ -1,7 +1,7 @@
 import bpy
 
 import eu07_tools
-from common.utils import get_root
+from common.utils import get_environment_path
 from common import includes
 from common.export_manager import ExportManager
 from .hierarchy_maker import HierarchyMaker
@@ -42,7 +42,7 @@ class T3DExporter:
 
             output.dump_element(submodel)
 
-        export_manager.flush_buffers_to_files(get_root(filepath), filepath)
+        export_manager.flush_buffers_to_files(get_environment_path(), filepath)
 
     def _create_submodel_to_export(self, obj):
         builder = output_builders.get_builder(obj)

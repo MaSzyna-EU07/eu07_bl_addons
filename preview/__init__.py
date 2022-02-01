@@ -6,7 +6,7 @@ import subprocess
 import eu07_tools
 import bpy
 
-from common.utils import get_root, get_viewport_camera_location, get_viewport_camera_rotation
+from common.utils import get_environment_path, get_viewport_camera_location, get_viewport_camera_rotation
 from common.preferences import get_preferences
 
 
@@ -21,7 +21,7 @@ class EU07_OT_GameEnginePreview(bpy.types.Operator):
     def execute(self, context):
         settings = bpy.context.scene.eu07_model_preview
 
-        root = get_root()
+        root = get_environment_path()
 
         model_outpath = str(pathlib.Path(root, "models", MODEL_FILENAME))
         bpy.ops.export_scene.t3d(filepath=model_outpath, aggregate_includes=True, embed_skins=True)
