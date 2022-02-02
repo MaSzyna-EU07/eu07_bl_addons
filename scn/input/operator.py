@@ -66,7 +66,7 @@ class SCNImportOperator(bpy.types.Operator, ImportHelper):
     )
 
     def execute(self, context):
-        root = get_environment_path()
+        root = get_environment_path(self.filepath)
 
         asset_searcher = eu07_tools.utils.AssetSearcher(
             root, Path(self.filepath).parent

@@ -4,7 +4,7 @@ import common
 
 
 def get_qualified_material_name(abspath, opacity=1):
-    root = common.utils.get_environment_path()
+    root = common.utils.get_environment_path(abspath)
 
     try:
         name = str(pathlib.Path(abspath).relative_to(root).with_suffix(""))

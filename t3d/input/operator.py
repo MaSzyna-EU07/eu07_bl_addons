@@ -39,7 +39,7 @@ class T3DImportOperator(bpy.types.Operator, ImportHelper):
     )
 
     def execute(self, context):
-        root = get_environment_path()
+        root = get_environment_path(self.filepath)
         basedir = pathlib.Path(self.filepath).parent
         asset_searcher = eu07_tools.utils.AssetSearcher(root, basedir)
         asset_searcher.models.remove_extension(".e3d")

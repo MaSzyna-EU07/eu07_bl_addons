@@ -64,14 +64,6 @@ class E3DImporter:
             if submodel.flags & (1 << 5):
                 opacity = 0
 
-            else:
-
-                if submodel.map in {"-1", "-2", "-3", "-4"}:
-                    shift = int(submodel.map) * -1 - 1
-
-                    if submodel.flags & (1 << shift):
-                        opacity = -1
-
             builder.set_map(submodel.map, self.asset_searcher, opacity)
 
             geometry = Geometry.from_e3d(submodel.get_triangles_iter())

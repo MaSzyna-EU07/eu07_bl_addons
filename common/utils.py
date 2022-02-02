@@ -7,17 +7,21 @@ import mathutils
 
 import eu07_tools
 
-from common import preferences
 
-def get_environment_path():
+def get_environment_path(fallback_path=""):
     env_path = bpy.context.scene.eu07_project_properties.environment_path
     if not env_path:
-        raise ValueError("EU07 Addon Error: Environment path not set in Project Properties")
+        if fallback_path:
+            env_path = \
+            bpy.context.scene.eu07_project_properties.environment_path = \
+            eu07_tools.utils.find_asset_root(fallback_path)
+        else:
+            raise ValueError("EU07 Addon Error: Environment path not set")
 
     return env_path
 
 def get_source_path(abspath):
-    env_path = get_environment_path()
+    env_path = get_environment_path(abspath)
     return str(pathlib.Path(abspath).relative_to(env_path))
 
 def uilist_safe_index_after_delete(uilist, index):

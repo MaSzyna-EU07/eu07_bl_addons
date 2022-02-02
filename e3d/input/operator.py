@@ -31,7 +31,7 @@ class E3DImportOperator(bpy.types.Operator, ImportHelper):
 
     def execute(self, context):
         asset_searcher = eu07_tools.utils.AssetSearcher(
-            get_environment_path(),
+            get_environment_path(self.filepath),
             Path(self.filepath).parent
         )
 
