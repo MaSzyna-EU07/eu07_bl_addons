@@ -153,7 +153,7 @@ class BananMeshInputBuilder(MeshInputBuilder):
     def create_submodel(self, name):
         self.obj = bpy.data.objects.new(name, None)
 
-    def set_map(self, map_, asset_searcher):
+    def set_map(self, map_, asset_searcher, opacity):
         pass
 
     def set_geometry(self, geometry):

@@ -41,7 +41,7 @@ class MaterialWrapper:
             bsdf.inputs[BSDF_ALPHA_INPUT]
         )
 
-    def get_diffuse(self):
+    def get_diffusemap(self):
         bsdf = self._get_bsdf_node()
 
         links = bsdf.inputs[BSDF_COLOR_INPUT].links
@@ -74,6 +74,12 @@ class MaterialWrapper:
     def set_opacity(self, opacity: float):
         if opacity == 1:
             self.material.blend_method = 'OPAQUE'
+        elif opacity == -1:
+            diffusemap = self.get_diffusemap()
+            if diffusemap:
+                has_alpha = diffusemap.depth == 32
+                if has_alpha:
+                    self.material.blend_method = 'BLEND'
         else:
             self.material.blend_method = 'BLEND'
 

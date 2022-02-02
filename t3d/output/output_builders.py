@@ -86,7 +86,7 @@ class MeshOutputBuilder(SubmodelOutputBuilder):
         if self.obj.active_material:
             wrapper = MaterialWrapper(self.obj.active_material)
 
-            if wrapper.get_diffuse() is not None:
+            if wrapper.get_diffusemap() is not None:
                 self.submodel.opacity = wrapper.get_opacity()
 
     def set_map(self, embed_skins=False):
