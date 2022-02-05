@@ -40,7 +40,8 @@ class T3DExporter:
             output = export_manager.get_output(identifier)
             submodel = self._create_submodel_to_export(obj)
 
-            output.dump_element(submodel)
+            if output:
+                output.dump_element(submodel)
 
         export_manager.flush_buffers_to_files(get_environment_path(), filepath)
 

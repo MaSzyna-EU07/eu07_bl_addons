@@ -1,6 +1,10 @@
 import pathlib
+import bpy
 
 import common
+import eu07_tools
+
+from .wrapper import MaterialWrapper
 
 
 def get_qualified_material_name(abspath, opacity=1):
@@ -21,9 +25,9 @@ def get_shortpath_from_material(material):
     if material is None:
         return "none"
 
-    shortpath = material.eu07_properties.source_path
-
-    if shortpath == "":
-        return "none"
-
-    return shortpath
+    if material.is_imported:
+        return material.eu07_properties.source_path
+    else:
+        wrapper = MaterialWrapper(material)
+        image = wrapper.get_diffusemap()
+        return eu07_tools.utils.shorten_asset_path(image.filepath)

@@ -79,7 +79,14 @@ class EU07Include(bpy.types.PropertyGroup):
 
     file_path: bpy.props.StringProperty(
         name="Path",
-        description="Path to .scm file, relative to scenery directory",
+        description="Path to included file, relative to main file",
+    )
+
+    # Default is false, because it's more idiot-proof: it minimizes risk of overwriting includes (like Turbokibel did)
+    is_exportable: bpy.props.BoolProperty(
+        name="Exportable",
+        description="When enabled, objects assigned to this include will export to file at given path",
+        default=False
     )
 
     identifier: bpy.props.IntProperty(min=0)
@@ -105,6 +112,8 @@ class EU07_PT_Includes(bpy.types.Panel):
     bl_category = "[EU07] Developer Tools"
 
     def draw(self, context):
+        item = get_active_include()
+
         list_row = self.layout.row()
         list_row.template_list(
             "EU07_UL_Includes", "",
@@ -116,11 +125,10 @@ class EU07_PT_Includes(bpy.types.Panel):
         addrem_col.operator("eu07.delete_include", icon="REMOVE", text="")
 
         ops_row = self.layout.row()
-        ops_row.operator("eu07.assign_to_include", text="Assign")
+        assign_op = ops_row.operator("eu07.assign_to_include", text="Assign")
+
         ops_row.operator("eu07.unassign_from_include", text="Unassign")
         ops_row.operator("eu07.select_included", text="Select")
-
-        item = get_active_include()
 
         if item:
             name_row = self.layout.row()
@@ -128,6 +136,9 @@ class EU07_PT_Includes(bpy.types.Panel):
 
             path_row = self.layout.row()
             path_row.prop(item, "file_path")
+
+            exportable_row = self.layout.row()
+            exportable_row.prop(item, "is_exportable")
 
 
 class EU07_OT_AddInclude(bpy.types.Operator):

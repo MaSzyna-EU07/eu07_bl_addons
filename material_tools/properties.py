@@ -8,6 +8,12 @@ class EU07MaterialProperties(bpy.types.PropertyGroup):
         description="Source path for this material, relative to environment root."
     )
 
+    is_imported: bpy.props.BoolProperty(
+        name="Is imported",
+        default=False,
+        description="This material was imported by addon?"
+    )
+
 
 classes = (
     EU07MaterialProperties,

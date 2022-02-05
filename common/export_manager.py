@@ -17,7 +17,8 @@ class ExportManager:
 
         if not self.aggregate_includes:
             for include in self._includes_list:
-                self._buffers[include.identifier] = io.StringIO()
+                if include.is_exportable:
+                    self._buffers[include.identifier] = io.StringIO()
 
     def create_outputs(self, output_cls):
         self._outputs[includes.MASTER_IDENTIFIER] = output_cls(self._buffers[includes.MASTER_IDENTIFIER])
