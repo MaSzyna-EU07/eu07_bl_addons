@@ -16,10 +16,10 @@ NORMALMAP_NORMAL_OUTPUT = 0
 class MaterialWrapper:
     def __init__(self, material):
         self.material: bpy.types.Material = material
-        self.material.use_nodes = True
         self._node_tree: bpy.types.NodeTree = self.material.node_tree
 
-    def apply_specific_settings(self):
+    def initialize(self):
+        self.material.use_nodes = True
         bsdf = self._get_bsdf_node()
 
         bsdf.inputs[BSDF_SPECULAR_INPUT].default_value = 0

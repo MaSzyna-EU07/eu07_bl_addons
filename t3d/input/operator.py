@@ -28,14 +28,17 @@ class T3DImportOperator(bpy.types.Operator, ImportHelper):
     import_meshes: BoolProperty(
         name="Import Meshes",
         default=True,
+        options={'HIDDEN'}
     )
     import_spots: BoolProperty(
         name="Import FreeSpotLights",
-        default=True
+        default=True,
+        options={'HIDDEN'}
     )
     import_stars: BoolProperty(
         name="Import Stars",
-        default=True
+        default=True,
+        options={'HIDDEN'}
     )
 
     def execute(self, context):

@@ -1,5 +1,4 @@
 import bpy
-from bpy.props import StringProperty, BoolProperty
 from bpy_extras.io_utils import ExportHelper
 
 from .exporter import T3DExporter
@@ -10,31 +9,40 @@ class EU07_OT_ExportT3D(bpy.types.Operator, ExportHelper):
     bl_label = "Export T3D"
     filename_ext = ".t3d"
 
-    filter_glob: StringProperty(
+    filter_glob: bpy.props.StringProperty(
         default="*.t3d",
         options={'HIDDEN'}
     )
-    use_selection: BoolProperty(
-        name="Selection Only",
-        default=False
+    objects_range: bpy.props.EnumProperty(
+        name="Export range",
+        items=[
+            ("ALL", "All Objects", "Export all objects from scene"),
+            ("SELECTION", "Selected Objects", "Export only selected objects"),
+            ("VISIBLE", "Visible Objects", "Export only visible objects"),
+            ("ACTIVE_COLLECTION", "Active Collection", "Export objects from active collection"),
+        ]
     )
-    apply_modifiers: BoolProperty(
+    apply_modifiers: bpy.props.BoolProperty(
         name="Apply modifiers",
-        default=True
+        default=True,
+        description="Export geometry with applied modifiers"
     )
-    aggregate_includes: BoolProperty(
+    aggregate_includes: bpy.props.BoolProperty(
         name="Aggregate includes",
-        default=False
+        default=False,
+        description="Write all include objects to main file - do not write into include files",
+        options={'HIDDEN'}
     )
-    embed_skins: BoolProperty(
+    embed_skins: bpy.props.BoolProperty(
         name="Embed skins",
         default=False,
+        description="Export material paths instead replaceable skins identifiers",
         options={'HIDDEN'}
     )
 
     def execute(self, context):
         exporter = T3DExporter()
-        exporter.use_selection = self.use_selection
+        exporter.objects_range = self.objects_range
         exporter.apply_modifiers = self.apply_modifiers
         exporter.aggregate_includes = self.aggregate_includes
         exporter.embed_skins = self.embed_skins

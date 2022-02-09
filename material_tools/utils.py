@@ -32,3 +32,6 @@ def get_shortpath_from_material(material):
         image = wrapper.get_diffusemap()
         return eu07_tools.utils.shorten_asset_path(image.filepath)
 
+
+
+

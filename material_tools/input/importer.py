@@ -27,12 +27,14 @@ class MaterialImporter:
 
         if material is None:
             material = bpy.data.materials.new(name)
+        else:
+            material.name = name
 
         material.eu07_properties.source_path = source_path
         material.eu07_properties.is_imported = True
 
         wrapper = MaterialWrapper(material)
-        wrapper.apply_specific_settings()
+        wrapper.initialize()
 
         if abspath.endswith(".mat"):
             # TODO: Ugly, opacity should be muted without returning

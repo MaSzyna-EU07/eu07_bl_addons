@@ -19,14 +19,17 @@ class E3DImportOperator(bpy.types.Operator, ImportHelper):
     import_meshes: bpy.props.BoolProperty(
         name="Import Meshes",
         default=True,
+        options={'HIDDEN'}
     )
     import_spots: bpy.props.BoolProperty(
         name="Import FreeSpotLights",
-        default=True
+        default=True,
+        options={'HIDDEN'}
     )
     import_stars: bpy.props.BoolProperty(
         name="Import Stars",
-        default=True
+        default=True,
+        options={'HIDDEN'}
     )
 
     def execute(self, context):

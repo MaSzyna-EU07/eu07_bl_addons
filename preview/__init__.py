@@ -75,8 +75,7 @@ class EU07_OT_GameEnginePreview(bpy.types.Operator):
         cwd = os.getcwd()
         os.chdir(root)
 
-        addon_preferences = get_preferences()
-        args = [*addon_preferences.executable.split(" "), "-s", SCENERY_FILENAME]
+        args = [*settings.executable_command.split(" "), "-s", SCENERY_FILENAME]
 
         subprocess.Popen(args)
 
@@ -86,6 +85,10 @@ class EU07_OT_GameEnginePreview(bpy.types.Operator):
 
 
 class ModelPreviewSettings(bpy.types.PropertyGroup):
+    executable_command: bpy.props.StringProperty(
+        default="eu07.exe"
+    )
+
     angles: bpy.props.FloatVectorProperty(
         size=3,
         default=(0, 0, 0)
@@ -133,9 +136,7 @@ class EU07_PT_GameEnginePreview(bpy.types.Panel):
 
         settings = bpy.context.scene.eu07_model_preview
 
-        addon_preferences = get_preferences()
-
-        self.layout.prop(addon_preferences, "executable")
+        self.layout.prop(settings, "executable_command")
         lightbox = self.layout.box()
         lightbox.label(text="Lights")
         lightbox.prop(settings, "lights", text="States")
