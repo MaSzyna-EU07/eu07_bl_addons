@@ -21,8 +21,8 @@ class T3DImportOperator(bpy.types.Operator, ImportHelper):
         default="*.t3d",
         options={'HIDDEN'}
     )
-    load_includes: BoolProperty(
-        name="Load includes",
+    load_included_objects: BoolProperty(
+        name="Load Included Objects",
         default=True,
     )
     import_meshes: BoolProperty(
@@ -48,7 +48,7 @@ class T3DImportOperator(bpy.types.Operator, ImportHelper):
         asset_searcher.models.remove_extension(".e3d")
 
         importer = T3DImporter(asset_searcher)
-        importer.load_includes = self.load_includes
+        importer.load_included_objects = self.load_included_objects
         importer.import_meshes = self.import_meshes
         importer.import_spots = self.import_spots
         importer.import_stars = self.import_stars

@@ -24,13 +24,15 @@ class EU07_OT_MaterialImport(bpy.types.Operator, ImportHelper):
     )
     use_fake_user: bpy.props.BoolProperty(
         name="Use fake user",
-        default=False
+        default=False,
+        options={'HIDDEN'}
     )
     opacity: bpy.props.FloatProperty(
         name="Opacity",
         min=0,
         max=1,
-        default=1
+        default=1,
+        options={'HIDDEN'}
     )
     import_into_active: bpy.props.BoolProperty(
         name="Import into active",

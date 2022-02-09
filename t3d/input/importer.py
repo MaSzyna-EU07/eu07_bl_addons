@@ -9,7 +9,7 @@ from .geometry import Geometry
 
 class T3DImporter:
     def __init__(self, asset_searcher):
-        self.load_includes = True
+        self.load_included_objects = True
         self.import_meshes = True
         self.import_spots = True
         self.import_stars = True
@@ -34,7 +34,7 @@ class T3DImporter:
                 if obj:
                     objects.append(obj)
 
-            elif element.element_type == "include" and self.load_includes:
+            elif element.element_type == "include":
                 included_objects = self.import_from_include_element(element)
                 objects.extend(included_objects)
 
@@ -105,7 +105,7 @@ class T3DImporter:
             prev_inc_identifier = self.include_identifier
             self.include_identifier = include.identifier
 
-            objects = self.import_from_filepath(inc_path)
+            objects = self.import_from_filepath(inc_path) if self.load_included_objects else []
 
             self.include_identifier = prev_inc_identifier
 
