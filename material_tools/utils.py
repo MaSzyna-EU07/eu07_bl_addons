@@ -30,7 +30,10 @@ def get_shortpath_from_material(material):
     else:
         wrapper = MaterialWrapper(material)
         image = wrapper.get_diffusemap()
-        return eu07_tools.utils.shorten_asset_path(image.filepath)
+        if image:
+            return eu07_tools.utils.shorten_asset_path(image.filepath)
+        else:
+            return "none"
 
 
 

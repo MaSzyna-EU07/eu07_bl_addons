@@ -94,14 +94,14 @@ class T3DSubmodelProperties(bpy.types.PropertyGroup):
         default=1
     )
     replacableskin_id: EnumProperty(
-        name='Skin',
+        name='Map',
         default='None',
         items=[
             ('None', 'From Material', ''),
-            ('-1', '-1', ''),
-            ('-2', '-2', ''),
-            ('-3', '-3', ''),
-            ('-4', '-4', '')]
+            ('-1', 'Skin #1', ''),
+            ('-2', 'Skin #2', ''),
+            ('-3', 'Skin #3', ''),
+            ('-4', 'Skin #4', '')]
     )
     use_near_atten: BoolProperty(
         name='UseNearAtten',

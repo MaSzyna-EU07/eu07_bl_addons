@@ -53,12 +53,6 @@ class T3DImportOperator(bpy.types.Operator, ImportHelper):
         importer.import_spots = self.import_spots
         importer.import_stars = self.import_stars
 
-        with cProfile.Profile() as pr:
-            objects = importer.import_from_filepath(self.filepath)
-
-        pr.print_stats()
-
-        for obj in objects:
-            bpy.context.scene.collection.objects.link(obj)
+        objects = importer.import_from_filepath(self.filepath)
 
         return {'FINISHED'}

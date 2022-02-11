@@ -163,6 +163,12 @@ class BananMeshOutputBuilder(MeshOutputBuilder):
     def __init__(self, obj):
         super().__init__(obj)
 
+        name = obj.name
+        if obj.name.startswith("smokesource"):
+            name = obj.name.split(".")[0]
+
+        self.submodel = eu07_tools.t3d.create_submodel("Mesh", name)
+
     def set_map(self, embed_skins=False):
         self.submodel.map = "none"
 

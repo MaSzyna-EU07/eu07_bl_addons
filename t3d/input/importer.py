@@ -6,6 +6,8 @@ from common import includes
 from t3d.input import input_builders
 from .geometry import Geometry
 
+import bpy
+
 
 class T3DImporter:
     def __init__(self, asset_searcher):
@@ -15,6 +17,7 @@ class T3DImporter:
         self.import_stars = True
         self.asset_searcher = asset_searcher
         self.include_identifier = includes.MASTER_IDENTIFIER
+        self.link_objects_adhoc = True
 
     def import_from_filepath(self, filepath):
         with open(filepath, "r", encoding="latin-1") as file:
@@ -91,6 +94,10 @@ class T3DImporter:
 
         obj = builder.obj
         obj.eu07_include_identifier = self.include_identifier
+
+        if self.link_objects_adhoc:
+            bpy.context.scene.collection.objects.link(obj)
+
         return obj
 
     def import_from_include_element(self, element):

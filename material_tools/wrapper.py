@@ -50,6 +50,7 @@ class MaterialWrapper:
                 return node.image
 
     def set_normalmap(self, image: bpy.types.Image):
+        return # display issues...
         image.colorspace_settings.name = 'Non-Color'
 
         bsdf = self._get_bsdf_node()
