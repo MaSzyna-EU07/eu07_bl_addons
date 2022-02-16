@@ -24,7 +24,7 @@ class EU07_OT_GameEnginePreview(bpy.types.Operator):
         root = get_environment_path()
 
         model_outpath = str(pathlib.Path(root, "models", MODEL_FILENAME))
-        bpy.ops.export_scene.t3d(filepath=model_outpath, aggregate_includes=True, embed_skins=True)
+        bpy.ops.export_scene.t3d(filepath=model_outpath, aggregate_includes=True, embed_skins=True, objects_range='VISIBLE')
 
         scn_elements = []
 

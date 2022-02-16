@@ -64,7 +64,7 @@ class E3DImporter:
             if submodel.flags & (1 << 5):
                 opacity = 0
 
-            builder.set_map(submodel.map, self.asset_searcher, opacity)
+            builder.set_map(submodel.map, self.asset_searcher, opacity, submodel.diffuse_color[:3] * 255)
 
             geometry = Geometry.from_e3d(submodel.get_triangles_iter())
             # Because weird rotations are made by EU07.exe during e3d generation,

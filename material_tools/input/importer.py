@@ -25,23 +25,26 @@ class MaterialImporter:
         name = utils.get_qualified_material_name(abspath, opacity)
         source_path = common.get_source_path(abspath)
 
+        wrapper = MaterialWrapper(material)
+        wrapper.initialize()
+
         if material is None:
             material = bpy.data.materials.new(name)
         else:
+            wrapper.clean()
             material.name = name
 
         material.eu07_properties.source_path = source_path
         material.eu07_properties.is_imported = True
 
-        wrapper = MaterialWrapper(material)
-        wrapper.initialize()
+
 
         if abspath.endswith(".mat"):
             # TODO: Ugly, opacity should be muted without returning
             opacity = self._build_from_mat_file(abspath, wrapper, opacity)
         else:
             image = bpy.data.images.load(abspath, check_existing=True)
-            wrapper.set_diffuse(image)
+            wrapper.set_diffusemap(image)
 
         wrapper.set_opacity(opacity)
 
@@ -62,7 +65,7 @@ class MaterialImporter:
                 image = bpy.data.images.load(image_path, check_existing=True)
 
                 if key in {"texture_diffuse", "texture1"}:
-                    wrapper.set_diffuse(image)
+                    wrapper.set_diffusemap(image)
 
                 elif key in {"texture_normalmap", "texture2"}:
                     wrapper.set_normalmap(image)

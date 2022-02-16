@@ -68,7 +68,7 @@ class T3DImporter:
             builder.set_wire(element.wire)
             builder.set_wire_size(element.wire_size)
             builder.set_opacity(element.opacity)
-            builder.set_map(element.map, self.asset_searcher, element.opacity)
+            builder.set_map(element.map, self.asset_searcher, element.opacity, element.diffuse_color)
 
             if element.use_indices:
                 geometry = Geometry.from_indexed_t3d(

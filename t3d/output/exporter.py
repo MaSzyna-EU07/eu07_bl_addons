@@ -10,7 +10,7 @@ from . import output_builders
 
 class T3DExporter:
     def __init__(self):
-        self.export_range = "ALL"
+        self.objects_range = "ALL"
         self.apply_modifiers = True
         self.aggregate_includes = False
         self.embed_skins = False
@@ -21,11 +21,11 @@ class T3DExporter:
         export_manager.create_outputs(eu07_tools.t3d.T3DOutput)
 
         objects_to_export = bpy.context.scene.objects
-        if self.export_range == "SELECTION":
+        if self.objects_range == "SELECTION":
             objects_to_export = bpy.context.selected_objects
-        elif self.export_range == "VISIBLE":
+        elif self.objects_range == "VISIBLE":
             objects_to_export = bpy.context.visible_objects
-        elif self.export_range == "ACTIVE_COLLECTION":
+        elif self.objects_range == "ACTIVE_COLLECTION":
             objects_to_export = bpy.context.collection
 
         objects_to_export = HierarchyMaker().make_hierarchy(objects_to_export)

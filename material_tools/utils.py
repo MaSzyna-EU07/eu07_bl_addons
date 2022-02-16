@@ -26,7 +26,7 @@ def get_shortpath_from_material(material):
         return "none"
 
     if material.eu07_properties.is_imported:
-        return material.eu07_properties.source_path
+        return str(pathlib.Path(material.eu07_properties.source_path).with_suffix(""))
     else:
         wrapper = MaterialWrapper(material)
         image = wrapper.get_diffusemap()

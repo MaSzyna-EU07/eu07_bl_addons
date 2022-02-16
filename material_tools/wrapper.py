@@ -16,16 +16,25 @@ NORMALMAP_NORMAL_OUTPUT = 0
 class MaterialWrapper:
     def __init__(self, material):
         self.material = material
-        self.material.use_nodes = True
+
+    def clean(self):
+        for node in self.material.node_tree.nodes:
+            if "Bsdf" not in node.bl_idname and "Output" not in node.bl_idname:
+                self.material.node_tree.nodes.remove(node)
 
     def initialize(self):
+        self.material.use_nodes = True
         bsdf = self._get_bsdf_node()
 
         bsdf.inputs[BSDF_SPECULAR_INPUT].default_value = 0
         bsdf.inputs[BSDF_ROUGHNESS_INPUT].default_value = 1
         self.material.use_backface_culling = True
 
-    def set_diffuse(self, image: bpy.types.Image):
+    def set_diffuse_color(self, diffuse_color):
+        bsdf = self._get_bsdf_node()
+        bsdf.inputs[BSDF_COLOR_INPUT].default_value = [*diffuse_color, 1]
+
+    def set_diffusemap(self, image: bpy.types.Image):
         bsdf = self._get_bsdf_node()
 
         img_node = self._create_image_node(image)

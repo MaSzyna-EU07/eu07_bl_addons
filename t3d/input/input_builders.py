@@ -9,6 +9,7 @@ import bpy
 
 from material_tools.input import MaterialImporter
 from material_tools.utils import get_qualified_material_name
+from material_tools.wrapper import MaterialWrapper
 
 
 def get_builder(element):
@@ -79,8 +80,18 @@ class MeshInputBuilder(SubmodelInputBuilder):
     def set_opacity(self, opacity):
         self.obj.t3d_properties.opacity = opacity
 
-    def set_map(self, map_, asset_searcher, opacity):
+    def set_map(self, map_, asset_searcher, opacity, diffuse):
         if map_ == "none":
+            # name = f"Color {' '.join((str(int(x)) for x in diffuse))}"
+            #
+            # try:
+            #     self.obj.active_material = bpy.data.materials[name]
+            # except KeyError:
+            #     material = self.obj.active_material = bpy.data.materials.new(name)
+            #     wrapper = MaterialWrapper(material)
+            #     wrapper.initialize()
+            #     wrapper.set_diffuse_color(diffuse / 255)
+
             return
 
         is_repl = map_ in ["-1", "-2", "-3", "-4", "replacableskin"]
@@ -96,6 +107,7 @@ class MeshInputBuilder(SubmodelInputBuilder):
                 self.obj.active_material = bpy.data.materials[repl_mat_name]
             else:
                 self.obj.active_material = bpy.data.materials.new(repl_mat_name)
+                self.obj.active_material.use_nodes = True
 
         else:
             abspath = asset_searcher.textures.find(map_)
@@ -153,7 +165,7 @@ class BananMeshInputBuilder(MeshInputBuilder):
     def create_submodel(self, name):
         self.obj = bpy.data.objects.new(name, None)
 
-    def set_map(self, map_, asset_searcher, opacity):
+    def set_map(self, map_, asset_searcher, opacity, diffuse):
         pass
 
     def set_geometry(self, geometry):
