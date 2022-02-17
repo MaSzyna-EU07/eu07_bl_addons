@@ -29,6 +29,7 @@ class MaterialWrapper:
         bsdf.inputs[BSDF_SPECULAR_INPUT].default_value = 0
         bsdf.inputs[BSDF_ROUGHNESS_INPUT].default_value = 1
         self.material.use_backface_culling = True
+        self.material.show_transparent_back = False
 
     def set_diffuse_color(self, diffuse_color):
         bsdf = self._get_bsdf_node()
