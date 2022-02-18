@@ -123,7 +123,11 @@ class MeshOutputBuilder(SubmodelOutputBuilder):
 
         uv_data = uv_layer.data[:]
 
-        mesh.calc_tangents(uvmap=uv_layer.name)
+        try:
+            mesh.calc_tangents(uvmap=uv_layer.name)
+        except RuntimeError:
+            return
+
         if not mesh.has_custom_normals:
             mesh.calc_normals_split()
 
