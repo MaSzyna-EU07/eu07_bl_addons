@@ -24,6 +24,8 @@ class SceneryBuilder:
         self._include_identifier = include_identifier
 
     def run(self, data):
+        assearch = self._config["asset_searcher"]
+
         for element in data:
             obj = None
             if element.type == "camera":
@@ -42,8 +44,6 @@ class SceneryBuilder:
 
                     sb = SceneryBuilder(self._config, include.identifier)
 
-                    assearch = self._config["asset_searcher"]
-
                     abspath = assearch.scenes.find(element.path)
 
                     with open(abspath, encoding='latin-1') as infile:
@@ -61,7 +61,7 @@ class SceneryBuilder:
                         tree_instance.location = eu07_tools.utils.swizzle_coords([float(x) for x in element.parameters[1:4]])
                         tree_instance.rotation_euler[2] = math.radians(float(element.parameters[4]))
 
-                        material = MaterialImporter(assearch).import_material_from_relpath(element.parameters[0])
+                        material = MaterialImporter(assearch).import_from_relpath(element.parameters[0])
                         scn.tree_utils.set_tree_material(tree_instance, material)
 
                         Sectorizer.auto_put(tree_instance)
@@ -85,8 +85,8 @@ class SceneryBuilder:
                     Sectorizer.auto_put(trajectory)
                     scn.trajectory_tools.profile.set_instance(trajectory, profile)
 
-                    trajectory_tools.set_material(trajectory, MaterialImporter(assearch).import_material_from_relpath(element.map1), 0)
-                    trajectory_tools.set_material(trajectory, MaterialImporter(assearch).import_material_from_relpath(element.map2), 1)
+                    trajectory_tools.set_material(trajectory, MaterialImporter(assearch).import_from_relpath(element.map1), 0)
+                    trajectory_tools.set_material(trajectory, MaterialImporter(assearch).import_from_relpath(element.map2), 1)
 
                     obj = trajectory
 

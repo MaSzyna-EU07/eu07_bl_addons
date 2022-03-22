@@ -47,10 +47,11 @@ class TerrainBuilder:
         self._terrain_mesh.to_mesh(self._terrain_object.data)
         self._terrain_mesh.free()
 
+        assearch = MaterialImporter(self._config["asset_searcher"])
 
         for map_ in self._maps:
             map_ = map_.split(":")[0]
-            material = MaterialImporter.import_from_relpath(map_)
+            material = assearch.import_from_relpath(map_)
 
             self._terrain_object.data.materials.append(material)
 
