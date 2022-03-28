@@ -1,18 +1,13 @@
 import bpy
 
-from .entity_panel import SCN_PT_entity
+from . import entity
 
-classes = (
-    SCN_PT_entity,
-)
 
 def register():
-    for c in classes:
-        bpy.utils.register_class(c)
+    entity.register()
 
 
 def unregister():
-    for c in classes:
-        bpy.utils.unregister_class(c)
+    entity.unregister()
 
 
