@@ -17,6 +17,8 @@ from . import camera
 from . import tree_utils
 from . import memcell
 
+from . import entity
+from . import ui
 
 classes = (
     SCNImportOperator,
@@ -53,6 +55,8 @@ def menu_func_export(self, context):
 
 def register():
     sectorizer.register()
+    entity.register()
+    ui.register()
 
     for c in classes:
         bpy.utils.register_class(c)
@@ -67,6 +71,10 @@ def register():
 
 
 def unregister():
+    sectorizer.unregister()
+    entity.unregister()
+    ui.unregister()
+
     for c in classes:
         bpy.utils.unregister_class(c)
 
