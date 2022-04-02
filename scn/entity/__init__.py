@@ -8,6 +8,7 @@ def register():
         name="Entity Type",
         description="Entity Type",
         items=[
+            ("none", "none", "Non-scenery object"),
             ("include", "include", "Static object, defined in *.inc file"),
             ("camera", "camera", "Camera"),
             ("node::eventlauncher", "eventlauncher", "Event launcher"),
@@ -19,7 +20,8 @@ def register():
             ("node::traction", "traction", "Catenary wires"),
             ("node::tractionpowersource", "tractionpowersource", "Power source for overhead electric lines"),
             ("node::triangles", "triangles", "Geometry (e.g. terrain)"),
-        ]
+        ],
+        default="none",
     )
 
     track.register()

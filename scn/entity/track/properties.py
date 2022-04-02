@@ -1,7 +1,7 @@
 import bpy
 
 from scn.entity.node import NodeProperties
-
+from . import properties_functions
 
 class TrackProperties(NodeProperties):
     type: bpy.props.EnumProperty(
@@ -24,7 +24,7 @@ class TrackProperties(NodeProperties):
         description="Length of the trajectory",
         default=0,
         unit="LENGTH",
-        get=None,
+        get=properties_functions.get_length,
     )
 
     width: bpy.props.FloatProperty(
@@ -118,8 +118,8 @@ class TrackProperties(NodeProperties):
         name="Point 1",
         size=3,
         unit="LENGTH",
-        set=None,
-        get=None,
+        set=properties_functions.set_p1,
+        get=properties_functions.get_p1,
     )
 
     p1_roll: bpy.props.FloatProperty(
@@ -131,8 +131,8 @@ class TrackProperties(NodeProperties):
         name="Point 2",
         size=3,
         unit="LENGTH",
-        set=None,
-        get=None,
+        set=properties_functions.set_p2,
+        get=properties_functions.get_p2,
     )
 
     p2_roll: bpy.props.FloatProperty(
@@ -144,8 +144,8 @@ class TrackProperties(NodeProperties):
         name="Point 3",
         size=3,
         unit="LENGTH",
-        set=None,
-        get=None,
+        set=properties_functions.set_p3,
+        get=properties_functions.get_p3,
     )
 
     p3_roll: bpy.props.FloatProperty(
@@ -157,8 +157,8 @@ class TrackProperties(NodeProperties):
         name="Point 4",
         size=3,
         unit="LENGTH",
-        set=None,
-        get=None,
+        set=properties_functions.set_p4,
+        get=properties_functions.get_p4,
     )
 
     p4_roll: bpy.props.FloatProperty(

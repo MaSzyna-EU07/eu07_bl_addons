@@ -1,3 +1,5 @@
+from scn.entity.track.validate import is_track_junction
+
 def draw(context, layout):
     props = context.object.eu07_track
 
@@ -40,3 +42,15 @@ def draw(context, layout):
     row = layout.row()
     row.prop(props, "geometry_params", text="Ballast geometry")
 
+    row = layout.row()
+    row.prop(props, "p1", text="P1")
+
+    row = layout.row()
+    row.prop(props, "p2", text="P2")
+
+    if is_track_junction(context.object):
+        row = layout.row()
+        row.prop(props, "p3", text="P3")
+
+        row = layout.row()
+        row.prop(props, "p4", text="P4")
