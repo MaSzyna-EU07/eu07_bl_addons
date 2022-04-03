@@ -32,7 +32,7 @@ class TrackProperties(NodeProperties):
         description="Width of the trajectory",
         default=1.435,
         unit="LENGTH",
-        update=None
+        update=properties_functions.update_geometry,
     )
 
     friction: bpy.props.FloatProperty(
@@ -97,7 +97,7 @@ class TrackProperties(NodeProperties):
         description="Map #1 repetition distance",
         default=4,
         unit="LENGTH",
-        update=None
+        update=properties_functions.update_geometry,
     )
 
     map2: bpy.props.StringProperty(
@@ -112,6 +112,7 @@ class TrackProperties(NodeProperties):
         size=3,
         default=(0.2, 0.5, 1.3),
         unit="LENGTH",
+        update=properties_functions.update_geometry,
     )
 
     p1: bpy.props.FloatVectorProperty(
@@ -170,32 +171,32 @@ class TrackProperties(NodeProperties):
         name="Control Vector 1",
         size=3,
         unit="LENGTH",
-        set=None,
-        get=None,
+        set=properties_functions.set_cv1,
+        get=properties_functions.get_cv1,
     )
 
     cv2: bpy.props.FloatVectorProperty(
         name="Control Vector 2",
         size=3,
         unit="LENGTH",
-        set=None,
-        get=None,
+        set=properties_functions.set_cv2,
+        get=properties_functions.get_cv2,
     )
 
     cv3: bpy.props.FloatVectorProperty(
         name="Control Vector 3",
         size=3,
         unit="LENGTH",
-        set=None,
-        get=None,
+        set=properties_functions.set_cv3,
+        get=properties_functions.get_cv3,
     )
 
     cv4: bpy.props.FloatVectorProperty(
         name="Control Vector 4",
         size=3,
         unit="LENGTH",
-        set=None,
-        get=None,
+        set=properties_functions.set_cv4,
+        get=properties_functions.get_cv4,
     )
 
     radius1: bpy.props.FloatProperty(
@@ -282,6 +283,11 @@ class TrackProperties(NodeProperties):
         name="Rail Profile",
         default="",
         update=None,
+    )
+
+    friction_memcell: bpy.props.StringProperty(
+        name="Friction Memcell",
+        default="none",
     )
 
 
