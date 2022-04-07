@@ -33,8 +33,9 @@ class TrackNormalGeometryManager(GeometryManager):
             geometry_container = bpy.data.objects.new("TrackGeometry", geometry)
             # TODO: Link more accurately
             entity.users_collection[0].objects.link(geometry_container)
-            geometry_container.parent = entity
-            geometry_container.location = entity.eu07_track.p1
+
+        geometry_container.parent = entity
+        geometry_container.location = 0, 0, 0
 
         bpy.data.orphans_purge(do_recursive=True)
         geometry_container.modifiers.clear()
