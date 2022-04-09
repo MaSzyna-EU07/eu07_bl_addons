@@ -1,3 +1,5 @@
+import random
+
 import bpy
 
 import eu07_tools
@@ -59,7 +61,12 @@ class MaterialImporter:
                 opacity = value
 
             if key.startswith("texture"):
-                image_path = self.asset_searcher.textures.find(value.path)
+                if value.value_type == "PATH":
+                    tex_relpath = value.path
+                elif value.value_type == "TEXTURE_SET":
+                    tex_relpath = random.choice(value.value)
+
+                image_path = self.asset_searcher.textures.find(tex_relpath)
                 if image_path:
                     image = bpy.data.images.load(image_path, check_existing=True)
 
