@@ -61,11 +61,11 @@ class MaterialImporter:
                 opacity = value
 
             if key.startswith("texture"):
-                tex_relpath = "" #nonsense, but users had issues wit some non-declared variable...
-                if value.value_type == "TEXTURE_SET":
-                    tex_relpath = random.choice(value.value)
-                else:
-                    tex_relpath = value.path
+                texture_object = value
+
+                tex_relpath = texture_object.value
+                if texture_object.value_type == "TEXTURE_SET":
+                    tex_relpath = random.choice(texture_object.value)
 
                 image_path = self.asset_searcher.textures.find(tex_relpath)
                 if image_path:
