@@ -1,6 +1,6 @@
 import eu07_tools
 import eu07_tools.utils.structures.mesh_geometry
-from eu07_tools.utils.structures.mesh_geometry import GeometryProcessor
+from eu07_tools.utils.structures.mesh_geometry import SmoothGroupsNormalCalculator
 
 
 class Geometry:
@@ -14,12 +14,12 @@ class Geometry:
 
     @classmethod
     def from_legacy_t3d(cls, triangles):
-        geometry_data = GeometryProcessor().process_legacy_t3d(triangles)
+        geometry_data = SmoothGroupsNormalCalculator().run(triangles)
         return cls(*geometry_data)
 
     @classmethod
     def from_e3d(cls, vertices_e3d):
-        geometry_data = GeometryProcessor().process_e3d(vertices_e3d)
+        geometry_data = SmoothGroupsNormalCalculator().process_e3d(vertices_e3d)
         return cls(*geometry_data)
 
     @classmethod
@@ -33,7 +33,7 @@ class Geometry:
             triangle = eu07_tools.utils.structures.mesh_geometry.MeshTriangle(verts, smooth=-1)
             triangles.append(triangle)
 
-        geometry_data = GeometryProcessor().process_legacy_t3d(triangles)
+        geometry_data = SmoothGroupsNormalCalculator().run(triangles)
 
         return cls(*geometry_data)
 
