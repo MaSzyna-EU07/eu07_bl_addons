@@ -3,8 +3,7 @@ import pathlib
 import eu07_tools
 
 from common import includes
-from t3d.input import input_builders
-from .geometry import Geometry
+from . import input_builders
 
 import bpy
 
@@ -69,16 +68,7 @@ class T3DImporter:
             builder.set_wire_size(element.wire_size)
             builder.set_opacity(element.opacity)
             builder.set_map(element.map, self.asset_searcher, element.opacity, element.diffuse_color)
-
-            if element.use_indices:
-                geometry = Geometry.from_indexed_t3d(
-                    element.vertices, element.num_verts,
-                    element.indices, element.num_indices
-                )
-            else:
-                geometry = Geometry.from_legacy_t3d(element.triangles)
-
-            builder.set_geometry(geometry)
+            builder.set_geometry(element.geometry)
 
         elif element.type == 'FreeSpotLight':
             builder.set_near_atten_start(element.near_atten_start)

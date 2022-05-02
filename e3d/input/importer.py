@@ -4,7 +4,6 @@ import bpy
 import eu07_tools
 
 from t3d.input import input_builders
-from t3d.input.geometry import Geometry
 
 import mathutils
 
