@@ -36,6 +36,9 @@ class SubmodelInputBuilder(abc.ABC):
         self.obj = None
 
     def set_parent(self, parent_name):
+        if parent_name == "none":
+            return
+
         self.obj.parent = bpy.data.objects.get(parent_name)
 
     def set_diffuse(self, diffuse):
