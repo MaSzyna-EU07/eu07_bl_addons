@@ -7,7 +7,7 @@ import eu07_tools
 import bmesh
 import bpy
 
-from eu07_tools.utils.structures.mesh_geometry import VertexStorageSectored
+from eu07_tools.utils.geometry import VertexStorageSectored
 from material_tools.input import MaterialImporter
 from material_tools.utils import get_qualified_material_name
 from material_tools.wrapper import MaterialWrapper
