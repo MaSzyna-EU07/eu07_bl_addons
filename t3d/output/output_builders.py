@@ -7,6 +7,7 @@ import bpy
 import eu07_tools
 from material_tools.utils import get_shortpath_from_material
 from material_tools.wrapper import MaterialWrapper
+from common.utils import remove_name_suffix
 
 
 def get_builder(obj):
@@ -34,9 +35,18 @@ class SubmodelOutputBuilder(abc.ABC):
         self.obj = obj
         self.submodel = None
 
-    def set_parent(self):
+    def set_name(self, remove_name_suffixes):
+        self.submodel.name = (
+            remove_name_suffix(self.obj.name) if (remove_name_suffixes or self.obj.name.startswith("smokesource"))
+            else self.obj.name
+        )
+
+    def set_parent(self, remove_name_suffixes):
         if self.obj.parent:
-            self.submodel.parent_name = self.obj.parent.name
+            self.submodel.parent_name = (
+                remove_name_suffix(self.obj.parent.name) if remove_name_suffixes
+                else self.obj.parent.name
+            )
         else:
             return "none"
 
@@ -66,7 +76,7 @@ class SubmodelOutputBuilder(abc.ABC):
 class MeshOutputBuilder(SubmodelOutputBuilder):
     def __init__(self, obj):
         super().__init__(obj)
-        self.submodel = eu07_tools.t3d.create_submodel("Mesh", obj.name)
+        self.submodel = eu07_tools.t3d.create_submodel("Mesh", remove_name_suffix(obj.name))
 
     def set_ambient(self):
         self.submodel.ambient_color = self.obj.t3d_properties.ambient_color * 255
@@ -167,12 +177,7 @@ class MeshOutputBuilder(SubmodelOutputBuilder):
 class BananMeshOutputBuilder(MeshOutputBuilder):
     def __init__(self, obj):
         super().__init__(obj)
-
-        name = obj.name
-        if obj.name.startswith("smokesource"):
-            name = obj.name.split(".")[0]
-
-        self.submodel = eu07_tools.t3d.create_submodel("Mesh", name)
+        self.submodel = eu07_tools.t3d.create_submodel("Mesh", obj.name)
 
     def set_map(self, embed_skins=False):
         self.submodel.map = "none"
@@ -185,7 +190,7 @@ class BananMeshOutputBuilder(MeshOutputBuilder):
 class FreeSpotLightOutputBuilder(SubmodelOutputBuilder):
     def __init__(self, obj):
         super().__init__(obj)
-        self.submodel = eu07_tools.t3d.create_submodel("FreeSpotLight", obj.name)
+        self.submodel = eu07_tools.t3d.create_submodel("FreeSpotLight", remove_name_suffix(obj.name))
 
     def set_diffuse(self):
         self.submodel.diffuse_color = self.obj.data.color * 255
@@ -218,7 +223,7 @@ class FreeSpotLightOutputBuilder(SubmodelOutputBuilder):
 class StarsOutputBuilder(SubmodelOutputBuilder):
     def __init__(self, obj):
         super().__init__(obj)
-        self.submodel = eu07_tools.t3d.create_submodel("Stars", obj.name)
+        self.submodel = eu07_tools.t3d.create_submodel("Stars", remove_name_suffix(obj.name))
 
     def set_geometry(self):
         points = [

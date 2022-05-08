@@ -28,6 +28,18 @@ def uilist_safe_index_after_delete(uilist, index):
     return min(max(0, index - 1), len(uilist) - 1)
 
 
+def remove_name_suffix(name):
+    try:
+        newname, suffix = name.split(".")
+        if suffix.isdigit():
+            name = newname
+    except ValueError:
+        pass
+
+    return name
+
+
+
 def get_viewport_camera_location():
     return view3d_utils.region_2d_to_origin_3d(bpy.context.region, bpy.context.space_data.region_3d, (0, 0))
 
