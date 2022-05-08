@@ -87,6 +87,14 @@ class T3DSubmodelProperties(bpy.types.PropertyGroup):
         min=0,
         default=1
     )
+    opacity_source: EnumProperty(
+        name="Opacity source",
+        default="MATERIAL",
+        items=(
+            ("MATERIAL", "Material", "Get opacity from material"),
+            ("OBJECT", "Object", "Get opacity from object"),
+        )
+    )
     opacity: FloatProperty(
         name='Opacity',
         min=0,
@@ -181,11 +189,17 @@ class T3DSubmodelPropertiesPanel(bpy.types.Panel):
             wiresize_r = wire_b.row()
             wiresize_r.prop(self.obj.t3d_properties, "wire_size")
 
-            opacity_r = self.layout.row()
-            if self.obj.active_material:
-                opacity_r.label(text=f"Opacity: {MaterialWrapper(self.obj.active_material).get_opacity()} (taken from material)")
+            opacity_box = self.layout.box()
+            opacity_box.row().prop(self.obj.t3d_properties, "opacity_source")
+
+            if self.obj.t3d_properties.opacity_source == "MATERIAL":
+                if self.obj.active_material:
+                    opacity_box.row().label(text=f"Opacity: {MaterialWrapper(self.obj.active_material).get_opacity()} (taken from material)")
+                else:
+                    opacity_box.row().label(text="No active material! Fallback value will be used:", icon="ERROR")
+                    opacity_box.row().prop(self.obj.t3d_properties, "opacity", text="Opacity (fallback)")
             else:
-                opacity_r.prop(self.obj.t3d_properties, "opacity", text="Opacity (fallback)")
+                opacity_box.prop(self.obj.t3d_properties, "opacity", text="Opacity")
 
             map_b = self.layout.box()
             replacableskin_r = map_b.row()

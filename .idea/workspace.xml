@@ -3,11 +3,9 @@
   <component name="ChangeListManager">
     <list default="true" id="e0b16479-e3a7-48fe-9202-654047234a47" name="Default Changelist" comment="meshes without geometry are imported as empties">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/common/utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/common/utils.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/eu07_tools" beforeDir="false" afterPath="$PROJECT_DIR$/eu07_tools" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/t3d/output/exporter.py" beforeDir="false" afterPath="$PROJECT_DIR$/t3d/output/exporter.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/t3d/output/operator.py" beforeDir="false" afterPath="$PROJECT_DIR$/t3d/output/operator.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/t3d/input/input_builders.py" beforeDir="false" afterPath="$PROJECT_DIR$/t3d/input/input_builders.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/t3d/output/output_builders.py" beforeDir="false" afterPath="$PROJECT_DIR$/t3d/output/output_builders.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/t3d/properties.py" beforeDir="false" afterPath="$PROJECT_DIR$/t3d/properties.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
