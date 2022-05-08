@@ -56,18 +56,30 @@ class EU07_OT_GameEnginePreview(bpy.types.Operator):
 
         scn_elements.append(camera)
 
+        if settings.use_track:
+            track = eu07_tools.scn.create_element("node:track")
+            track.p1 = (0, -0.18, -75)
+            track.p2 = (0, -0.18, 75)
+            track.map1 = "rail_screw_used1"
+            track.map2 = "tpbps-new3"
+            track.geometry_params = [0.2, 0.5, 1.1]
+
+            scn_elements.append(track)
+
         scn_path = pathlib.Path(root, "scenery", SCENERY_FILENAME)
         with open(scn_path, "w", encoding="windows-1250", newline="\r\n") as outfile:
             outfile.write("//$a\n")
             if settings.use_ground:
+                track_lower = -0.38 if settings.use_track else 0
+
                 outfile.write(
                     "node -1 0 none triangles grass\n"
-                    "75 0 75 0 1 0 10.4197 -9.4197 end\n"
-                    "-75 0 -75 0 1 0 -9.4197 10.4197 end\n"
-                    "-75 0 75 0 1 0 -9.4197 -9.4197 end\n"
-                    "75 0 75 0 1 0 10.4197 -9.4197 end\n"
-                    "75 0 -75 0 1 0 10.4197 10.4197 end\n"
-                    "-75 0 -75 0 1 0 -9.4197 10.4197\n"
+                    f"75 {track_lower} 75 0 1 0 10.4197 -9.4197 end\n"
+                    f"-75 {track_lower} -75 0 1 0 -9.4197 10.4197 end\n"
+                    f"-75 {track_lower} 75 0 1 0 -9.4197 -9.4197 end\n"
+                    f"75 {track_lower} 75 0 1 0 10.4197 -9.4197 end\n"
+                    f"75 {track_lower} -75 0 1 0 10.4197 10.4197 end\n"
+                    f"-75 {track_lower} -75 0 1 0 -9.4197 10.4197\n"
                     "endtri\n"
                 )
             eu07_tools.scn.dump(scn_elements, outfile)
@@ -119,6 +131,10 @@ class ModelPreviewSettings(bpy.types.PropertyGroup):
         default=True
     )
 
+    use_track: bpy.props.BoolProperty(
+        name="Use track",
+        default=False,
+    )
 
 class EU07_PT_GameEnginePreview(bpy.types.Panel):
     bl_idname = "EU07_PT_GameEnginePreview"
@@ -144,6 +160,7 @@ class EU07_PT_GameEnginePreview(bpy.types.Panel):
         lightbox.prop(settings, "transition")
         self.layout.prop(settings, "angles")
         self.layout.prop(settings, "use_ground")
+        self.layout.prop(settings, "use_track")
 
 
 classes = (

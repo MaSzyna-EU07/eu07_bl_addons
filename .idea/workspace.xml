@@ -1,0 +1,470 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ChangeListManager">
+    <list default="true" id="e0b16479-e3a7-48fe-9202-654047234a47" name="Default Changelist" comment="meshes without geometry are imported as empties">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/eu07_tools/scn/structures/nodes.py" beforeDir="false" afterPath="$PROJECT_DIR$/eu07_tools/scn/structures/nodes.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/preview/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/preview/__init__.py" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Python Script" />
+      </list>
+    </option>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_BRANCH_BY_REPOSITORY">
+      <map>
+        <entry key="$PROJECT_DIR$" value="master" />
+      </map>
+    </option>
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+    <option name="RESET_MODE" value="HARD" />
+    <option name="ROOT_SYNC" value="DONT_SYNC" />
+  </component>
+  <component name="GitSEFilterConfiguration">
+    <file-type-list>
+      <filtered-out-file-type name="LOCAL_BRANCH" />
+      <filtered-out-file-type name="REMOTE_BRANCH" />
+      <filtered-out-file-type name="TAG" />
+      <filtered-out-file-type name="COMMIT_BY_MESSAGE" />
+    </file-type-list>
+  </component>
+  <component name="ProjectId" id="1oqTgi357HXPvcTTnbc887jKSfS" />
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">
+    <property name="ASKED_SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
+    <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
+    <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
+    <property name="com.intellij.ide.scratch.LRUPopupBuilder$1/New Scratch File" value="Python" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+    <property name="settings.editor.selected.configurable" value="preferences.fileTypes" />
+  </component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/common" />
+    </key>
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/scn/ui/entity" />
+      <recent name="$PROJECT_DIR$/scn/entity/track" />
+      <recent name="$PROJECT_DIR$/preview" />
+      <recent name="$PROJECT_DIR$/animation_tools" />
+      <recent name="$PROJECT_DIR$/t3d/input" />
+    </key>
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="e0b16479-e3a7-48fe-9202-654047234a47" name="Default Changelist" comment="" />
+      <created>1614013234224</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1614013234224</updated>
+    </task>
+    <task id="LOCAL-00004" summary="materializing trajectories, include experiment">
+      <created>1614095035789</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1614095035789</updated>
+    </task>
+    <task id="LOCAL-00005" summary="extracted trajectory_utils">
+      <created>1614100022648</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1614100022648</updated>
+    </task>
+    <task id="LOCAL-00006" summary="Switches import with profiles">
+      <created>1614164841675</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1614164841675</updated>
+    </task>
+    <task id="LOCAL-00007" summary="so you can change track material easily now">
+      <created>1614194293214</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1614194293214</updated>
+    </task>
+    <task id="LOCAL-00008" summary="kopiowanie materialow do zaznaczonych torow">
+      <created>1614201372301</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1614201372301</updated>
+    </task>
+    <task id="LOCAL-00009" summary="export fixes - succesful!">
+      <created>1614204698655</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1614204698655</updated>
+    </task>
+    <task id="LOCAL-00010" summary="basemaps purging and panel moved to scn section">
+      <created>1614265030715</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL-00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1614265030715</updated>
+    </task>
+    <task id="LOCAL-00011" summary="basemaps purging and panel moved to scn section">
+      <created>1614266721958</created>
+      <option name="number" value="00011" />
+      <option name="presentableId" value="LOCAL-00011" />
+      <option name="project" value="LOCAL" />
+      <updated>1614266721958</updated>
+    </task>
+    <task id="LOCAL-00012" summary="some bugfixes to trajectory utils">
+      <created>1614282100483</created>
+      <option name="number" value="00012" />
+      <option name="presentableId" value="LOCAL-00012" />
+      <option name="project" value="LOCAL" />
+      <updated>1614282100483</updated>
+    </task>
+    <task id="LOCAL-00013" summary="fixed rails uv">
+      <created>1614364253166</created>
+      <option name="number" value="00013" />
+      <option name="presentableId" value="LOCAL-00013" />
+      <option name="project" value="LOCAL" />
+      <updated>1614364253166</updated>
+    </task>
+    <task id="LOCAL-00014" summary="road surface generator">
+      <created>1614366037550</created>
+      <option name="number" value="00014" />
+      <option name="presentableId" value="LOCAL-00014" />
+      <option name="project" value="LOCAL" />
+      <updated>1614366037550</updated>
+    </task>
+    <task id="LOCAL-00015" summary="i broke something with switch profile copying :(">
+      <created>1615050899072</created>
+      <option name="number" value="00015" />
+      <option name="presentableId" value="LOCAL-00015" />
+      <option name="project" value="LOCAL" />
+      <updated>1615050899072</updated>
+    </task>
+    <task id="LOCAL-00016" summary="Fixed StructRNA problem (purging in wrong moment)">
+      <created>1615120135553</created>
+      <option name="number" value="00016" />
+      <option name="presentableId" value="LOCAL-00016" />
+      <option name="project" value="LOCAL" />
+      <updated>1615120135553</updated>
+    </task>
+    <task id="LOCAL-00017" summary="something changed">
+      <created>1616846718776</created>
+      <option name="number" value="00017" />
+      <option name="presentableId" value="LOCAL-00017" />
+      <option name="project" value="LOCAL" />
+      <updated>1616846718776</updated>
+    </task>
+    <task id="LOCAL-00018" summary="working on indexed geometry">
+      <created>1616854463819</created>
+      <option name="number" value="00018" />
+      <option name="presentableId" value="LOCAL-00018" />
+      <option name="project" value="LOCAL" />
+      <updated>1616854463819</updated>
+    </task>
+    <task id="LOCAL-00019" summary="some working with importing indexed geo">
+      <created>1616858698069</created>
+      <option name="number" value="00019" />
+      <option name="presentableId" value="LOCAL-00019" />
+      <option name="project" value="LOCAL" />
+      <updated>1616858698069</updated>
+    </task>
+    <task id="LOCAL-00020" summary="working i/o for indexed geometry - works bad with edge split faces">
+      <created>1616870761158</created>
+      <option name="number" value="00020" />
+      <option name="presentableId" value="LOCAL-00020" />
+      <option name="project" value="LOCAL" />
+      <updated>1616870761158</updated>
+    </task>
+    <task id="LOCAL-00021" summary="working i/o of indexed geometry">
+      <created>1616872530888</created>
+      <option name="number" value="00021" />
+      <option name="presentableId" value="LOCAL-00021" />
+      <option name="project" value="LOCAL" />
+      <updated>1616872530888</updated>
+    </task>
+    <task id="LOCAL-00022" summary="full shading recovery from indexed t3d geometry">
+      <created>1616874740214</created>
+      <option name="number" value="00022" />
+      <option name="presentableId" value="LOCAL-00022" />
+      <option name="project" value="LOCAL" />
+      <updated>1616874740214</updated>
+    </task>
+    <task id="LOCAL-00023" summary="full shading recovery from indexed t3d geometry">
+      <created>1616874758479</created>
+      <option name="number" value="00023" />
+      <option name="presentableId" value="LOCAL-00023" />
+      <option name="project" value="LOCAL" />
+      <updated>1616874758479</updated>
+    </task>
+    <task id="LOCAL-00024" summary="a lot of changes">
+      <created>1617466795187</created>
+      <option name="number" value="00024" />
+      <option name="presentableId" value="LOCAL-00024" />
+      <option name="project" value="LOCAL" />
+      <updated>1617466795187</updated>
+    </task>
+    <task id="LOCAL-00025" summary="ch ch ch changes">
+      <created>1620043818413</created>
+      <option name="number" value="00025" />
+      <option name="presentableId" value="LOCAL-00025" />
+      <option name="project" value="LOCAL" />
+      <updated>1620043818413</updated>
+    </task>
+    <task id="LOCAL-00026" summary="nie pamietam co zmienilem">
+      <created>1626374524400</created>
+      <option name="number" value="00026" />
+      <option name="presentableId" value="LOCAL-00026" />
+      <option name="project" value="LOCAL" />
+      <updated>1626374524400</updated>
+    </task>
+    <task id="LOCAL-00027" summary="import size parameters from mat">
+      <created>1626375204698</created>
+      <option name="number" value="00027" />
+      <option name="presentableId" value="LOCAL-00027" />
+      <option name="project" value="LOCAL" />
+      <updated>1626375204698</updated>
+    </task>
+    <task id="LOCAL-00028" summary="import and connect normal map. connect default maps to shader slots">
+      <created>1626377680334</created>
+      <option name="number" value="00028" />
+      <option name="presentableId" value="LOCAL-00028" />
+      <option name="project" value="LOCAL" />
+      <updated>1626377680334</updated>
+    </task>
+    <task id="LOCAL-00029" summary="wiec po wielu probacvh udalo sie zaimportowac maty za posrednictwem importu scn">
+      <created>1626457269975</created>
+      <option name="number" value="00029" />
+      <option name="presentableId" value="LOCAL-00029" />
+      <option name="project" value="LOCAL" />
+      <updated>1626457269975</updated>
+    </task>
+    <task id="LOCAL-00030" summary="wyczulenie asset searchera na sciezki ktore nie sa lowercase">
+      <created>1626459359104</created>
+      <option name="number" value="00030" />
+      <option name="presentableId" value="LOCAL-00030" />
+      <option name="project" value="LOCAL" />
+      <updated>1626459359104</updated>
+    </task>
+    <task id="LOCAL-00031" summary="mozna podac krotka sciezke repla. submodele z replem dostaja nazwany material.">
+      <created>1626466852754</created>
+      <option name="number" value="00031" />
+      <option name="presentableId" value="LOCAL-00031" />
+      <option name="project" value="LOCAL" />
+      <updated>1626466852754</updated>
+    </task>
+    <task id="LOCAL-00032" summary="mat imporvements + btach scenery export">
+      <created>1626548449754</created>
+      <option name="number" value="00032" />
+      <option name="presentableId" value="LOCAL-00032" />
+      <option name="project" value="LOCAL" />
+      <updated>1626548449754</updated>
+    </task>
+    <task id="LOCAL-00033" summary="material plus in scn object props">
+      <created>1626549396053</created>
+      <option name="number" value="00033" />
+      <option name="presentableId" value="LOCAL-00033" />
+      <option name="project" value="LOCAL" />
+      <updated>1626549396053</updated>
+    </task>
+    <task id="LOCAL-00034" summary="customizowana wielkosc sectora scenerii (dla polepszenia wydajnosci)">
+      <created>1626807501582</created>
+      <option name="number" value="00034" />
+      <option name="presentableId" value="LOCAL-00034" />
+      <option name="project" value="LOCAL" />
+      <updated>1626807501582</updated>
+    </task>
+    <task id="LOCAL-00035" summary="opcja weldu terenu">
+      <created>1626807951482</created>
+      <option name="number" value="00035" />
+      <option name="presentableId" value="LOCAL-00035" />
+      <option name="project" value="LOCAL" />
+      <updated>1626807951482</updated>
+    </task>
+    <task id="LOCAL-00036" summary="fixing mat import issues (:t and bad normal map)">
+      <created>1626814667255</created>
+      <option name="number" value="00036" />
+      <option name="presentableId" value="LOCAL-00036" />
+      <option name="project" value="LOCAL" />
+      <updated>1626814667255</updated>
+    </task>
+    <task id="LOCAL-00037" summary="flip dds">
+      <created>1626894729591</created>
+      <option name="number" value="00037" />
+      <option name="presentableId" value="LOCAL-00037" />
+      <option name="project" value="LOCAL" />
+      <updated>1626894729591</updated>
+    </task>
+    <task id="LOCAL-00038" summary="working on new texture loader">
+      <created>1627144003915</created>
+      <option name="number" value="00038" />
+      <option name="presentableId" value="LOCAL-00038" />
+      <option name="project" value="LOCAL" />
+      <updated>1627144003915</updated>
+    </task>
+    <task id="LOCAL-00039" summary="brand new material importer">
+      <created>1627221824266</created>
+      <option name="number" value="00039" />
+      <option name="presentableId" value="LOCAL-00039" />
+      <option name="project" value="LOCAL" />
+      <updated>1627221824266</updated>
+    </task>
+    <task id="LOCAL-00040" summary="looks like new material loader works fine">
+      <created>1627304250737</created>
+      <option name="number" value="00040" />
+      <option name="presentableId" value="LOCAL-00040" />
+      <option name="project" value="LOCAL" />
+      <updated>1627304250737</updated>
+    </task>
+    <task id="LOCAL-00041" summary="removed mat exclusion from import scripts">
+      <created>1627306641025</created>
+      <option name="number" value="00041" />
+      <option name="presentableId" value="LOCAL-00041" />
+      <option name="project" value="LOCAL" />
+      <updated>1627306641025</updated>
+    </task>
+    <task id="LOCAL-00042" summary="removed mat exclusion from import scripts">
+      <created>1627306657907</created>
+      <option name="number" value="00042" />
+      <option name="presentableId" value="LOCAL-00042" />
+      <option name="project" value="LOCAL" />
+      <updated>1627306657907</updated>
+    </task>
+    <task id="LOCAL-00043" summary="fixed issue with empty abspath in material importer">
+      <created>1627309378176</created>
+      <option name="number" value="00043" />
+      <option name="presentableId" value="LOCAL-00043" />
+      <option name="project" value="LOCAL" />
+      <updated>1627309378176</updated>
+    </task>
+    <task id="LOCAL-00044" summary="a lot of changes i dont remember but surely i did better material naming">
+      <created>1628957023862</created>
+      <option name="number" value="00044" />
+      <option name="presentableId" value="LOCAL-00044" />
+      <option name="project" value="LOCAL" />
+      <updated>1628957023862</updated>
+    </task>
+    <task id="LOCAL-00045" summary="import material button in utils">
+      <created>1628961385993</created>
+      <option name="number" value="00045" />
+      <option name="presentableId" value="LOCAL-00045" />
+      <option name="project" value="LOCAL" />
+      <updated>1628961385993</updated>
+    </task>
+    <task id="LOCAL-00046" summary="tree.inc importing">
+      <created>1630871831579</created>
+      <option name="number" value="00046" />
+      <option name="presentableId" value="LOCAL-00046" />
+      <option name="project" value="LOCAL" />
+      <updated>1630871831579</updated>
+    </task>
+    <task id="LOCAL-00047" summary="more trees inc for trees spawner">
+      <created>1630955080418</created>
+      <option name="number" value="00047" />
+      <option name="presentableId" value="LOCAL-00047" />
+      <option name="project" value="LOCAL" />
+      <updated>1630955080418</updated>
+    </task>
+    <task id="LOCAL-00048" summary="inc parameter context analyze alpha version">
+      <created>1630960183783</created>
+      <option name="number" value="00048" />
+      <option name="presentableId" value="LOCAL-00048" />
+      <option name="project" value="LOCAL" />
+      <updated>1630960183783</updated>
+    </task>
+    <task id="LOCAL-00049" summary="exposed tokenizer">
+      <created>1630960196562</created>
+      <option name="number" value="00049" />
+      <option name="presentableId" value="LOCAL-00049" />
+      <option name="project" value="LOCAL" />
+      <updated>1630960196562</updated>
+    </task>
+    <task id="LOCAL-00050" summary="INC import preparation: t3d mesh join on import">
+      <created>1631125155332</created>
+      <option name="number" value="00050" />
+      <option name="presentableId" value="LOCAL-00050" />
+      <option name="project" value="LOCAL" />
+      <updated>1631125155333</updated>
+    </task>
+    <task id="LOCAL-00051" summary="empty with no point lamp children are exported as empty mesh">
+      <created>1637352340520</created>
+      <option name="number" value="00051" />
+      <option name="presentableId" value="LOCAL-00051" />
+      <option name="project" value="LOCAL" />
+      <updated>1637352340520</updated>
+    </task>
+    <task id="LOCAL-00052" summary="meshes without geometry are imported as empties">
+      <created>1637353240225</created>
+      <option name="number" value="00052" />
+      <option name="presentableId" value="LOCAL-00052" />
+      <option name="project" value="LOCAL" />
+      <updated>1637353240225</updated>
+    </task>
+    <option name="localTasksCounter" value="53" />
+    <servers />
+  </component>
+  <component name="Vcs.Log.History.Properties">
+    <option name="COLUMN_ID_ORDER">
+      <list>
+        <option value="Default.Root" />
+        <option value="Default.Author" />
+        <option value="Default.Date" />
+        <option value="Default.Subject" />
+      </list>
+    </option>
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+    <option name="oldMeFiltersMigrated" value="true" />
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="import size parameters from mat" />
+    <MESSAGE value="import and connect normal map. connect default maps to shader slots" />
+    <MESSAGE value="wiec po wielu probacvh udalo sie zaimportowac maty za posrednictwem importu scn" />
+    <MESSAGE value="wyczulenie asset searchera na sciezki ktore nie sa lowercase" />
+    <MESSAGE value="mozna podac krotka sciezke repla. submodele z replem dostaja nazwany material." />
+    <MESSAGE value="mat imporvements + btach scenery export" />
+    <MESSAGE value="material plus in scn object props" />
+    <MESSAGE value="customizowana wielkosc sectora scenerii (dla polepszenia wydajnosci)" />
+    <MESSAGE value="opcja weldu terenu" />
+    <MESSAGE value="fixing mat import issues (:t and bad normal map)" />
+    <MESSAGE value="flip dds" />
+    <MESSAGE value="working on new texture loader" />
+    <MESSAGE value="brand new material importer" />
+    <MESSAGE value="looks like new material loader works fine" />
+    <MESSAGE value="removed mat exclusion from import scripts" />
+    <MESSAGE value="fixed issue with empty abspath in material importer" />
+    <MESSAGE value="a lot of changes i dont remember but surely i did better material naming" />
+    <MESSAGE value="import material button in utils" />
+    <MESSAGE value="tree.inc importing" />
+    <MESSAGE value="more trees inc for trees spawner" />
+    <MESSAGE value="inc parameter context analyze alpha version" />
+    <MESSAGE value="exposed tokenizer" />
+    <MESSAGE value="INC import preparation: t3d mesh join on import" />
+    <MESSAGE value="empty with no point lamp children are exported as empty mesh" />
+    <MESSAGE value="meshes without geometry are imported as empties" />
+    <option name="LAST_COMMIT_MESSAGE" value="meshes without geometry are imported as empties" />
+  </component>
+</project>
