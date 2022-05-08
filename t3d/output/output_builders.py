@@ -103,6 +103,8 @@ class MeshOutputBuilder(SubmodelOutputBuilder):
     def set_geometry(self, apply_modifiers):
         mesh = None
 
+        self.submodel.geometry.to_indexed()
+
         if apply_modifiers:
             depsgraph = bpy.context.evaluated_depsgraph_get()
             obj_eval = self.obj.evaluated_get(depsgraph)
@@ -132,7 +134,6 @@ class MeshOutputBuilder(SubmodelOutputBuilder):
             mesh.calc_normals_split()
 
 
-        self.submodel.use_indices = True
         verts_collector = {}
         vertex_count = 0
 
@@ -155,10 +156,10 @@ class MeshOutputBuilder(SubmodelOutputBuilder):
                     verts_collector[vert_data] = index
                     vertex_count += 1
 
-                self.submodel.indices.append(index)
+                self.submodel.geometry.indices.append(index)
 
         for vert_data, index in verts_collector.items():
-            self.submodel.vertices.new(vert_data)
+            self.submodel.geometry.vertices.new(vert_data)
 
         bpy.data.meshes.remove(mesh)
 

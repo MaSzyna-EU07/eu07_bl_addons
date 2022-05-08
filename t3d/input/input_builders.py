@@ -7,6 +7,7 @@ import eu07_tools
 import bmesh
 import bpy
 
+from eu07_tools.utils.geometry import VertexStorageSectored
 from material_tools.input import MaterialImporter
 from material_tools.utils import get_qualified_material_name
 from material_tools.wrapper import MaterialWrapper
@@ -18,7 +19,7 @@ def get_builder(element):
 
     if element.type == 'Mesh':
         cls = MeshInputBuilder
-        if not element.has_geometry:
+        if element.geometry.is_empty:
             cls = BananMeshInputBuilder
     elif element.type == 'FreeSpotLight':
         cls = FreeSpotLightInputBuilder
@@ -35,6 +36,9 @@ class SubmodelInputBuilder(abc.ABC):
         self.obj = None
 
     def set_parent(self, parent_name):
+        if parent_name == "none":
+            return
+
         self.obj.parent = bpy.data.objects.get(parent_name)
 
     def set_diffuse(self, diffuse):
@@ -123,35 +127,57 @@ class MeshInputBuilder(SubmodelInputBuilder):
     def set_geometry(self, geometry):
         bm = bmesh.new()
         uv_layer = bm.loops.layers.uv.new()
-        sg_layer = bm.faces.layers.int.new("SmoothGroup")
 
-        for location in geometry.locations:
-            location = mathutils.Vector(location)
-            bm_vertex = bm.verts.new(location)
+        geometry.to_triangles()
+
+        try:
+            geometry.calc_smooth_groups_normals()
+        except ValueError:
+            pass
+
+        unique_vertices = VertexStorageSectored()
+
+        indices = []
+        per_face_vertex_normals = []
+        per_face_uvs = []
+
+        for triangle in geometry.triangles:
+            for vertex in triangle.vertices:
+
+                try:
+                    index = unique_vertices.find(vertex)
+                except KeyError:
+                    index = unique_vertices.push(vertex)
+                finally:
+                    indices.append(index)
+
+                per_face_vertex_normals.append(vertex.normal)
+                per_face_uvs.append(vertex.mapping)
+
+        for vertex in unique_vertices:
+            bm.verts.new(vertex.location)
 
         bm.verts.ensure_lookup_table()
 
-        num_triangles = geometry.num_indices // 3
+        num_triangles = len(geometry.triangles)
 
         custom_normals = []
 
         for i in range(num_triangles):
             bm_verts = []
 
-            for index in geometry.indices[i*3:i*3+3]:
+            for index in indices[i*3:i*3+3]:
                 bm_verts.append(bm.verts[index])
 
             try:
                 bm_face = bm.faces.new(bm_verts)
-                for normal in geometry.per_face_vertex_normals[i * 3: i * 3 + 3]:
-                    normal = normal
+                for normal in per_face_vertex_normals[i * 3: i * 3 + 3]:
                     custom_normals.append(normal)
-                bm_face[sg_layer] = geometry.debug_smooth_groups[i]
-            except ValueError as e:
+            except ValueError:
                 pass
             else:
                 for vertex_index, loop in enumerate(bm_face.loops):
-                    loop[uv_layer].uv = geometry.per_face_uvs[i * 3 + vertex_index]
+                    loop[uv_layer].uv = per_face_uvs[i * 3 + vertex_index]
 
         bm.to_mesh(self.obj.data)
         bm.free()
