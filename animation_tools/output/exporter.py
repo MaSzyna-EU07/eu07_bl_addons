@@ -10,6 +10,7 @@ class AnimationExporter:
         self.objects_range = "ALL"
         self.model_name = ""
         self.main_event_name = ""
+        self.anim_event_name_prefix = ""
 
     def export_to_filepath(self, filepath):
         with open(filepath, mode="w+", encoding="windows-1250", newline="\r\n") as out_file:
@@ -22,10 +23,11 @@ class AnimationExporter:
         elif self.objects_range == "VISIBLE":
             objects = bpy.context.visible_objects
         elif self.objects_range == "ACTIVE_COLLECTION":
-            objects = bpy.context.collection
+            objects = bpy.context.collection.objects
 
         elements = []
 
+        multiple = None
         if self.main_event_name != "":
             multiple = eu07_tools.scn.create_element("event:multiple")
             multiple.name = self.main_event_name
@@ -39,7 +41,10 @@ class AnimationExporter:
         bpy.context.scene.frame_current = bpy.context.scene.frame_start
 
         for obj in objects:
-            elements.extend(eventize_object_animation(obj, self.model_name))
+            anim_events = eventize_object_animation(obj, self.model_name, self.anim_event_name_prefix)
+            if multiple:
+                multiple.events_names.extend(ev.name for ev in anim_events)
+            elements.extend(anim_events)
 
         bpy.context.scene.frame_current = original_frame
 

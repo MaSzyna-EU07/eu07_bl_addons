@@ -58,7 +58,7 @@ class KeyframeDataStorage:
             group[key] = kf_data
 
 
-def eventize_object_animation(object, model_name):
+def eventize_object_animation(object, model_name, name_prefix=""):
     # Works only when:
     # There are no keyframes outside action.frame_range
     # And range is in <0;inf)
@@ -93,7 +93,8 @@ def eventize_object_animation(object, model_name):
             event = eu07_tools.scn.create_element("event:animation")
             event.delay = prev_data.delay
             event.anim_type = "translate" if kf_data.animated_property == "location" else "rotate"
-            event.name = f"{object.animation_data.action.name}_{event.anim_type}{kf_index}"
+            prefix_sep = "_" if name_prefix else ""
+            event.name = f"{name_prefix}{prefix_sep}{object.animation_data.action.name}_{event.anim_type}{kf_index}"
             event.model_name = model_name
             event.submodel_name = object.name
             event.speed = kf_data.vector.magnitude / prev_data.time_to_next
