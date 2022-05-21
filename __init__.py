@@ -10,7 +10,7 @@ bl_info = {
 import sys, os
 sys.path.append(os.path.dirname(__file__))
 
-from . import common, t3d, e3d, scn, material_tools, project, preview
+from . import common, t3d, e3d, scn, material_tools, project, preview, animation_tools
 
 
 def register():
@@ -18,8 +18,9 @@ def register():
     project.register()
     t3d.register()
     e3d.register()
-    scn.register()
+    #scn.register()
     material_tools.register()
+    animation_tools.register()
     preview.register()
 
 
@@ -28,7 +29,8 @@ def unregister():
     project.register()
     t3d.unregister()
     e3d.unregister()
-    scn.unregister()
+    #scn.unregister()
+    animation_tools.unregister()
     material_tools.unregister()
     preview.unregister()
 
