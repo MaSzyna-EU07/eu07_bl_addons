@@ -84,12 +84,11 @@ class TrackProperties(NodeProperties):
         get=None,
     )
 
-    map1: bpy.props.StringProperty(
-        name="Material name #1",
+    map1: bpy.props.PointerProperty(
+        type=bpy.types.Material,
+        name="Material #1",
         description="Material name #1",
-        default="",
-        set=None,
-        get=None,
+        update=properties_functions.update_map1,
     )
 
     map1_length: bpy.props.FloatProperty(
@@ -100,12 +99,11 @@ class TrackProperties(NodeProperties):
         update=properties_functions.update_geometry,
     )
 
-    map2: bpy.props.StringProperty(
-        name="Material name #2",
-        description="Material name #2",
-        default="",
-        set=None,
-        get=None,
+    map2: bpy.props.PointerProperty(
+        type=bpy.types.Material,
+        name="Material #2",
+        description="Material #2",
+        update=properties_functions.update_map2,
     )
 
     geometry_params: bpy.props.FloatVectorProperty(

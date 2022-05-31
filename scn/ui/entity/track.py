@@ -32,12 +32,14 @@ def draw(context, layout):
 
     row = layout.row()
     row.prop(props, "map1")
+    row.operator("eu07.import_material", text="", icon="PLUS")
 
     row = layout.row()
     row.prop(props, "map1_length")
 
     row = layout.row()
     row.prop(props, "map2")
+    row.operator("eu07.import_material", text="", icon="PLUS")
 
     row = layout.row()
     row.prop(props, "geometry_params", text="Ballast geometry")

@@ -4,10 +4,23 @@ from scn.entity.track import validate
 from scn.geometry.track import TrackNormalGeometryManager
 
 
+#TODO: Keep old materials, maybe make method in geometry manager to grab it from object
 def update_geometry(self, context):
+    obj = self.id_data
     mngr = TrackNormalGeometryManager()
-    geometry = mngr.get(self.id_data)
-    mngr.set(self.id_data, geometry)
+
+    old_geometry = mngr.get_from_entity(obj)
+    old_materials = [slot.material for slot in old_geometry.material_slots]
+    print(old_materials)
+
+    geometry = mngr.get(obj)
+    mngr.set(obj, geometry)
+
+    print(old_materials)
+
+    update_mapX(obj, old_materials[0], 0)
+    update_mapX(obj, old_materials[1], 1)
+
 
 def get_length(self):
     obj = self.id_data
@@ -15,6 +28,33 @@ def get_length(self):
         return obj.data.splines[0].calc_length()
 
     return 0
+
+# TODO: Update is called before REAL update, so assigning new material if previously was None results in material == None
+# TODO: instead of new one
+def update_map1(self, context):
+    obj = self.id_data
+    material = obj.eu07_track.map1
+    update_mapX(obj, material, 0)
+
+
+def update_map2(self, context):
+    obj = self.id_data
+    material = obj.eu07_track.map2
+    update_mapX(obj, material, 1)
+
+
+# TODO: Get container properly
+def update_mapX(obj, material, slot_index):
+    profile_container = obj.children[0] if obj.children else None
+    if profile_container:
+        slots = profile_container.material_slots
+        if not slots:
+            for _ in range(2):
+                profile_container.data.materials.append(None)
+
+        slot = profile_container.material_slots[slot_index]
+        slot.link = 'OBJECT'
+        slot.material = material
 
 
 def get_p1(self):

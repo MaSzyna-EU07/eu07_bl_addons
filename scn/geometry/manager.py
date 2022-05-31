@@ -5,6 +5,9 @@ class GeometryManager:
     def get(self, entity_props):
         pass
 
+    def get_from_entity(self, entity):
+        pass
+
     def set(self, entity, geometry):
         pass
 

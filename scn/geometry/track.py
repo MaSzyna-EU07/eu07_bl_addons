@@ -6,6 +6,7 @@ import bmesh
 from .manager import GeometryManager
 
 
+# TODO: Link objects more accurately
 class TrackNormalGeometryManager(GeometryManager):
     def __init__(self):
         super().__init__()
@@ -23,15 +24,17 @@ class TrackNormalGeometryManager(GeometryManager):
         else:
             return self.create(entity)
 
-    def set(self, entity, geometry):
+    def get_from_entity(self, entity):
         for child in entity.children:
             if "TrackGeometry" in child.name:
-                child.data = geometry
-                geometry_container = child
-                break
+                return child
+
+    def set(self, entity, geometry):
+        geometry_container = self.get_from_entity(entity)
+        if geometry_container:
+            geometry_container.data = geometry
         else:
             geometry_container = bpy.data.objects.new("TrackGeometry", geometry)
-            # TODO: Link more accurately
             entity.users_collection[0].objects.link(geometry_container)
 
         geometry_container.parent = entity
