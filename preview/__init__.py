@@ -71,7 +71,7 @@ class EU07_OT_GameEnginePreview(bpy.types.Operator):
 
         scn_elements.extend([launcher, multiple])
 
-        for obj in bpy.data.objects:
+        for obj in bpy.context.visible_objects:
             anim_events = eventize_object_animation(obj, "model_preview")
             multiple.events_names.extend(ev.name for ev in anim_events)
             scn_elements.extend(anim_events)
