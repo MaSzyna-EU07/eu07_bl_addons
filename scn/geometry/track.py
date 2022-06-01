@@ -33,7 +33,7 @@ class TrackNormalGeometryManager(GeometryManager):
         return default
 
     def set(self, entity, geometry):
-        geometry_container = self.get_from_entity(entity)
+        geometry_container = self.get_container_from(entity)
         if geometry_container:
             old_geometry = geometry_container.data
             geometry_container.data = geometry

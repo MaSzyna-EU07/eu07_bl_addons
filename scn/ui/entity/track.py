@@ -33,19 +33,20 @@ def draw(context, layout):
     row = layout.row()
     row.prop(props, "visibility")
 
-    row = layout.row()
-    row.prop(props, "map1")
-    row.operator("eu07.import_material", text="", icon="PLUS")
+    if props.visibility == "vis":
+        row = layout.row()
+        row.prop(props, "map1")
+        row.operator("eu07.import_material", text="", icon="PLUS")
 
-    row = layout.row()
-    row.prop(props, "map1_length")
+        row = layout.row()
+        row.prop(props, "map1_length")
 
-    row = layout.row()
-    row.prop(props, "map2")
-    row.operator("eu07.import_material", text="", icon="PLUS")
+        row = layout.row()
+        row.prop(props, "map2")
+        row.operator("eu07.import_material", text="", icon="PLUS")
 
-    row = layout.row()
-    row.prop(props, "geometry_params", text="Ballast geometry")
+        row = layout.row()
+        row.prop(props, "geometry_params", text="Ballast geometry")
 
     row = layout.row()
     row.prop(props, "p1", text="P1")
