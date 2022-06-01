@@ -24,10 +24,12 @@ class TrackNormalGeometryManager(GeometryManager):
         else:
             return self.create(entity)
 
-    def get_from_entity(self, entity):
+    def get_from_entity(self, entity, default=None):
         for child in entity.children:
             if "TrackGeometry" in child.name:
                 return child
+
+        return default
 
     def set(self, entity, geometry):
         geometry_container = self.get_from_entity(entity)

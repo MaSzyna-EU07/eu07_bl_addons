@@ -10,16 +10,15 @@ def update_geometry(self, context):
     mngr = TrackNormalGeometryManager()
 
     old_geometry = mngr.get_from_entity(obj)
-    old_materials = [slot.material for slot in old_geometry.material_slots]
-    print(old_materials)
+    old_materials = []
+    if old_geometry:
+        old_materials = [slot.material for slot in old_geometry.material_slots]
 
     geometry = mngr.get(obj)
     mngr.set(obj, geometry)
 
-    print(old_materials)
-
-    update_mapX(obj, old_materials[0], 0)
-    update_mapX(obj, old_materials[1], 1)
+    for i, old_material in enumerate(old_materials):
+        update_mapX(obj, old_materials[i], i)
 
 
 def get_length(self):
