@@ -34,7 +34,9 @@ class TrackNormalGeometryManager(GeometryManager):
     def set(self, entity, geometry):
         geometry_container = self.get_from_entity(entity)
         if geometry_container:
+            old_geometry = geometry_container.data
             geometry_container.data = geometry
+            self._purge_if_needed(old_geometry)
         else:
             geometry_container = bpy.data.objects.new("TrackGeometry", geometry)
             entity.users_collection[0].objects.link(geometry_container)
@@ -42,7 +44,6 @@ class TrackNormalGeometryManager(GeometryManager):
         geometry_container.parent = entity
         geometry_container.location = 0, 0, 0
 
-        bpy.data.orphans_purge(do_recursive=True)
         geometry_container.modifiers.clear()
 
         array_mod = geometry_container.modifiers.new('Array', type='ARRAY')
@@ -55,6 +56,11 @@ class TrackNormalGeometryManager(GeometryManager):
         entity.data.dimensions = "3D"
         entity.data.use_stretch = True
         entity.data.use_deform_bounds = True
+
+    def _purge_if_needed(self, geometry):
+        if geometry:
+            if geometry.users == 0:
+                bpy.data.meshes.remove(geometry)
 
 
     def create(self, entity):
