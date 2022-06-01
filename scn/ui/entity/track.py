@@ -7,6 +7,9 @@ def draw(context, layout):
     row.prop(props, "type")
 
     row = layout.row()
+    row.operator("wm.url_open", text="Documentation", icon='QUESTION').url = "https://wiki.eu07.pl/index.php/Obiekt_node::track"
+
+    row = layout.row()
     row.prop(props, "length")
 
     row = layout.row()
@@ -95,12 +98,6 @@ def draw(context, layout):
 
     row = layout.row()
     row.prop(props, "eventall2_name", text="EventAll 2")
-
-    row = layout.row()
-    row.prop(props, "event0_name", text="Event 0")
-
-    row = layout.row()
-    row.prop(props, "event1_name", text="Event 1")
 
     row = layout.row()
     row.prop(props, "isolated_name", text="Isolated")
