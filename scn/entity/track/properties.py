@@ -1,7 +1,7 @@
 import bpy
 
 from scn.entity.node import NodeProperties
-from . import properties_functions
+from . import callbacks
 
 class TrackProperties(NodeProperties):
     type: bpy.props.EnumProperty(
@@ -24,7 +24,7 @@ class TrackProperties(NodeProperties):
         description="Length of the trajectory",
         default=0,
         unit="LENGTH",
-        get=properties_functions.get_length,
+        get=callbacks.get_length,
     )
 
     width: bpy.props.FloatProperty(
@@ -32,7 +32,7 @@ class TrackProperties(NodeProperties):
         description="Width of the trajectory",
         default=1.435,
         unit="LENGTH",
-        update=properties_functions.update_geometry,
+        update=callbacks.update_geometry,
     )
 
     friction: bpy.props.FloatProperty(
@@ -80,14 +80,14 @@ class TrackProperties(NodeProperties):
             ("vis", "vis", "Visible"),
             ("unvis", "unvis", "Not visible")
         ],
-        update=properties_functions.update_visibility,
+        update=callbacks.update_visibility,
     )
 
     map1: bpy.props.PointerProperty(
         type=bpy.types.Material,
         name="Material #1",
         description="Material name #1",
-        update=properties_functions.update_map1,
+        update=callbacks.update_map1,
     )
 
     map1_length: bpy.props.FloatProperty(
@@ -95,29 +95,29 @@ class TrackProperties(NodeProperties):
         description="Map #1 repetition distance",
         default=4,
         unit="LENGTH",
-        update=properties_functions.update_geometry,
+        update=callbacks.update_geometry,
     )
 
     map2: bpy.props.PointerProperty(
         type=bpy.types.Material,
         name="Material #2",
         description="Material #2",
-        update=properties_functions.update_map2,
+        update=callbacks.update_map2,
     )
 
     geometry_params: bpy.props.FloatVectorProperty(
         size=3,
         default=(0.2, 0.5, 1.3),
         unit="LENGTH",
-        update=properties_functions.update_geometry,
+        update=callbacks.update_geometry,
     )
 
     p1: bpy.props.FloatVectorProperty(
         name="Point 1",
         size=3,
         unit="LENGTH",
-        set=properties_functions.set_p1,
-        get=properties_functions.get_p1,
+        set=callbacks.set_p1,
+        get=callbacks.get_p1,
     )
 
     p1_roll: bpy.props.FloatProperty(
@@ -129,8 +129,8 @@ class TrackProperties(NodeProperties):
         name="Point 2",
         size=3,
         unit="LENGTH",
-        set=properties_functions.set_p2,
-        get=properties_functions.get_p2,
+        set=callbacks.set_p2,
+        get=callbacks.get_p2,
     )
 
     p2_roll: bpy.props.FloatProperty(
@@ -142,8 +142,8 @@ class TrackProperties(NodeProperties):
         name="Point 3",
         size=3,
         unit="LENGTH",
-        set=properties_functions.set_p3,
-        get=properties_functions.get_p3,
+        set=callbacks.set_p3,
+        get=callbacks.get_p3,
     )
 
     p3_roll: bpy.props.FloatProperty(
@@ -155,8 +155,8 @@ class TrackProperties(NodeProperties):
         name="Point 4",
         size=3,
         unit="LENGTH",
-        set=properties_functions.set_p4,
-        get=properties_functions.get_p4,
+        set=callbacks.set_p4,
+        get=callbacks.get_p4,
     )
 
     p4_roll: bpy.props.FloatProperty(
@@ -168,32 +168,32 @@ class TrackProperties(NodeProperties):
         name="Control Vector 1",
         size=3,
         unit="LENGTH",
-        set=properties_functions.set_cv1,
-        get=properties_functions.get_cv1,
+        set=callbacks.set_cv1,
+        get=callbacks.get_cv1,
     )
 
     cv2: bpy.props.FloatVectorProperty(
         name="Control Vector 2",
         size=3,
         unit="LENGTH",
-        set=properties_functions.set_cv2,
-        get=properties_functions.get_cv2,
+        set=callbacks.set_cv2,
+        get=callbacks.get_cv2,
     )
 
     cv3: bpy.props.FloatVectorProperty(
         name="Control Vector 3",
         size=3,
         unit="LENGTH",
-        set=properties_functions.set_cv3,
-        get=properties_functions.get_cv3,
+        set=callbacks.set_cv3,
+        get=callbacks.get_cv3,
     )
 
     cv4: bpy.props.FloatVectorProperty(
         name="Control Vector 4",
         size=3,
         unit="LENGTH",
-        set=properties_functions.set_cv4,
-        get=properties_functions.get_cv4,
+        set=callbacks.set_cv4,
+        get=callbacks.get_cv4,
     )
 
     radius1: bpy.props.FloatProperty(
