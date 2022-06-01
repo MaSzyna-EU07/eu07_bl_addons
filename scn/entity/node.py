@@ -26,3 +26,5 @@ class NodeProperties(bpy.types.PropertyGroup):
         set=set_name,
     )
 
+    
+

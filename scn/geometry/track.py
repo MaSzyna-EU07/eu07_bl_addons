@@ -6,6 +6,13 @@ import bmesh
 from .manager import GeometryManager
 
 
+def create_track_geometry_manager(obj):
+    if obj.eu07_track.type == "normal":
+        return TrackNormalGeometryManager()
+    else:
+        raise ValueError(f"{obj.eu07_track.type} is not valid trajectory type or Geometry Manager is not implemented.")
+
+
 # TODO: Link objects more accurately
 class TrackNormalGeometryManager(GeometryManager):
     def __init__(self):
@@ -24,7 +31,6 @@ class TrackNormalGeometryManager(GeometryManager):
         else:
             return self.create(entity)
 
-    # TODO: This returns object, but mesh should be returned, and container should be returned by another method
     def get_container_from(self, entity, default=None):
         for child in entity.children:
             if "TrackGeometry" in child.name:

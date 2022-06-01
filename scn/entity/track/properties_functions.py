@@ -1,13 +1,12 @@
 import bpy
 
 from scn.entity.track import validate
-from scn.geometry.track import TrackNormalGeometryManager
+from scn.geometry.track import create_track_geometry_manager
 
 
-#TODO: Replace concrete class instantiation with factory
 def update_geometry(self, context):
     obj = self.id_data
-    mngr = TrackNormalGeometryManager()
+    mngr = create_track_geometry_manager(obj)
 
     container = mngr.get_container_from(obj)
     old_materials = []
@@ -28,11 +27,11 @@ def get_length(self):
 
     return 0
 
-# TODO: Get container properly
 def update_visibility(self, context):
     obj = self.id_data
+    mngr = create_track_geometry_manager(obj)
 
-    profile_container = obj.children[0] if obj.children else None
+    profile_container = mngr.get_container_from(obj)
     if profile_container:
         profile_container.hide_viewport = obj.eu07_track.visibility == "unvis"
     
@@ -40,7 +39,6 @@ def update_visibility(self, context):
 def update_map1(self, context):
     obj = self.id_data
     material = obj.eu07_track.map1
-    print(material)
     update_mapX(obj, material, 0)
 
 
@@ -50,9 +48,10 @@ def update_map2(self, context):
     update_mapX(obj, material, 1)
 
 
-# TODO: Get container properly
 def update_mapX(obj, material, slot_index):
-    profile_container = obj.children[0] if obj.children else None
+    mngr = create_track_geometry_manager(obj)
+
+    profile_container = mngr.get_container_from(obj)
     if profile_container:
         slots = profile_container.material_slots
         if not slots:
