@@ -2,12 +2,28 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="e0b16479-e3a7-48fe-9202-654047234a47" name="Default Changelist" comment="meshes without geometry are imported as empties">
+<<<<<<< HEAD
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/scn/entity/track/properties.py" beforeDir="false" afterPath="$PROJECT_DIR$/scn/entity/track/properties.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/scn/entity/track/properties_functions.py" beforeDir="false" afterPath="$PROJECT_DIR$/scn/entity/track/properties_functions.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/scn/geometry/manager.py" beforeDir="false" afterPath="$PROJECT_DIR$/scn/geometry/manager.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/scn/geometry/track.py" beforeDir="false" afterPath="$PROJECT_DIR$/scn/geometry/track.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/scn/ui/entity/track.py" beforeDir="false" afterPath="$PROJECT_DIR$/scn/ui/entity/track.py" afterDir="false" />
+=======
+      <change afterPath="$PROJECT_DIR$/animation_tools/output/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/animation_tools/output/eventize.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/animation_tools/output/exporter.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/animation_tools/output/operator.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/eu07_tools" beforeDir="false" afterPath="$PROJECT_DIR$/eu07_tools" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/eu07_tools/scn/output.py" beforeDir="false" afterPath="$PROJECT_DIR$/eu07_tools/scn/output.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/eu07_tools/t3d/output.py" beforeDir="false" afterPath="$PROJECT_DIR$/eu07_tools/t3d/output.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/eu07_tools/utils/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/eu07_tools/utils/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/eu07_tools/utils/output/text_writer.py" beforeDir="false" afterPath="$PROJECT_DIR$/eu07_tools/utils/output/text_writer.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/preview/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/preview/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/t3d/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/t3d/__init__.py" afterDir="false" />
+>>>>>>> master
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

@@ -4,7 +4,6 @@ import bpy
 import eu07_tools
 
 from t3d.input import input_builders
-from t3d.input.geometry import Geometry
 
 import mathutils
 
@@ -66,11 +65,10 @@ class E3DImporter:
 
             builder.set_map(submodel.map, self.asset_searcher, opacity, submodel.diffuse_color[:3] * 255)
 
-            geometry = Geometry.from_e3d(submodel.get_triangles_iter())
             # Because weird rotations are made by EU07.exe during e3d generation,
             # we need to compensate them
             matrix = mathutils.Matrix.Rotation(math.radians(90), 4, 'X')
-            builder.set_geometry(geometry)
+            builder.set_geometry(submodel.get_geometry())
 
         elif submodel.type == 'FreeSpotLight':
             builder.set_near_atten_start(submodel.near_atten_start)

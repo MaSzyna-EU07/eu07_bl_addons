@@ -39,6 +39,11 @@ class EU07_OT_ExportT3D(bpy.types.Operator, ExportHelper):
         description="Export material paths instead replaceable skins identifiers",
         options={'HIDDEN'}
     )
+    remove_name_suffixes: bpy.props.BoolProperty(
+        name="Remove name suffixes",
+        default=False,
+        description="Remove .00x suffixes from object names",
+    )
 
     def execute(self, context):
         exporter = T3DExporter()
@@ -46,6 +51,7 @@ class EU07_OT_ExportT3D(bpy.types.Operator, ExportHelper):
         exporter.apply_modifiers = self.apply_modifiers
         exporter.aggregate_includes = self.aggregate_includes
         exporter.embed_skins = self.embed_skins
+        exporter.remove_name_suffixes = self.remove_name_suffixes
 
         exporter.export_to_file(self.filepath)
 

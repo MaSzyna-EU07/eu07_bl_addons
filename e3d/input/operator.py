@@ -1,3 +1,4 @@
+import io
 from pathlib import Path
 
 import bpy
@@ -6,6 +7,7 @@ import eu07_tools
 from e3d.input.importer import E3DImporter
 from bpy_extras.io_utils import ImportHelper
 
+import cProfile, pstats
 
 class E3DImportOperator(bpy.types.Operator, ImportHelper):
     bl_idname = "import_scene.e3d"
@@ -33,19 +35,26 @@ class E3DImportOperator(bpy.types.Operator, ImportHelper):
     )
 
     def execute(self, context):
-        asset_searcher = eu07_tools.utils.AssetSearcher(
-            get_environment_path(self.filepath),
-            Path(self.filepath).parent
-        )
+        with cProfile.Profile() as pr:
 
-        importer = E3DImporter(asset_searcher)
-        importer.import_meshes = self.import_meshes
-        importer.import_spots = self.import_spots
-        importer.import_stars = self.import_stars
+            asset_searcher = eu07_tools.utils.AssetSearcher(
+                get_environment_path(self.filepath),
+                Path(self.filepath).parent
+            )
 
-        objects = importer.import_from_filepath(self.filepath)
+            importer = E3DImporter(asset_searcher)
+            importer.import_meshes = self.import_meshes
+            importer.import_spots = self.import_spots
+            importer.import_stars = self.import_stars
 
-        for obj in objects:
-            bpy.context.scene.collection.objects.link(obj)
+            objects = importer.import_from_filepath(self.filepath)
+
+            for obj in objects:
+                bpy.context.scene.collection.objects.link(obj)
+
+        s = io.StringIO()
+        ps = pstats.Stats(pr, stream=s).sort_stats(pstats.SortKey.CUMULATIVE)
+        ps.print_stats()
+        print(s.getvalue())
 
         return {'FINISHED'}

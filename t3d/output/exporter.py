@@ -14,6 +14,7 @@ class T3DExporter:
         self.apply_modifiers = True
         self.aggregate_includes = False
         self.embed_skins = False
+        self.remove_name_suffixes = False
 
     def export_to_file(self, filepath):
         export_manager = ExportManager(bpy.context.scene.eu07_includes, self.aggregate_includes)
@@ -57,7 +58,8 @@ class T3DExporter:
         if not builder:
             return None
 
-        builder.set_parent()
+        builder.set_name(self.remove_name_suffixes)
+        builder.set_parent(self.remove_name_suffixes)
         builder.set_diffuse()
         builder.set_anim()
         builder.set_selfillum()

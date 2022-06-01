@@ -1,16 +1,25 @@
 class HierarchyMaker:
+    # TODO: This class isn't making hierarchy anymore, so should be called like ObjectFilter?
+
     def make_hierarchy(self, objects):
-        objects = self._filter_objects(objects)
+        objects = list(self._filter_objects(objects))
 
-        for o in objects:
-            if not o.parent:
-                yield from self._sort_branch(o)
+        full_hierarchy = list(self.iter_default_hierarchy(objects))
 
-    def _sort_branch(self, first):
-        children = self._filter_objects(first.children)
-        yield first
-        for child in children:
-            yield from self._sort_branch(child)
+        print(full_hierarchy)
+        print("that was full, now selected")
+        print(list(objects))
+
+        for o in full_hierarchy:
+            if o in objects:
+                yield o
+
+    def iter_default_hierarchy(self, objects):
+        for obj in objects:
+            if obj.parent not in objects:
+                yield obj
+                for child in obj.children_recursive:
+                    yield child
 
     def _filter_objects(self, objects):
         for o in objects:
