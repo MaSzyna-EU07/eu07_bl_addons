@@ -24,7 +24,8 @@ class TrackNormalGeometryManager(GeometryManager):
         else:
             return self.create(entity)
 
-    def get_from_entity(self, entity, default=None):
+    # TODO: This returns object, but mesh should be returned, and container should be returned by another method
+    def get_container_from(self, entity, default=None):
         for child in entity.children:
             if "TrackGeometry" in child.name:
                 return child

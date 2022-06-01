@@ -4,21 +4,21 @@ from scn.entity.track import validate
 from scn.geometry.track import TrackNormalGeometryManager
 
 
-#TODO: Keep old materials, maybe make method in geometry manager to grab it from object
+#TODO: Replace concrete class instantiation with factory
 def update_geometry(self, context):
     obj = self.id_data
     mngr = TrackNormalGeometryManager()
 
-    old_geometry = mngr.get_from_entity(obj)
+    container = mngr.get_container_from(obj)
     old_materials = []
-    if old_geometry:
-        old_materials = [slot.material for slot in old_geometry.material_slots]
+    if container:
+        old_materials = [slot.material for slot in container.material_slots]
 
     geometry = mngr.get(obj)
     mngr.set(obj, geometry)
 
     for i, old_material in enumerate(old_materials):
-        update_mapX(obj, old_materials[i], i)
+        update_mapX(obj, old_material, i)
 
 
 def get_length(self):
