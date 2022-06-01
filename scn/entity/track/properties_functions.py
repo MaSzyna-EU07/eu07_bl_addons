@@ -28,11 +28,19 @@ def get_length(self):
 
     return 0
 
-# TODO: Update is called before REAL update, so assigning new material if previously was None results in material == None
-# TODO: instead of new one
+# TODO: Get container properly
+def update_visibility(self, context):
+    obj = self.id_data
+
+    profile_container = obj.children[0] if obj.children else None
+    if profile_container:
+        profile_container.hide_viewport = obj.eu07_track.visibility == "unvis"
+    
+    
 def update_map1(self, context):
     obj = self.id_data
     material = obj.eu07_track.map1
+    print(material)
     update_mapX(obj, material, 0)
 
 

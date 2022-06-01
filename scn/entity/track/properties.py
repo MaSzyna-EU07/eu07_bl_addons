@@ -80,8 +80,7 @@ class TrackProperties(NodeProperties):
             ("vis", "vis", "Visible"),
             ("unvis", "unvis", "Not visible")
         ],
-        set=None,
-        get=None,
+        update=properties_functions.update_visibility,
     )
 
     map1: bpy.props.PointerProperty(
