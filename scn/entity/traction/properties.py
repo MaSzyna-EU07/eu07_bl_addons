@@ -1,6 +1,6 @@
 import bpy
 
-from .node import NodeProperties
+from scn.entity.node import NodeProperties
 
 class TractionProperties(NodeProperties):
     power_supply_name: bpy.types.StringProperty(

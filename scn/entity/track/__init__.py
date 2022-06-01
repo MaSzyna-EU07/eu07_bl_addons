@@ -1,6 +1,7 @@
 import bpy
 
 from .properties import TrackProperties
+from .setup import setup_track
 
 classes = (
     TrackProperties,
