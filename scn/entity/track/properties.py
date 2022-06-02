@@ -252,7 +252,7 @@ class TrackProperties(NodeProperties):
         default=""
     )
 
-    overhead: bpy.props.StringProperty(
+    overhead: bpy.props.IntProperty(
         name="Overhead",
         default="",
     )
