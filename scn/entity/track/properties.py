@@ -254,7 +254,8 @@ class TrackProperties(NodeProperties):
 
     overhead: bpy.props.IntProperty(
         name="Overhead",
-        default="",
+        default=-1,
+        min=-1
     )
 
     angle1: bpy.props.FloatProperty(
