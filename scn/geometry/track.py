@@ -70,6 +70,56 @@ class TrackNormalGeometryManager(GeometryManager):
                 bpy.data.meshes.remove(geometry)
 
 
+    def create_mesh(self, length, profile1, profile2, fidelity=1):
+        segment_length = 2 / fidelity
+        step = segment_length / length
+        num_steps = 1 / step
+
+        for i in range(num_steps):
+            pass
+        # Interpolate X between two profiles for each point
+        # Create faces
+
+
+
+    def create_profile(self, entity, roll):
+        width = entity.eu07_track.width
+        htw = width * 0.5
+        height, side, slope = entity.eu07_track.geometry_params
+        span = htw + side + slope
+        rail_height = 0.18 #TODO: Grab from profile
+        total_height = height + rail_height
+        med_x = htw + side
+
+        sin = math.sin(roll)
+        cos = math.cos(roll)
+
+        output = (
+            (
+                (-span, 0, -total_height),
+                (0, 0)
+            ),
+            (
+                (-(med_x * cos), 0, -med_x * sin - rail_height),
+                (0, 0)
+            ),
+            (
+                (0, 0, -rail_height + 0.01),
+                (0, 0)
+            ),
+            (
+                (med_x * cos, 0, med_x * sin - rail_height),
+                (0, 0)
+            ),
+            (
+                (span, 0, -total_height),
+                (0, 0)
+            )
+        )
+
+        return output
+
+
     def create(self, entity):
         geometry = bpy.data.meshes.new(f"{self.prefix}")
         geometry["scn_geometry_type"] = "node:track:normal"

@@ -83,13 +83,14 @@ class TrackProperties(NodeProperties):
         update=callbacks.update_visibility,
     )
 
-    #TODO: This should be a string, material slot should be separate thing
     map1: bpy.props.PointerProperty(
         type=bpy.types.Material,
         name="Material #1",
         description="Material name #1",
         update=callbacks.update_map1,
     )
+
+    map1_path: bpy.props.StringProperty()
 
     map1_length: bpy.props.FloatProperty(
         name="Map #1 Length",
@@ -105,6 +106,8 @@ class TrackProperties(NodeProperties):
         description="Material #2",
         update=callbacks.update_map2,
     )
+
+    map2_path: bpy.props.StringProperty()
 
     geometry_params: bpy.props.FloatVectorProperty(
         size=3,
@@ -284,9 +287,34 @@ class TrackProperties(NodeProperties):
         update=None,
     )
 
+    trackbed: bpy.props.PointerProperty(
+        name="Trackbed Material",
+        type=bpy.types.Material
+    )
+
     friction_memcell: bpy.props.StringProperty(
         name="Friction Memcell",
         default="none",
+    )
+
+    next2: bpy.props.PointerProperty(
+        name="Next",
+        type=bpy.types.Object
+    )
+
+    next4: bpy.props.PointerProperty(
+        name="Next",
+        type=bpy.types.Object
+    )
+
+    prev1: bpy.props.PointerProperty(
+        name="Prev",
+        type=bpy.types.Object
+    )
+
+    prev3: bpy.props.PointerProperty(
+        name="Prev",
+        type=bpy.types.Object
     )
 
 
