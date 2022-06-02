@@ -1,11 +1,13 @@
 import bpy
 
+from . import camera
 from . import track
 from . import model
 from . import traction
 
 
 def register():
+    camera.register()
     track.register()
     model.register()
     traction.register()
@@ -32,7 +34,9 @@ def register():
 
 
 def unregister():
+    camera.unregister()
     track.unregister()
     model.unregister()
+    traction.unregister()
 
 
