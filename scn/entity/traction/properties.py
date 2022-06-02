@@ -3,27 +3,27 @@ import bpy
 from scn.entity.node import NodeProperties
 
 class TractionProperties(NodeProperties):
-    power_supply_name: bpy.types.StringProperty(
+    power_supply_name: bpy.props.StringProperty(
         name="Power Supply Name",
         default="none",
     )
 
-    nominal_voltage: bpy.types.FloatProperty(
+    nominal_voltage: bpy.props.FloatProperty(
         name="Nominal Voltage",
         default=0,
     )
 
-    max_current: bpy.types.FloatProperty(
+    max_current: bpy.props.FloatProperty(
         name="Max Current",
         default=0,
     )
 
-    resistivity: bpy.types.FloatProperty(
+    resistivity: bpy.props.FloatProperty(
         name="Resistivity",
         default=0,
     )
 
-    material: bpy.types.EnumProperty(
+    material: bpy.props.EnumProperty(
         name="Material",
         items=[
             ("Cu", "Cu", "Copper"),
@@ -31,7 +31,80 @@ class TractionProperties(NodeProperties):
         ]
     )
 
-    thickness = bpy.types.FloatProperty(
+    wire_thickness: bpy.props.FloatProperty(
         name="Thickness",
         default=1,
     )
+
+    damage_flag: bpy.props.IntProperty(
+        name="Damage flag",
+        default=0
+    )
+
+    p1: bpy.props.FloatVectorProperty(
+        name="P1",
+        size=3
+    )
+
+    p2: bpy.props.FloatVectorProperty(
+        name="P2",
+        size=3
+    )
+
+    p3: bpy.props.FloatVectorProperty(
+        name="P3",
+        size=3
+    )
+
+    p4: bpy.props.FloatVectorProperty(
+        "P4",
+        size=3
+    )
+
+    min_height: bpy.props.FloatProperty(
+        name="Min. height"
+    )
+
+    segment_length: bpy.props.FloatProperty(
+        name="Segment length"
+    )
+
+    wires: bpy.props.IntProperty(
+        name="Wires",
+        default=2
+    )
+
+    wires_offset: bpy.props.FloatProperty(
+        name="Wires offset",
+        default=0.04
+    )
+
+    visible: bpy.props.EnumProperty(
+        name="Visible",
+        items=(
+            ("vis", "vis", "Object is visible"),
+            ("unvis", "unvis", "Object is hidden"),
+        ),
+        default="vis"
+    )
+
+    parallel: bpy.props.StringProperty(
+        name="Parallel",
+        default="none"
+    )
+
+classes = (
+    TractionProperties,
+)
+
+
+def register():
+    for cls in classes:
+        bpy.utils.register_class(cls)
+
+    bpy.types.Object.eu07_traction = bpy.props.PointerProperty(type=TractionProperties)
+
+
+def unregister():
+    for cls in classes:
+        bpy.utils.register_class(cls)

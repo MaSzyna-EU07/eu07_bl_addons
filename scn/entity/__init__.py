@@ -1,20 +1,15 @@
 import bpy
 
 from . import track
-from .track import setup_track
+from . import model
+from . import traction
 
-
-# TODO: Move callback to better place
-def update_entity_type(self, context):
-    obj = self.id_data
-
-    if obj.eu07_scn_entity_type == "none":
-        pass
-    elif obj.eu07_scn_entity_type == "node::track":
-        setup_track(obj)
-    
 
 def register():
+    track.register()
+    model.register()
+    traction.register()
+
     bpy.types.Object.eu07_scn_entity_type = bpy.props.EnumProperty(
         name="Entity Type",
         description="Entity Type",
@@ -33,11 +28,11 @@ def register():
             ("node::triangles", "triangles", "Geometry (e.g. terrain)"),
         ],
         default="none",
-        update=update_entity_type
     )
-
-    track.register()
 
 
 def unregister():
     track.unregister()
+    model.unregister()
+
+

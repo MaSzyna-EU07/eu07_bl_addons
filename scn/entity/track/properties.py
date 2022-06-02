@@ -83,6 +83,7 @@ class TrackProperties(NodeProperties):
         update=callbacks.update_visibility,
     )
 
+    #TODO: This should be a string, material slot should be separate thing
     map1: bpy.props.PointerProperty(
         type=bpy.types.Material,
         name="Material #1",
@@ -288,4 +289,18 @@ class TrackProperties(NodeProperties):
     )
 
 
+classes = (
+    TrackProperties,
+)
 
+
+def register():
+    for cls in classes:
+        bpy.utils.register_class(cls)
+
+    bpy.types.Object.eu07_track = bpy.props.PointerProperty(type=TrackProperties)
+
+
+def unregister():
+    for cls in classes:
+        bpy.utils.register_class(cls)
