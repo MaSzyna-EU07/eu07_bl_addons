@@ -55,13 +55,15 @@ class TrackNormalGeometryManager(GeometryManager):
             geometry_container = bpy.data.objects.new("TrackGeometry", geometry)
             entity.users_collection[0].objects.link(geometry_container)
 
+        curve_mod = geometry_container.modifiers.new('Curve', type='CURVE')
+        curve_mod.object = entity
+
+        geometry_container.location = entity.location
         geometry_container.parent = entity
-        geometry_container.location = 0, 0, 0
 
         geometry_container.modifiers.clear()
 
-        # curve_mod = geometry_container.modifiers.new('Curve', type='CURVE')
-        # curve_mod.object = entity
+        
 
         entity.data.dimensions = "3D"
         entity.data.use_stretch = True
@@ -77,11 +79,10 @@ class TrackNormalGeometryManager(GeometryManager):
     def create_mesh(self, length, profile1, profile2, fidelity=1):
         segment_length = 2 / fidelity
         step = segment_length / length
-        num_segments = int(1 / step) + 1
+        num_segments = math.ceil(length / segment_length) + 1
 
         profiles = []
 
-        # TODO: Make last segment to fit to track length regardless of segment_length
         for i in range(num_segments):
             profile_interpolated = self.interpolate_profiles(profile1, profile2, i * step)
             profiles.append(profile_interpolated)
@@ -105,6 +106,8 @@ class TrackNormalGeometryManager(GeometryManager):
 
     
     def interpolate_profiles(self, profile1, profile2, x):
+        x = 1 if x > 1 else x
+
         output = []
 
         for vert1, vert2 in zip(profile1, profile2):
@@ -176,7 +179,8 @@ class TrackNormalGeometryManager(GeometryManager):
         self.uv_layer = self.mesh.loops.layers.uv.new()
 
         profile1 = self.create_profile(entity, entity.eu07_track.p1_roll)
-        profile2 = self.create_profile(entity, entity.eu07_track.p2_roll, entity.eu07_track.length)
+        # TODO: Guess why we need to negate yOffset?
+        profile2 = self.create_profile(entity, entity.eu07_track.p2_roll, -entity.eu07_track.length)
         self.create_mesh(entity.eu07_track.length, profile1, profile2)
 
         #self.generate_rails(entity.eu07_track.map1_length, entity.eu07_track.width)

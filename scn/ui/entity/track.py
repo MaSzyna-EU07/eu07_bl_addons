@@ -10,7 +10,7 @@ def draw(context, layout):
     row.operator("wm.url_open", text="Documentation", icon='QUESTION').url = "https://wiki.eu07.pl/index.php/Obiekt_node::track"
 
     row = layout.row()
-    row.label(text=f"Length: {props.length}")
+    row.label(text=f"Length: {props.length:.4f}")
 
     row = layout.row()
     row.prop(props, "width")
