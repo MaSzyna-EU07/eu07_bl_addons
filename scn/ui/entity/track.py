@@ -10,7 +10,7 @@ def draw(context, layout):
     row.operator("wm.url_open", text="Documentation", icon='QUESTION').url = "https://wiki.eu07.pl/index.php/Obiekt_node::track"
 
     row = layout.row()
-    row.prop(props, "length")
+    row.label(text=f"Length: {props.length}")
 
     row = layout.row()
     row.prop(props, "width")
@@ -52,6 +52,9 @@ def draw(context, layout):
     row.prop(props, "p1", text="P1")
 
     row = layout.row()
+    row.prop(props, "p1_roll", text="P1 Roll")
+
+    row = layout.row()
     row.prop(props, "cv1", text="CV1")
 
     row = layout.row()
@@ -61,11 +64,17 @@ def draw(context, layout):
     row.prop(props, "p2", text="P2")
 
     row = layout.row()
+    row.prop(props, "p2_roll", text="P2 Roll")
+
+    row = layout.row()
     row.prop(props, "radius1", text="Radius 1")
 
     if is_track_junction(context.object):
         row = layout.row()
         row.prop(props, "p3", text="P3")
+
+        row = layout.row()
+        row.prop(props, "p3_roll", text="P3 Roll")
 
         row = layout.row()
         row.prop(props, "cv3", text="CV3")
@@ -75,6 +84,9 @@ def draw(context, layout):
 
         row = layout.row()
         row.prop(props, "p4", text="P4")
+
+        row = layout.row()
+        row.prop(props, "p4_roll", text="P4 Roll")
 
         row = layout.row()
         row.prop(props, "radius2", text="Radius 2")

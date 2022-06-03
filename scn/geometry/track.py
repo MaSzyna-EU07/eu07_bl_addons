@@ -2,8 +2,11 @@ import math
 
 import bpy
 import bmesh
+import mathutils
 
 from .manager import GeometryManager
+
+
 
 
 def create_track_geometry_manager(obj):
@@ -11,6 +14,10 @@ def create_track_geometry_manager(obj):
         return TrackNormalGeometryManager()
     else:
         raise ValueError(f"{obj.eu07_track.type} is not valid trajectory type or Geometry Manager is not implemented.")
+
+
+def interpolate(x1: float, x2: float, y1: float, y2: float, x: float):
+    return ((y2 - y1) * x + x2 * y1 - x1 * y2) / (x2 - x1)
 
 
 # TODO: Link objects more accurately
@@ -53,12 +60,8 @@ class TrackNormalGeometryManager(GeometryManager):
 
         geometry_container.modifiers.clear()
 
-        array_mod = geometry_container.modifiers.new('Array', type='ARRAY')
-        array_mod.fit_type = 'FIT_CURVE'
-        array_mod.curve = entity
-
-        curve_mod = geometry_container.modifiers.new('Curve', type='CURVE')
-        curve_mod.object = entity
+        # curve_mod = geometry_container.modifiers.new('Curve', type='CURVE')
+        # curve_mod.object = entity
 
         entity.data.dimensions = "3D"
         entity.data.use_stretch = True
@@ -70,19 +73,61 @@ class TrackNormalGeometryManager(GeometryManager):
                 bpy.data.meshes.remove(geometry)
 
 
+
     def create_mesh(self, length, profile1, profile2, fidelity=1):
         segment_length = 2 / fidelity
         step = segment_length / length
-        num_steps = 1 / step
+        num_segments = int(1 / step) + 1
 
-        for i in range(num_steps):
-            pass
-        # Interpolate X between two profiles for each point
-        # Create faces
+        profiles = []
+
+        # TODO: Make last segment to fit to track length regardless of segment_length
+        for i in range(num_segments):
+            profile_interpolated = self.interpolate_profiles(profile1, profile2, i * step)
+            profiles.append(profile_interpolated)
+
+ 
+        for segment_index in range(num_segments-1):
+            p_verts = []
+            p_uvs = []
+            profileA, profileB = profiles[segment_index], profiles[segment_index+1]
+            for vertA, vertB in zip(profileA, profileB):
+                coA, uvA = vertA
+                coB, uvB = vertB
+                p_verts.extend((
+                    self.mesh.verts.new(coA), 
+                    self.mesh.verts.new(coB)
+                ))
+                p_uvs.extend((uvA, uvB))
+
+            self._make_faces(p_verts, p_uvs, 0, 4)
+
+
+    
+    def interpolate_profiles(self, profile1, profile2, x):
+        output = []
+
+        for vert1, vert2 in zip(profile1, profile2):
+            co1, co2 = mathutils.Vector(vert1[0]), mathutils.Vector(vert2[0])
+
+            co_out = co1.lerp(co2, x)
+
+            print(co_out)
+
+            vert_data = (
+                co_out,
+                (0, 0)
+            )
+
+            output.append(vert_data)
+
+        print("----")
+
+        return output           
 
 
 
-    def create_profile(self, entity, roll):
+    def create_profile(self, entity, roll, yOffset=0):
         width = entity.eu07_track.width
         htw = width * 0.5
         height, side, slope = entity.eu07_track.geometry_params
@@ -91,28 +136,28 @@ class TrackNormalGeometryManager(GeometryManager):
         total_height = height + rail_height
         med_x = htw + side
 
-        sin = math.sin(roll)
-        cos = math.cos(roll)
+        sin = math.sin(math.radians(roll))
+        cos = math.cos(math.radians(roll))
 
         output = (
             (
-                (-span, 0, -total_height),
+                (-span, yOffset, -total_height),
                 (0, 0)
             ),
             (
-                (-(med_x * cos), 0, -med_x * sin - rail_height),
+                (-(med_x * cos), yOffset, -med_x * sin - rail_height),
                 (0, 0)
             ),
             (
-                (0, 0, -rail_height + 0.01),
+                (0, yOffset, -rail_height + 0.01),
                 (0, 0)
             ),
             (
-                (med_x * cos, 0, med_x * sin - rail_height),
+                (med_x * cos, yOffset, med_x * sin - rail_height),
                 (0, 0)
             ),
             (
-                (span, 0, -total_height),
+                (span, yOffset, -total_height),
                 (0, 0)
             )
         )
@@ -130,40 +175,11 @@ class TrackNormalGeometryManager(GeometryManager):
         self.mesh = bmesh.new()
         self.uv_layer = self.mesh.loops.layers.uv.new()
 
-        max_z = entity.eu07_track.geometry_params[0]
-        med_y = entity.eu07_track.width / 2 + entity.eu07_track.geometry_params[1]
-        max_y = med_y + entity.eu07_track.geometry_params[2]
-        segment_length = entity.eu07_track.map1_length
+        profile1 = self.create_profile(entity, entity.eu07_track.p1_roll)
+        profile2 = self.create_profile(entity, entity.eu07_track.p2_roll, entity.eu07_track.length)
+        self.create_mesh(entity.eu07_track.length, profile1, profile2)
 
-        verts = [
-            self.mesh.verts.new((-segment_length / 2, max_y, -max_z)),
-            self.mesh.verts.new((segment_length / 2, max_y, -max_z)),
-            self.mesh.verts.new((-segment_length / 2, med_y, 0)),
-            self.mesh.verts.new((segment_length / 2, med_y, 0)),
-            self.mesh.verts.new((-segment_length / 2, -med_y, 0)),
-            self.mesh.verts.new((segment_length / 2, -med_y, 0)),
-            self.mesh.verts.new((-segment_length / 2, -max_y, -max_z)),
-            self.mesh.verts.new((segment_length / 2, -max_y, -max_z)),
-        ]
-
-        slope_uv_length = math.sqrt(entity.eu07_track.geometry_params[2] ** 2 + max_z ** 2) / entity.eu07_track.map1_length
-        med_u = med_y / entity.eu07_track.map1_length
-        max_u = slope_uv_length + med_u
-
-        verts_uv = [
-            (0.5 + max_u, 0),
-            (0.5 + max_u, 1),
-            (med_u + 0.5, 0),
-            (med_u + 0.5, 1),
-            (0.5 - med_u, 0),
-            (0.5 - med_u, 1),
-            (0.5 - max_u, 0),
-            (0.5 - max_u, 1)
-        ]
-
-        self._make_faces(verts, verts_uv, 1, 3)
-
-        self.generate_rails(entity.eu07_track.map1_length, entity.eu07_track.width)
+        #self.generate_rails(entity.eu07_track.map1_length, entity.eu07_track.width)
 
         self.mesh.to_mesh(geometry)
         self.mesh.free()

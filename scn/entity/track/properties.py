@@ -127,6 +127,7 @@ class TrackProperties(NodeProperties):
     p1_roll: bpy.props.FloatProperty(
         name="Point 1 Roll",
         default=0,
+        update=callbacks.update_geometry
     )
 
     p2: bpy.props.FloatVectorProperty(
@@ -140,6 +141,7 @@ class TrackProperties(NodeProperties):
     p2_roll: bpy.props.FloatProperty(
         name="Point 2 Roll",
         default=0,
+        update=callbacks.update_geometry
     )
 
     p3: bpy.props.FloatVectorProperty(
@@ -153,6 +155,7 @@ class TrackProperties(NodeProperties):
     p3_roll: bpy.props.FloatProperty(
         name="Point 3 Roll",
         default=0,
+        update=callbacks.update_geometry
     )
 
     p4: bpy.props.FloatVectorProperty(
@@ -166,6 +169,7 @@ class TrackProperties(NodeProperties):
     p4_roll: bpy.props.FloatProperty(
         name="Point 4 Roll",
         default=0,
+        update=callbacks.update_geometry
     )
 
     cv1: bpy.props.FloatVectorProperty(
