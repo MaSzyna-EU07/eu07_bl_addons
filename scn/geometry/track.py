@@ -27,23 +27,10 @@ class TrackNormalGeometryManager(GeometryManager):
         self.type = "node:track:normal"
 
     def get(self, entity):
-        for mesh in bpy.data.meshes:
-            if mesh["scn_geometry_type"] == self.type:
-                if (
-                    mesh["width"] == entity.eu07_track.width and
-                    mesh["map1_length"] == entity.eu07_track.map1_length and
-                    mesh["geometry_params"] == entity.eu07_track.geometry_params
-                ):
-                    return mesh
-        else:
-            return self.create(entity)
+        return entity.eu07_track.geometry_container.data if entity.eu07_track.geometry_container else self.create(entity)
 
     def get_container_from(self, entity, default=None):
-        for child in entity.children:
-            if "TrackGeometry" in child.name:
-                return child
-
-        return default
+        return entity.eu07_track.geometry_container if entity.eu07_track.geometry_container else default
 
     def set(self, entity, geometry):
         geometry_container = self.get_container_from(entity)
@@ -52,29 +39,24 @@ class TrackNormalGeometryManager(GeometryManager):
             geometry_container.data = geometry
             self._purge_if_needed(old_geometry)
         else:
-            geometry_container = bpy.data.objects.new("TrackGeometry", geometry)
-            entity.users_collection[0].objects.link(geometry_container)
+            geometry_container = bpy.data.objects.new(f"TrackGeometry({entity.name})", geometry)
+            bpy.context.scene.collection.objects.link(geometry_container)
+            entity.eu07_track.geometry_container = geometry_container
 
-        curve_mod = geometry_container.modifiers.new('Curve', type='CURVE')
-        curve_mod.object = entity
+            curve_mod = geometry_container.modifiers.new('Curve', type='CURVE')
+            curve_mod.object = entity
+
+            entity.data.dimensions = "3D"
+            entity.data.use_stretch = True
+            entity.data.use_deform_bounds = True
 
         geometry_container.location = entity.location
-        geometry_container.parent = entity
-
-        geometry_container.modifiers.clear()
-
-        
-
-        entity.data.dimensions = "3D"
-        entity.data.use_stretch = True
-        entity.data.use_deform_bounds = True
+        geometry_container.hide_select = True
 
     def _purge_if_needed(self, geometry):
         if geometry:
             if geometry.users == 0:
                 bpy.data.meshes.remove(geometry)
-
-
 
     def create_mesh(self, length, profile1, profile2, fidelity=1):
         segment_length = 2 / fidelity
@@ -103,8 +85,6 @@ class TrackNormalGeometryManager(GeometryManager):
 
             self._make_faces(p_verts, p_uvs, 0, 4)
 
-
-    
     def interpolate_profiles(self, profile1, profile2, x):
         x = 1 if x > 1 else x
 
@@ -115,8 +95,6 @@ class TrackNormalGeometryManager(GeometryManager):
 
             co_out = co1.lerp(co2, x)
 
-            print(co_out)
-
             vert_data = (
                 co_out,
                 (0, 0)
@@ -124,43 +102,39 @@ class TrackNormalGeometryManager(GeometryManager):
 
             output.append(vert_data)
 
-        print("----")
+        return output
 
-        return output           
-
-
-
-    def create_profile(self, entity, roll, yOffset=0):
+    def create_profile(self, entity, roll, xOffset=0):
         width = entity.eu07_track.width
         htw = width * 0.5
         height, side, slope = entity.eu07_track.geometry_params
         span = htw + side + slope
         rail_height = 0.18 #TODO: Grab from profile
         total_height = height + rail_height
-        med_x = htw + side
+        med_y = htw + side
 
         sin = math.sin(math.radians(roll))
         cos = math.cos(math.radians(roll))
 
         output = (
             (
-                (-span, yOffset, -total_height),
+                (xOffset, -span, -total_height),
                 (0, 0)
             ),
             (
-                (-(med_x * cos), yOffset, -med_x * sin - rail_height),
+                (xOffset, -(med_y * cos), -med_y * sin - rail_height),
                 (0, 0)
             ),
             (
-                (0, yOffset, -rail_height + 0.01),
+                (xOffset, 0, -rail_height + 0.01),
                 (0, 0)
             ),
             (
-                (med_x * cos, yOffset, med_x * sin - rail_height),
+                (xOffset, med_y * cos, med_y * sin - rail_height),
                 (0, 0)
             ),
             (
-                (span, yOffset, -total_height),
+                (xOffset, span, -total_height),
                 (0, 0)
             )
         )
@@ -170,10 +144,6 @@ class TrackNormalGeometryManager(GeometryManager):
 
     def create(self, entity):
         geometry = bpy.data.meshes.new(f"{self.prefix}")
-        geometry["scn_geometry_type"] = "node:track:normal"
-        geometry["width"] = entity.eu07_track.width
-        geometry["map1_length"] = entity.eu07_track.map1_length
-        geometry["geometry_params"] = entity.eu07_track.geometry_params
 
         self.mesh = bmesh.new()
         self.uv_layer = self.mesh.loops.layers.uv.new()

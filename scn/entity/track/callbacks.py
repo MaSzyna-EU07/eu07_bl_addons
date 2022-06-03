@@ -13,7 +13,7 @@ def update_geometry(self, context):
     if container:
         old_materials = [slot.material for slot in container.material_slots]
 
-    geometry = mngr.get(obj)
+    geometry = mngr.create(obj)
     mngr.set(obj, geometry)
 
     for i, old_material in enumerate(old_materials):

@@ -321,6 +321,10 @@ class TrackProperties(NodeProperties):
         type=bpy.types.Object
     )
 
+    geometry_container: bpy.props.PointerProperty(
+        type=bpy.types.Object
+    )
+
 
 classes = (
     TrackProperties,
