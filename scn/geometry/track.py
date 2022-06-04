@@ -58,7 +58,7 @@ class TrackNormalGeometryManager(GeometryManager):
             if geometry.users == 0:
                 bpy.data.meshes.remove(geometry)
 
-    def create_mesh(self, length, profile1, profile2, fidelity=1):
+    def create_mesh(self, length, profile1, profile2, fidelity=1, num_faces=4, material_index=1):
         segment_length = 2 / fidelity
         step = segment_length / length
         num_segments = math.ceil(length / segment_length) + 1
@@ -83,7 +83,7 @@ class TrackNormalGeometryManager(GeometryManager):
                 ))
                 p_uvs.extend((uvA, uvB))
 
-            self._make_faces(p_verts, p_uvs, 0, 4)
+            self._make_faces(p_verts, p_uvs, material_index, num_faces)
 
     def interpolate_profiles(self, profile1, profile2, x):
         x = 1 if x > 1 else x
@@ -141,6 +141,49 @@ class TrackNormalGeometryManager(GeometryManager):
 
         return output
 
+    def create_rail_profile(self, entity, roll, xOffset=0, side=1):
+        htw = entity.eu07_track.width / 2
+
+        rail = [
+            [
+                [xOffset, 0.067, -0.172],
+                [0, 0]
+            ],
+            [
+                [xOffset, 0.067, 0],
+                [0, 0]
+            ],
+            [
+                [xOffset, 0, 0],
+                [0, 0],
+            ],
+            [
+                [xOffset, 0, -0.172],
+                [0, 0]
+            ]
+        ]
+
+        sin = math.sin(math.radians(roll))
+        cos = math.cos(math.radians(roll))
+
+        output = []
+
+        for i, point in enumerate(rail):
+            point_loc = point[0]
+
+            output.append(
+                [
+                    [
+                        point_loc[0],
+                        ((htw + point_loc[1]) * cos + point_loc[2] * sin) * side,
+                        (-(htw + point_loc[1]) * sin + point_loc[2] * cos) * side,
+                    ],
+                    point[1]
+                ]
+            )
+
+        return output
+
 
     def create(self, entity):
         geometry = bpy.data.meshes.new(f"{self.prefix}")
@@ -153,7 +196,14 @@ class TrackNormalGeometryManager(GeometryManager):
         profile2 = self.create_profile(entity, entity.eu07_track.p2_roll, -entity.eu07_track.length)
         self.create_mesh(entity.eu07_track.length, profile1, profile2)
 
-        #self.generate_rails(entity.eu07_track.map1_length, entity.eu07_track.width)
+        right_rail1 = self.create_rail_profile(entity, entity.eu07_track.p1_roll, side=-1)
+        right_rail2 = self.create_rail_profile(entity, entity.eu07_track.p2_roll, -entity.eu07_track.length, side=-1)
+        print(right_rail1)
+        self.create_mesh(entity.eu07_track.length, right_rail1, right_rail2, num_faces=3, material_index=0)
+
+        left_rail1 = self.create_rail_profile(entity, entity.eu07_track.p1_roll, side=1)
+        left_rail2 = self.create_rail_profile(entity, entity.eu07_track.p2_roll, -entity.eu07_track.length, side=1)
+        self.create_mesh(entity.eu07_track.length, left_rail1, left_rail2, num_faces=3, material_index=0)
 
         self.mesh.to_mesh(geometry)
         self.mesh.free()
