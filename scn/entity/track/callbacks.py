@@ -17,7 +17,7 @@ def update_geometry(self, context):
     mngr.set(obj, geometry)
 
     for i, old_material in enumerate(old_materials):
-        update_mapX(obj, old_material, i)
+        update_materialX(obj, old_material, i)
 
 
 def get_length(self):
@@ -36,19 +36,24 @@ def update_visibility(self, context):
         profile_container.hide_viewport = obj.eu07_track.visibility == "unvis"
     
     
-def update_map1(self, context):
+def update_material1(self, context):
     obj = self.id_data
-    material = obj.eu07_track.map1
-    update_mapX(obj, material, 0)
+
+    mngr = create_track_geometry_manager(obj)
+    geometry = mngr.create(obj)
+    mngr.set(obj, geometry)
+
+    update_materialX(obj, obj.eu07_track.material1, 0)
+    update_materialX(obj, obj.eu07_track.material2, 1)
 
 
-def update_map2(self, context):
+def update_material2(self, context):
     obj = self.id_data
-    material = obj.eu07_track.map2
-    update_mapX(obj, material, 1)
+    material = obj.eu07_track.material2
+    update_materialX(obj, material, 1)
 
 
-def update_mapX(obj, material, slot_index):
+def update_materialX(obj, material, slot_index):
     mngr = create_track_geometry_manager(obj)
 
     profile_container = mngr.get_container_from(obj)

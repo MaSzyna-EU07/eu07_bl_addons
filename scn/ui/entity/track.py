@@ -35,14 +35,14 @@ def draw(context, layout):
 
     if props.visibility == "vis":
         row = layout.row()
-        row.prop(props, "map1")
+        row.prop(props, "material1")
         row.operator("eu07.import_material", text="", icon="PLUS")
 
         row = layout.row()
         row.prop(props, "map1_length")
 
         row = layout.row()
-        row.prop(props, "map2")
+        row.prop(props, "material2")
         row.operator("eu07.import_material", text="", icon="PLUS")
 
         row = layout.row()

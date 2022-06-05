@@ -146,11 +146,7 @@ class TrackNormalGeometryManager(GeometryManager):
 
         rail = [
             [
-                [xOffset, 0.067, -0.172],
-                [0, 0]
-            ],
-            [
-                [xOffset, 0.067, 0],
+                [xOffset, 0, -0.172],
                 [0, 0]
             ],
             [
@@ -158,9 +154,13 @@ class TrackNormalGeometryManager(GeometryManager):
                 [0, 0],
             ],
             [
-                [xOffset, 0, -0.172],
+                [xOffset, 0.067, 0],
                 [0, 0]
-            ]
+            ],
+            [
+                [xOffset, 0.067, -0.172],
+                [0, 0]
+            ],
         ]
 
         sin = math.sin(math.radians(roll))
@@ -196,14 +196,15 @@ class TrackNormalGeometryManager(GeometryManager):
         profile2 = self.create_profile(entity, entity.eu07_track.p2_roll, -entity.eu07_track.length)
         self.create_mesh(entity.eu07_track.length, profile1, profile2)
 
-        right_rail1 = self.create_rail_profile(entity, entity.eu07_track.p1_roll, side=-1)
-        right_rail2 = self.create_rail_profile(entity, entity.eu07_track.p2_roll, -entity.eu07_track.length, side=-1)
-        print(right_rail1)
-        self.create_mesh(entity.eu07_track.length, right_rail1, right_rail2, num_faces=3, material_index=0)
+        #TODO: Why i must pass negative value of rolls? That's bad :(
+        if entity.eu07_track.material1:
+            right_rail1 = self.create_rail_profile(entity, -entity.eu07_track.p1_roll)
+            right_rail2 = self.create_rail_profile(entity, -entity.eu07_track.p2_roll, -entity.eu07_track.length)
+            self.create_mesh(entity.eu07_track.length, right_rail1, right_rail2, num_faces=3, material_index=0)
 
-        left_rail1 = self.create_rail_profile(entity, entity.eu07_track.p1_roll, side=1)
-        left_rail2 = self.create_rail_profile(entity, entity.eu07_track.p2_roll, -entity.eu07_track.length, side=1)
-        self.create_mesh(entity.eu07_track.length, left_rail1, left_rail2, num_faces=3, material_index=0)
+            left_rail1 = self.create_rail_profile(entity, -entity.eu07_track.p1_roll, side=-1)
+            left_rail2 = self.create_rail_profile(entity, -entity.eu07_track.p2_roll, -entity.eu07_track.length, side=-1)
+            self.create_mesh(entity.eu07_track.length, left_rail1, left_rail2, num_faces=3, material_index=0)
 
         self.mesh.to_mesh(geometry)
         self.mesh.free()

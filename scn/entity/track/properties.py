@@ -83,14 +83,14 @@ class TrackProperties(NodeProperties):
         update=callbacks.update_visibility,
     )
 
-    map1: bpy.props.PointerProperty(
+    material1: bpy.props.PointerProperty(
         type=bpy.types.Material,
         name="Material #1",
         description="Material name #1",
-        update=callbacks.update_map1,
+        update=callbacks.update_material1,
     )
 
-    map1_path: bpy.props.StringProperty()
+    map1: bpy.props.StringProperty()
 
     map1_length: bpy.props.FloatProperty(
         name="Map #1 Length",
@@ -100,14 +100,14 @@ class TrackProperties(NodeProperties):
         update=callbacks.update_geometry,
     )
 
-    map2: bpy.props.PointerProperty(
+    material2: bpy.props.PointerProperty(
         type=bpy.types.Material,
         name="Material #2",
         description="Material #2",
-        update=callbacks.update_map2,
+        update=callbacks.update_material2,
     )
 
-    map2_path: bpy.props.StringProperty()
+    map2: bpy.props.StringProperty()
 
     geometry_params: bpy.props.FloatVectorProperty(
         size=3,
