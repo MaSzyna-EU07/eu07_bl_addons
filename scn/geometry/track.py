@@ -26,6 +26,7 @@ class TrackNormalGeometryManager(GeometryManager):
         super().__init__()
         self.type = "node:track:normal"
 
+    # TODO: This is problematic while duplicating curves - geometry container reference is shared...
     def get(self, entity):
         return entity.eu07_track.geometry_container.data if entity.eu07_track.geometry_container else self.create(entity)
 
@@ -58,7 +59,7 @@ class TrackNormalGeometryManager(GeometryManager):
             if geometry.users == 0:
                 bpy.data.meshes.remove(geometry)
 
-    def create_mesh(self, length, profile1, profile2, fidelity=1, num_faces=4, material_index=1):
+    def create_mesh(self, length, profile1, profile2, fidelity=4, num_faces=4, material_index=1):
         segment_length = 2 / fidelity
         step = segment_length / length
         num_segments = math.ceil(length / segment_length) + 1
@@ -175,8 +176,8 @@ class TrackNormalGeometryManager(GeometryManager):
                 [
                     [
                         point_loc[0],
-                        ((htw + point_loc[1]) * cos + point_loc[2] * sin) * side,
-                        (-(htw + point_loc[1]) * sin + point_loc[2] * cos) * side,
+                        ( (htw + point_loc[1]) * side * cos + point_loc[2] * sin),
+                        (-(htw + point_loc[1]) * side * sin + point_loc[2] * cos),
                     ],
                     point[1]
                 ]
