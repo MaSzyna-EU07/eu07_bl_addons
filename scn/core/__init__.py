@@ -1,0 +1,1 @@
+# This is target directory for core scn stuff (= low level API + visualisation)
