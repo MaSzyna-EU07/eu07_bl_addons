@@ -1,3 +1,4 @@
+from msilib.schema import Error
 import pathlib
 
 import bpy
@@ -43,23 +44,65 @@ class RailProfileBank(bpy.types.PropertyGroup):
         type=RailProfile
     )
 
-    def add_from_filepath(self, filepath):
-        # TODO: Move name getting to eu07_tools
-        name = pathlib.Path(filepath).stem.lstrip("railprofile_")
+    def add_from_name(self, name):
+        environment_path = bpy.context.scene.eu07_project_properties.environment_path
+        if not environment_path:
+            raise ValueError("Environment path not set!")
+        profile_path = pathlib.Path(environment_path, "models", "tory", f"railprofile_{name}.txt")
 
-        with open(filepath, encoding="latin-1") as file:
-            self.add_from_file(file, name)
+        if profile_path.exists():
+            return self.add_from_filepath(profile_path, name)
+        else:
+            # TODO: Report it in better way
+            print(f"Can't find {name} rail profile in environment {environment_path}")
+            return None
+
+    def add_from_filepath(self, filepath, name):
+        with open(filepath) as file:
+            return self.add_from_file(file, name)
 
     def add_from_file(self, file, name):
-        input_profile = eu07_tools.railprofile.load(file, name)
+        existing = self.get_profile(name)
+        if existing:
+            return existing
 
-        profile = self.profiles.add()
-        profile.name = name
+        input_profile = eu07_tools.railprofile.load(file)
 
-        for input_rp in input_profile.rail_points:
-            rp = profile.rail_points.new()
-            rp.location, rp.normal, rp.mapping = input_rp.location, input_rp.normal, input_rp.mapping
+        try:
+            profile = self.profiles.add()
+            profile.name = name
 
-        for input_bp in input_profile.blade_points:
-            bp = profile.blade_points.new()
-            bp.location, bp.normal, bp.mapping = input_bp.location, input_bp.normal, input_bp.mapping
+            for input_rp in input_profile.rail_points:
+                rp = profile.rail_points.add()
+                rp.location, rp.normal, rp.mapping = input_rp.location, input_rp.normal, input_rp.mapping
+
+            for input_bp in input_profile.blade_points:
+                bp = profile.blade_points.add()
+                bp.location, bp.normal, bp.mapping = input_bp.location, input_bp.normal, input_bp.mapping
+        except Exception as e:
+            self.profiles.remove(profile)
+            raise e
+
+    def get_profile(self, name):
+        for profile in self.profiles:
+            if profile.name == name:
+                return profile
+
+
+
+classes = (
+    RailProfilePoint,
+    RailProfile,
+    RailProfileBank,
+)
+
+def register():
+    for cls in classes:
+        bpy.utils.register_class(cls)
+
+    bpy.types.Scene.eu07_rail_profile_bank = bpy.props.PointerProperty(type=RailProfileBank)
+
+def unregister():
+    for cls in classes:
+        bpy.utils.unregister_class(cls)
+    
