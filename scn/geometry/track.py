@@ -16,9 +16,6 @@ def create_track_geometry_manager(obj):
         raise ValueError(f"{obj.eu07_track.type} is not valid trajectory type or Geometry Manager is not implemented.")
 
 
-def interpolate(x1: float, x2: float, y1: float, y2: float, x: float):
-    return ((y2 - y1) * x + x2 * y1 - x1 * y2) / (x2 - x1)
-
 
 # TODO: Link objects more accurately
 class TrackNormalGeometryManager(GeometryManager):
@@ -59,7 +56,33 @@ class TrackNormalGeometryManager(GeometryManager):
             if geometry.users == 0:
                 bpy.data.meshes.remove(geometry)
 
-    def create_mesh(self, length, profile1, profile2, fidelity=4, num_faces=4, material_index=1):
+    def create(self, entity):
+        geometry = bpy.data.meshes.new(f"{self.prefix}")
+
+        self.mesh = bmesh.new()
+        self.uv_layer = self.mesh.loops.layers.uv.new()
+
+        profile1 = self.create_profile(entity, entity.eu07_track.p1_roll)
+        # TODO: Guess why we need to negate yOffset?
+        profile2 = self.create_profile(entity, entity.eu07_track.p2_roll, -entity.eu07_track.length)
+        self.create_mesh(entity.eu07_track.length, profile1, profile2)
+
+        #TODO: Why i must pass negative value of rolls? That's bad :(
+        if entity.eu07_track.material1:
+            right_rail1 = self.create_rail_profile(entity, -entity.eu07_track.p1_roll)
+            right_rail2 = self.create_rail_profile(entity, -entity.eu07_track.p2_roll, -entity.eu07_track.length)
+            self.create_mesh(entity.eu07_track.length, right_rail1, right_rail2, num_faces=len(right_rail1) - 1, material_index=0)
+
+            left_rail1 = self.create_rail_profile(entity, -entity.eu07_track.p1_roll, side=-1)
+            left_rail2 = self.create_rail_profile(entity, -entity.eu07_track.p2_roll, -entity.eu07_track.length, side=-1)
+            self.create_mesh(entity.eu07_track.length, left_rail1, left_rail2, num_faces=len(right_rail1) - 1, material_index=0)
+
+        self.mesh.to_mesh(geometry)
+        self.mesh.free()
+
+        return geometry
+
+    def create_mesh(self, length, profile1, profile2, fidelity=1, num_faces=4, material_index=1):
         segment_length = 2 / fidelity
         step = segment_length / length
         num_segments = math.ceil(length / segment_length) + 1
@@ -180,70 +203,3 @@ class TrackNormalGeometryManager(GeometryManager):
             )
 
         return output
-
-
-    def create(self, entity):
-        geometry = bpy.data.meshes.new(f"{self.prefix}")
-
-        self.mesh = bmesh.new()
-        self.uv_layer = self.mesh.loops.layers.uv.new()
-
-        profile1 = self.create_profile(entity, entity.eu07_track.p1_roll)
-        # TODO: Guess why we need to negate yOffset?
-        profile2 = self.create_profile(entity, entity.eu07_track.p2_roll, -entity.eu07_track.length)
-        self.create_mesh(entity.eu07_track.length, profile1, profile2)
-
-        #TODO: Why i must pass negative value of rolls? That's bad :(
-        if entity.eu07_track.material1:
-            right_rail1 = self.create_rail_profile(entity, -entity.eu07_track.p1_roll)
-            right_rail2 = self.create_rail_profile(entity, -entity.eu07_track.p2_roll, -entity.eu07_track.length)
-            self.create_mesh(entity.eu07_track.length, right_rail1, right_rail2, num_faces=3, material_index=0)
-
-            left_rail1 = self.create_rail_profile(entity, -entity.eu07_track.p1_roll, side=-1)
-            left_rail2 = self.create_rail_profile(entity, -entity.eu07_track.p2_roll, -entity.eu07_track.length, side=-1)
-            self.create_mesh(entity.eu07_track.length, left_rail1, left_rail2, num_faces=3, material_index=0)
-
-        self.mesh.to_mesh(geometry)
-        self.mesh.free()
-
-        return geometry
-
-    def generate_rails(self, mapping_length, trajectory_width):
-        height = 0.172
-        width = 0.067
-
-        # u coordinates
-
-
-        for rail_index in range(2):
-            sideY = -1 if rail_index == 1 else 1
-
-            minY = trajectory_width / 2 * sideY
-            maxY = minY + width * sideY
-            maxX = mapping_length / 2
-
-            verts = [
-                self.mesh.verts.new((-maxX, maxY, 0)),
-                self.mesh.verts.new((maxX, maxY, 0)),
-                self.mesh.verts.new((-maxX, maxY, height)),
-                self.mesh.verts.new((maxX, maxY, height)),
-                self.mesh.verts.new((-maxX, minY, height)),
-                self.mesh.verts.new((maxX, minY, height)),
-                self.mesh.verts.new((-maxX, minY, 0)),
-                self.mesh.verts.new((maxX, minY, 0)),
-            ]
-
-            uvs_co = [
-                (0.1, 0),
-                (0.1, 1),
-                (0.344, 0),
-                (0.344, 1),
-                (0.689, 0),
-                (0.689, 1),
-                (0.9, 0),
-                (0.9, 1)
-            ]
-
-            flip = True if sideY == -1 else False
-
-            self._make_faces(verts, uvs_co, 0, 3, flip)
