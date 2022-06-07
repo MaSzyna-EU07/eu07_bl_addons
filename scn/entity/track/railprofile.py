@@ -17,9 +17,6 @@ class RailProfilePoint(bpy.types.PropertyGroup):
 
     mapping: bpy.props.FloatProperty()
 
-    def get_values(self):
-        return [*self.location, *self.normal, *self.mapping]
-
 
 class RailProfile(bpy.types.PropertyGroup):
     name: bpy.props.StringProperty()
@@ -32,12 +29,6 @@ class RailProfile(bpy.types.PropertyGroup):
         type=RailProfilePoint
     )
 
-    def get_values_list_for_rail(self):
-        return [p.get_values() for p in self.rail_points]
-
-    def get_values_list_for_blade(self):
-        return [p.get_values() for p in self.blade_points]
-
 
 class RailProfileBank(bpy.types.PropertyGroup):
     profiles: bpy.props.CollectionProperty(
@@ -45,6 +36,9 @@ class RailProfileBank(bpy.types.PropertyGroup):
     )
 
     def add_from_name(self, name):
+        if name == "":
+            name = "default"
+
         environment_path = bpy.context.scene.eu07_project_properties.environment_path
         if not environment_path:
             raise ValueError("Environment path not set!")
@@ -83,7 +77,12 @@ class RailProfileBank(bpy.types.PropertyGroup):
             self.profiles.remove(profile)
             raise e
 
+        return profile
+
     def get_profile(self, name):
+        if name == "":
+            name = "default"
+
         for profile in self.profiles:
             if profile.name == name:
                 return profile

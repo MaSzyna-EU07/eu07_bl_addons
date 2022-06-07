@@ -75,12 +75,14 @@ class TrackNormalGeometryManager(GeometryManager):
             p_verts = []
             p_uvs = []
             profileA, profileB = profiles[segment_index], profiles[segment_index+1]
-            for vertA, vertB in zip(profileA, profileB):
-                coA, uvA = vertA
-                coB, uvB = vertB
+            for pointA, pointB in zip(profileA, profileB):
+                locA, nrmA, uvA = pointA[:3], pointA[3:6], pointA[6:8]
+                locB, nrmB, uvB = pointB[:3], pointB[3:6], pointB[6:8]
+
+                print(locA)
                 p_verts.extend((
-                    self.mesh.verts.new(coA), 
-                    self.mesh.verts.new(coB)
+                    self.mesh.verts.new(locA), 
+                    self.mesh.verts.new(locB)
                 ))
                 p_uvs.extend((uvA, uvB))
 
@@ -92,14 +94,15 @@ class TrackNormalGeometryManager(GeometryManager):
         output = []
 
         for vert1, vert2 in zip(profile1, profile2):
-            co1, co2 = mathutils.Vector(vert1[0]), mathutils.Vector(vert2[0])
+            co1, co2 = mathutils.Vector(vert1[:3]), mathutils.Vector(vert2[:3])
 
             co_out = co1.lerp(co2, x)
 
-            vert_data = (
-                co_out,
-                (0, 0)
-            )
+            vert_data = [
+                *co_out,
+                0, 0, 1,
+                0, 0
+            ]
 
             output.append(vert_data)
 
@@ -117,69 +120,62 @@ class TrackNormalGeometryManager(GeometryManager):
         sin = math.sin(math.radians(roll))
         cos = math.cos(math.radians(roll))
 
-        output = (
-            (
-                (xOffset, -span, -total_height),
-                (0, 0)
-            ),
-            (
-                (xOffset, -(med_y * cos), -med_y * sin - rail_height),
-                (0, 0)
-            ),
-            (
-                (xOffset, 0, -rail_height + 0.01),
-                (0, 0)
-            ),
-            (
-                (xOffset, med_y * cos, med_y * sin - rail_height),
-                (0, 0)
-            ),
-            (
-                (xOffset, span, -total_height),
-                (0, 0)
-            )
-        )
+        output = [
+            [
+                xOffset, -span, -total_height,
+                0, 0, 1,
+                0, 0,
+            ],
+            [
+                xOffset, -(med_y * cos), -med_y * sin - rail_height,
+                0, 0, 1,
+                0, 0
+            ],
+            [
+                xOffset, 0, -rail_height + 0.01,
+                0, 0, 1,
+                0, 0
+            ],
+            [
+                xOffset, med_y * cos, med_y * sin - rail_height,
+                0, 0, 1,
+                0, 0
+            ],
+            [
+                xOffset, span, -total_height,
+                0, 0, 1,
+                0, 0
+            ]
+        ]
 
         return output
 
     def create_rail_profile(self, entity, roll, xOffset=0, side=1):
+        profile_bank = bpy.context.scene.eu07_rail_profile_bank
+
+        profile_data = profile_bank.get(entity.eu07_track.railprofile)
+        if not profile_data:
+            profile_data = profile_bank.add_from_name(entity.eu07_track.railprofile)
+
         htw = entity.eu07_track.width / 2
-
-        rail = [
-            [
-                [xOffset, 0, -0.172],
-                [0, 0]
-            ],
-            [
-                [xOffset, 0, 0],
-                [0, 0],
-            ],
-            [
-                [xOffset, 0.067, 0],
-                [0, 0]
-            ],
-            [
-                [xOffset, 0.067, -0.172],
-                [0, 0]
-            ],
-        ]
-
         sin = math.sin(math.radians(roll))
         cos = math.cos(math.radians(roll))
 
         output = []
 
-        for i, point in enumerate(rail):
-            point_loc = point[0]
+        for i, point in enumerate(profile_data.rail_points):
 
+            # TODO: Fix normals and UV
             output.append(
                 [
-                    [
-                        point_loc[0],
-                        ( (htw + point_loc[1]) * side * cos + point_loc[2] * sin),
-                        (-(htw + point_loc[1]) * side * sin + point_loc[2] * cos),
-                    ],
-                    point[1]
+                    xOffset,
+                    (htw + point.location[0]) * side * cos + point.location[1] * sin,
+                    -(htw + point.location[0]) * side * sin + point.location[1] * cos,
+                    1,
+                    point.normal[0],
+                    point.normal[1],
+                    point.mapping,
+                    point.mapping
                 ]
             )
 
