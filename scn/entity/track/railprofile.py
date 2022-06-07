@@ -39,6 +39,10 @@ class RailProfileBank(bpy.types.PropertyGroup):
         if name == "":
             name = "default"
 
+        existing = self.get_profile(name)
+        if existing:
+            return existing
+
         environment_path = bpy.context.scene.eu07_project_properties.environment_path
         if not environment_path:
             raise ValueError("Environment path not set!")
