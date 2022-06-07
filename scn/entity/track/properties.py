@@ -288,7 +288,7 @@ class TrackProperties(NodeProperties):
     railprofile: bpy.props.StringProperty(
         name="Rail Profile",
         default="",
-        update=None,
+        update=callbacks.update_geometry,
     )
 
     trackbed: bpy.props.PointerProperty(
