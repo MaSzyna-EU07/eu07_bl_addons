@@ -27,7 +27,7 @@ class T3DExporter:
         elif self.objects_range == "VISIBLE":
             objects_to_export = bpy.context.visible_objects
         elif self.objects_range == "ACTIVE_COLLECTION":
-            objects_to_export = bpy.context.collection
+            objects_to_export = bpy.context.collection.objects
 
         objects_to_export = HierarchyMaker().make_hierarchy(objects_to_export)
 

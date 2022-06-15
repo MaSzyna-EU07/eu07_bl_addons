@@ -34,11 +34,17 @@ class EU07_OT_ExportAnimation(bpy.types.Operator, ExportHelper):
         default="",
     )
 
+    anim_event_name_prefix: bpy.props.StringProperty(
+        name="Anim events name prefix",
+        default=""
+    )
+
     def execute(self, context):
         exporter = AnimationExporter()
         exporter.objects_range = self.objects_range
         exporter.model_name = self.model_name
         exporter.main_event_name = self.main_event_name
+        exporter.anim_event_name_prefix = self.anim_event_name_prefix
 
         exporter.export_to_filepath(self.filepath)
 
