@@ -3,7 +3,7 @@
   <component name="ChangeListManager">
     <list default="true" id="e0b16479-e3a7-48fe-9202-654047234a47" name="Default Changelist" comment="meshes without geometry are imported as empties">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/preview/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/preview/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/preview/model/operator.py" beforeDir="false" afterPath="$PROJECT_DIR$/preview/model/operator.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
