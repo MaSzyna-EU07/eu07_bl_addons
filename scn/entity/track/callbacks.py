@@ -1,4 +1,5 @@
 import bpy
+import mathutils
 
 from scn.entity.track import validate
 from scn.geometry.track import create_track_geometry_manager
@@ -152,9 +153,12 @@ def get_pX(obj, x):
     spline_idx, point_idx = get_spline_and_point_indices(x)
 
     if validate.is_curve(obj):
-        return obj.data.splines[spline_idx].bezier_points[point_idx].co
+        try:
+            return obj.data.splines[spline_idx].bezier_points[point_idx].co
+        except:
+            pass
 
-    return 0, 0, 0
+    return mathutils.Vector((0, 0, 0))
 
 
 def set_pX(obj, x, value):
@@ -162,11 +166,14 @@ def set_pX(obj, x, value):
 
 
     if validate.is_curve(obj):
-        point = obj.data.splines[spline_idx].bezier_points[point_idx]
-        point.co = value
+        try:
+            point = obj.data.splines[spline_idx].bezier_points[point_idx]
+            point.co = value
 
-        point.handle_left_type = 'FREE'
-        point.handle_right_type = 'FREE'
+            point.handle_left_type = 'FREE'
+            point.handle_right_type = 'FREE'
+        except IndexError:
+            pass
 
 
 def get_spline_and_point_indices(x):
@@ -184,9 +191,11 @@ def get_cvX(obj, x):
     spline_idx, point_idx = get_spline_and_point_indices(x)
 
     if validate.is_curve(obj):
-        point = obj.data.splines[spline_idx].bezier_points[point_idx]
+        try:
+            point = obj.data.splines[spline_idx].bezier_points[point_idx]
+        except IndexError:
+            return mathutils.Vector((0, 0, 0))
 
-        # TODO: Relative to pX
         if x % 2 == 0:
             return point.handle_left
         else:
@@ -207,3 +216,15 @@ def set_cvX(obj, x, value):
             point.handle_right = value
             point.handle_left = 0, 0, 0
             point.handle_right_type = 'FREE'
+
+
+def get_cvX_local(obj, x):
+    cvX = get_cvX(obj, x)
+    pX = get_pX(obj, x)
+    return cvX - pX
+
+
+def set_cvX_local(obj, x, value):
+    pX = get_pX(obj, x)
+    cvX = pX + mathutils.Vector(value)
+    set_cvX(obj, x, cvX)

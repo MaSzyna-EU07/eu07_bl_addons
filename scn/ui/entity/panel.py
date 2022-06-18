@@ -22,5 +22,5 @@ class SCN_PT_entity(bpy.types.Panel):
         row = self.layout.row()
         row.prop(obj, "eu07_scn_entity_type")
 
-        if obj.eu07_scn_entity_type == "node::track":
+        if obj.eu07_scn_entity_type == "node:track":
             track.draw(context, self.layout)

@@ -8,7 +8,6 @@ import eu07_tools
 
 from common.export_manager import ExportManager
 from common import utils
-from scn import tree_utils, memcell, sound, camera, terrain, trajectory_tools, firstinit, config
 
 
 class SCNExporter(bpy.types.Operator, ExportHelper):
@@ -34,7 +33,7 @@ class SCNExporter(bpy.types.Operator, ExportHelper):
             export_date = datetime.now().strftime("%d/%m/%Y %H:%M")
             buffer.write(f"// Exported from BlendSCN Editor {export_date}\n\n")
 
-        export_manager.master_output.dump_element(config.get_config_as_element())
+        # export_manager.master_output.dump_element(config.get_config_as_element())
 
         for include in bpy.context.scene.eu07_includes:
             include_element = eu07_tools.scn.create_element("include")
@@ -50,16 +49,13 @@ class SCNExporter(bpy.types.Operator, ExportHelper):
             objects = bpy.data.objects
 
         for obj in objects:
+            print(f"Exporting {obj} to SCN")
             output = export_manager.get_output(obj.eu07_include_identifier)
 
-            if obj.scn_properties.type_ == "node:triangles":
-                output.dump_from_iterable(terrain.create_node_triangles_from_mesh(obj))
+            element = self._create_element_from_object(obj)
+            output.dump_element(element)
 
-            else:
-                element = self._create_element_from_object(obj)
-                output.dump_element(element)
-
-        export_manager.master_buffer.write(firstinit.get_firstinit())
+        # export_manager.master_buffer.write(firstinit.get_firstinit())
 
         export_manager.flush_buffers_to_files(utils.get_environment_path(), self.filepath)
 
@@ -67,15 +63,62 @@ class SCNExporter(bpy.types.Operator, ExportHelper):
 
     def _create_element_from_object(self, obj):
         element = None
-        if obj.scn_properties.type_ == "tree":
-            element = tree_utils.create_tree_include(obj)
-        elif obj.scn_properties.type_ == "node:memcell":
-            element = memcell.create_memcell_from_object(obj)
-        elif obj.scn_properties.type_ == "node:sound":
-            element = sound.create_sound_from_object(obj)
-        elif obj.scn_properties.type_ == "camera":
-            element = camera.create_camera_from_object(obj)
-        elif "node:track" in obj.scn_properties.type_:
-            element = trajectory_tools.create_element_from_track(obj)
+        if "node:track" in obj.eu07_scn_entity_type:
+            element = self._create_node_track(obj)
 
         return element
+
+    def _create_node_track(self, obj):
+        track = eu07_tools.scn.create_element("node:track")
+
+        tp = obj.eu07_track
+
+        track.subtype = tp.type
+        track.length = tp.length
+        track.width = tp.width
+        track.friction = tp.friction
+        track.sound_distance = tp.sound_distance
+        track.quality_flag = tp.quality_flag
+        track.damage_flag = tp.damage_flag
+        track.environment = tp.environment
+        track.visible = tp.visibility
+        track.map1 = "none"
+        track.map2 = "none"
+        track.mapping_length = tp.map1_length
+        track.geometry_params = tp.geometry_params
+
+        track.p1 = tp.p1
+        track.p1_roll = tp.p1_roll
+        track.cv1 = tp.get_cv1_local()
+        track.cv2 = tp.get_cv2_local()
+        track.p2 = tp.p2
+        track.p2_roll = tp.p2_roll
+        track.radius1 = tp.radius1
+
+        track.p3 = tp.p3
+        track.p3_roll = tp.p3_roll
+        track.cv3 = tp.get_cv3_local()
+        track.cv4 = tp.get_cv4_local()
+        track.p4 = tp.p4
+        track.p4_roll = tp.p4_roll
+        track.radius2 = tp.radius2
+
+        track.velocity = tp.velocity
+        track.event0 = tp.event0_name
+        track.event1 = tp.event1_name
+        track.event2 = tp.event2_name
+        track.eventall0 = tp.eventall0_name
+        track.eventall1 = tp.eventall1_name
+        track.eventall2 = tp.eventall2_name
+        track.isolated = tp.isolated_name
+        track.overhead = tp.overhead
+        track.angle1 = tp.angle1
+        track.angle2 = tp.angle2
+        track.fouling1 = tp.fouling1
+        track.fouling2 = tp.fouling2
+        track.railprofile = tp.railprofile
+        track.friction_memcell_name = tp.friction_memcell
+        track.trackbed = "none"
+
+        return track
+

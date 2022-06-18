@@ -226,37 +226,37 @@ class TrackProperties(NodeProperties):
 
     event0_name: bpy.props.StringProperty(
         name="Event 0",
-        default=""
+        default="none"
     )
 
     event1_name: bpy.props.StringProperty(
         name="Event 2",
-        default=""
+        default="none"
     )
 
     event2_name: bpy.props.StringProperty(
         name="Event 1",
-        default=""
+        default="none"
     )
 
     eventall0_name: bpy.props.StringProperty(
         name="EventAll 0",
-        default=""
+        default="none"
     )
 
     eventall1_name: bpy.props.StringProperty(
         name="EventAll 1",
-        default=""
+        default="none"
     )
 
     eventall2_name: bpy.props.StringProperty(
         name="EventAll 2",
-        default=""
+        default="none"
     )
 
     isolated_name: bpy.props.StringProperty(
         name="Isolated",
-        default=""
+        default="none"
     )
 
     overhead: bpy.props.IntProperty(
@@ -275,19 +275,19 @@ class TrackProperties(NodeProperties):
         unit="ROTATION",
     )
 
-    fouling1: bpy.props.FloatProperty(
+    fouling1: bpy.props.StringProperty(
         name="Fouling 1",
-        unit="LENGTH",
+        default="none"
     )
 
-    fouling2: bpy.props.FloatProperty(
+    fouling2: bpy.props.StringProperty(
         name="Fouling 2",
-        unit="LENGTH",
+        default="none"
     )
 
     railprofile: bpy.props.StringProperty(
         name="Rail Profile",
-        default="",
+        default="none",
         update=callbacks.update_geometry,
     )
 
@@ -324,6 +324,18 @@ class TrackProperties(NodeProperties):
     geometry_container: bpy.props.PointerProperty(
         type=bpy.types.Object
     )
+
+    def get_cv1_local(self):
+        return callbacks.get_cvX_local(self.id_data, 1)
+
+    def get_cv2_local(self):
+        return callbacks.get_cvX_local(self.id_data, 2)
+
+    def get_cv3_local(self):
+        return callbacks.get_cvX_local(self.id_data, 3)
+
+    def get_cv4_local(self):
+        return callbacks.get_cvX_local(self.id_data, 4)
 
 
 classes = (
