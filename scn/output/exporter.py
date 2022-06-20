@@ -73,6 +73,9 @@ class SCNExporter(bpy.types.Operator, ExportHelper):
 
         tp = obj.eu07_track
 
+        track.name = tp.name
+        track.max_distance = tp.max_distance
+        track.min_distance = tp.min_distance
         track.subtype = tp.type
         track.length = tp.length
         track.width = tp.width
