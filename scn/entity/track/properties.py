@@ -3,6 +3,9 @@ import bpy
 from scn.entity.node import NodeProperties
 from . import callbacks
 
+import material_tools
+
+
 class TrackProperties(NodeProperties):
     type: bpy.props.EnumProperty(
         name="Trajectory Type",
@@ -90,8 +93,6 @@ class TrackProperties(NodeProperties):
         update=callbacks.update_material1,
     )
 
-    map1: bpy.props.StringProperty()
-
     map1_length: bpy.props.FloatProperty(
         name="Map #1 Length",
         description="Map #1 repetition distance",
@@ -106,8 +107,6 @@ class TrackProperties(NodeProperties):
         description="Material #2",
         update=callbacks.update_material2,
     )
-
-    map2: bpy.props.StringProperty()
 
     geometry_params: bpy.props.FloatVectorProperty(
         size=3,
@@ -291,7 +290,7 @@ class TrackProperties(NodeProperties):
         update=callbacks.update_geometry,
     )
 
-    trackbed: bpy.props.PointerProperty(
+    material_trackbed: bpy.props.PointerProperty(
         name="Trackbed Material",
         type=bpy.types.Material
     )
@@ -336,6 +335,15 @@ class TrackProperties(NodeProperties):
 
     def get_cv4_local(self):
         return callbacks.get_cvX_local(self.id_data, 4)
+
+    def get_map1(self):
+        return material_tools.utils.get_shortpath_from_material(self.material1)
+
+    def get_map2(self):
+        return material_tools.utils.get_shortpath_from_material(self.material2)
+
+    def get_switch_trackbed_map(self):
+        return material_tools.utils.get_shortpath_from_material(self.material_trackbed)
 
 
 classes = (

@@ -35,24 +35,21 @@ class RailProfileBank(bpy.types.PropertyGroup):
     )
 
     def add_from_name(self, name):
-        if name == "":
-            name = "default"
-
-        existing = self.get_profile(name)
-        if existing:
-            return existing
-
         environment_path = bpy.context.scene.eu07_project_properties.environment_path
         if not environment_path:
             raise ValueError("Environment path not set!")
         profile_path = pathlib.Path(environment_path, "models", "tory", f"railprofile_{name}.txt")
 
-        if profile_path.exists():
-            return self.add_from_filepath(profile_path, name)
-        else:
-            # TODO: Report it in better way
-            print(f"Can't find {name} rail profile in environment {environment_path}")
-            return None
+        if not profile_path.exists():
+            name = "default"
+            profile_path = pathlib.Path(environment_path, "models", "tory", "railprofile_default.txt")
+
+        existing = self.get_profile(name)
+        if existing:
+            return existing
+
+        return self.add_from_filepath(profile_path, name)
+
 
     def add_from_filepath(self, filepath, name):
         with open(filepath) as file:

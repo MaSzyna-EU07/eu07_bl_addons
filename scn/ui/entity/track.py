@@ -134,6 +134,10 @@ def draw(context, layout):
     row = layout.row()
     row.prop(props, "fouling2", text="Fouling 2")
 
+    if props.type == "switch":
+        row = layout.row()
+        row.prop(props, "material_trackbed", text="Trackbed")
+
     row = layout.row()
     row.prop(props, "railprofile", text="Rail Profile")
 

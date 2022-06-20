@@ -84,26 +84,42 @@ class SCNExporter(bpy.types.Operator, ExportHelper):
         track.quality_flag = tp.quality_flag
         track.damage_flag = tp.damage_flag
         track.environment = tp.environment
-        track.visible = tp.visibility
-        track.map1 = "none"
-        track.map2 = "none"
+        track.is_visible = (tp.visibility == "vis")
+        track.map1 = tp.get_map1()
+        track.map2 = tp.get_map2()
         track.mapping_length = tp.map1_length
         track.geometry_params = tp.geometry_params
 
         track.p1 = tp.p1
+        track.p1.swizzle()
         track.p1_roll = tp.p1_roll
+
         track.cv1 = tp.get_cv1_local()
+        track.cv1.swizzle()
+
         track.cv2 = tp.get_cv2_local()
+        track.cv2.swizzle()
+
         track.p2 = tp.p2
+        track.p2.swizzle()
         track.p2_roll = tp.p2_roll
+
         track.radius1 = tp.radius1
 
         track.p3 = tp.p3
+        track.p3.swizzle()
         track.p3_roll = tp.p3_roll
+
         track.cv3 = tp.get_cv3_local()
+        track.cv3.swizzle()
+
         track.cv4 = tp.get_cv4_local()
+        track.cv4.swizzle()
+
         track.p4 = tp.p4
+        track.p4.swizzle()
         track.p4_roll = tp.p4_roll
+
         track.radius2 = tp.radius2
 
         track.velocity = tp.velocity
@@ -121,7 +137,7 @@ class SCNExporter(bpy.types.Operator, ExportHelper):
         track.fouling2 = tp.fouling2
         track.railprofile = tp.railprofile
         track.friction_memcell_name = tp.friction_memcell
-        track.trackbed = "none"
+        track.trackbed = tp.get_switch_trackbed_map()
 
         return track
 
