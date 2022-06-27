@@ -173,6 +173,21 @@ class TrackNormalGeometryManager(GeometryManager):
 
         return output
 
+
+    def calc_ballast_uv(self, mapping_length, tex_ratio=1, xOffset=0):
+        if mapping_length == 4:
+            return [
+                [0, 0],
+                [0.33, 0],
+                [0.5, 0],
+                [0.67, 0],
+                [1, 0]
+            ]
+
+        else:
+            # NOTE: This code is highly inspired by Track.cpp from EU07 source code
+            max = tex_ratio * mapping_length
+
     def create_rail_profile(self, entity, roll, xOffset=0, side=1):
         profile_bank = bpy.context.scene.eu07_rail_profile_bank
 

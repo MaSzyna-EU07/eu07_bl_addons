@@ -79,7 +79,7 @@ class EU07_OT_GameEnginePreviewModel(bpy.types.Operator):
             track.p1 = (0, -0.18, -75)
             track.p2 = (0, -0.18, 75)
             track.map1 = "rail_screw_used1"
-            track.map2 = "tpbps-new3"
+            track.map2 = "1435mm/tpd-stone3-new"
             track.geometry_params = [0.2, 0.5, 1.1]
 
             scn_elements.append(track)

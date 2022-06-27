@@ -2,14 +2,14 @@ import math
 import pathlib
 
 import bpy
-import mathutils
 import eu07_tools
 import scn.trajectory_tools.profile
 
 from scn.decorations import DecorationsBuilder
 from scn.trajectory_tools.trajectory_builder import TrajectoryBuilder
 from scn.terrain import TerrainBuilder
-from scn import trajectory_tools, factory
+from scn import trajectory_tools
+from scn.core import factory
 from scn.sectorizer import Sectorizer
 from material_tools.input import MaterialImporter
 from common import includes

@@ -1,6 +1,6 @@
 import bpy
 
-from scn.entity.node import NodeProperties
+from scn.core.entity.node import NodeProperties
 
 
 class ModelLightProperties(bpy.types.PropertyGroup):

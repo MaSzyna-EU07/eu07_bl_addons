@@ -1,6 +1,6 @@
 import bpy
 
-from scn.entity.node import NodeProperties
+from scn.core.entity.node import NodeProperties
 from . import callbacks
 
 import material_tools

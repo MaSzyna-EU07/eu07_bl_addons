@@ -1,5 +1,4 @@
 import bpy
-from bpy.props import PointerProperty, CollectionProperty, IntProperty
 
 from .output import SCNExporter
 from .input import  SCNImportOperator
@@ -17,8 +16,7 @@ from . import camera
 from . import tree_utils
 from . import memcell
 
-from . import entity
-from . import ui
+from . import core
 
 classes = (
     SCNImportOperator,
@@ -55,8 +53,7 @@ def menu_func_export(self, context):
 
 def register():
     sectorizer.register()
-    entity.register()
-    ui.register()
+    core.register()
 
     for c in classes:
         bpy.utils.register_class(c)
@@ -72,8 +69,7 @@ def register():
 
 def unregister():
     sectorizer.unregister()
-    entity.unregister()
-    ui.unregister()
+    core.unregister()
 
     for c in classes:
         bpy.utils.unregister_class(c)
