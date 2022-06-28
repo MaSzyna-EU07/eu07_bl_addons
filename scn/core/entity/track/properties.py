@@ -47,7 +47,8 @@ class TrackProperties(NodeProperties):
     sound_distance: bpy.props.FloatProperty(
         name="Sound distance",
         description="Distance for clatter sound",
-        default=-1,
+        default=0,
+        min=0,
         unit="LENGTH",
     )
 
