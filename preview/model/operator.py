@@ -2,15 +2,19 @@ import math
 import os
 import pathlib
 import subprocess
+import shutil
 
 import bpy
 
 import eu07_tools
 from animation_tools.output.eventize import eventize_object_animation
 from common import get_environment_path, get_viewport_camera_location, get_viewport_camera_rotation
-from preview.common import SCENERY_FILENAME, MODEL_FILENAME
+from preview.common import SCENERY_FILENAME, MODEL_FILENAME, SUBDIR_NAME
+
+from material_tools.utils import MaterialWrapper
 
 
+# TODO: Split this to shorter functions
 class EU07_OT_GameEnginePreviewModel(bpy.types.Operator):
     bl_idname = "eu07.model_preview"
     bl_label = "Preview model in MaSzyna"
@@ -20,11 +24,74 @@ class EU07_OT_GameEnginePreviewModel(bpy.types.Operator):
 
         root = get_environment_path()
 
+        scenery_subdir = pathlib.Path(root, "scenery", SUBDIR_NAME)
+        model_subdir = pathlib.Path(root, "models", SUBDIR_NAME)
+        tex_subdir = pathlib.Path(root, "textures", SUBDIR_NAME)
+
+        os.makedirs(scenery_subdir, exist_ok=True)
+        os.makedirs(model_subdir, exist_ok=True)
+
         original_frame = bpy.context.scene.frame_current
         bpy.context.scene.frame_current = bpy.context.scene.frame_start
 
-        model_outpath = str(pathlib.Path(root, "models", MODEL_FILENAME))
-        bpy.ops.export_scene.t3d(filepath=model_outpath, aggregate_includes=True, embed_skins=True, objects_range='VISIBLE')
+        model_outpath = str(pathlib.Path(root, "models", SUBDIR_NAME, MODEL_FILENAME))
+        bpy.ops.export_scene.t3d(
+            filepath=model_outpath,
+            aggregate_includes=True,
+            embed_skins=True,
+            objects_range='VISIBLE',
+            path_mode='FILENAME',
+            #use_generated_img_name=True
+        )
+
+# ----------------------------------------------------
+
+        shutil.rmtree(tex_subdir, ignore_errors=True)
+        os.makedirs(tex_subdir, exist_ok=True)
+
+        for obj in bpy.context.visible_objects:
+            if not obj.active_material:
+                break
+
+            #TODO: .mat support
+
+            wrapper = MaterialWrapper(obj.active_material)
+            diffuse = wrapper.get_diffusemap()
+
+            if not diffuse:
+                break
+
+            diffuse_filepath = pathlib.Path(bpy.path.abspath(diffuse.filepath))
+            dst = pathlib.Path(tex_subdir, diffuse_filepath.name)
+
+
+            if diffuse.packed_file:
+                data = diffuse.packed_file.data
+                with open(dst, "wb+") as outimage:
+                    outimage.write(data)
+            elif diffuse.source == 'GENERATED':
+                name = diffuse.name.replace(".", "_")
+                # TODO: Make it happen xD
+                #
+                # newimg = bpy.data.images.new(
+                #     f"{name}_forpreview",
+                #     width=diffuse.generated_width,
+                #     height=diffuse.generated_height
+                # )
+                #
+                # newimg.pixels = diffuse.pixels
+                # newimg.filepath_raw = str(dst / f"{name}.tga")
+                # newimg.file_format = 'TARGA'
+                # newimg.save()
+                #
+                # bpy.data.images.remove(newimg)
+
+            else:
+                try:
+                    dst.symlink_to(diffuse_filepath)
+                except FileExistsError:
+                    pass
+
 
         bpy.context.scene.frame_current = original_frame
 
@@ -32,7 +99,7 @@ class EU07_OT_GameEnginePreviewModel(bpy.types.Operator):
 
         node_model = eu07_tools.scn.create_element("node:model")
         node_model.name = "model_preview"
-        node_model.path = MODEL_FILENAME
+        node_model.path = str(pathlib.Path(SUBDIR_NAME, MODEL_FILENAME))
 
         if settings.lights:
             node_model.light_states = [float(state) for state in settings.lights.strip(" ").split(" ")]
@@ -84,7 +151,7 @@ class EU07_OT_GameEnginePreviewModel(bpy.types.Operator):
 
             scn_elements.append(track)
 
-        scn_path = pathlib.Path(root, "scenery", SCENERY_FILENAME)
+        scn_path = pathlib.Path(root, "scenery", SUBDIR_NAME, SCENERY_FILENAME)
         with open(scn_path, "w", encoding="windows-1250", newline="\r\n") as outfile:
             outfile.write("//$a\n")
             if settings.use_ground:
@@ -105,7 +172,7 @@ class EU07_OT_GameEnginePreviewModel(bpy.types.Operator):
         cwd = os.getcwd()
         os.chdir(root)
 
-        args = [*settings.executable_command.split(" "), "-s", SCENERY_FILENAME]
+        args = [*settings.executable_command.split(" "), "-s", pathlib.Path(SUBDIR_NAME, SCENERY_FILENAME)]
 
         subprocess.Popen(args)
 
