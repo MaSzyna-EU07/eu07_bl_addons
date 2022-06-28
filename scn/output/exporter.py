@@ -9,6 +9,13 @@ import eu07_tools
 from common.export_manager import ExportManager
 from common import utils
 
+import bpy
+import bmesh
+
+from collections.abc import Iterable
+
+from material_tools.utils import get_shortpath_from_material
+
 
 class SCNExporter(bpy.types.Operator, ExportHelper):
     bl_idname = "export_scene.scn"
@@ -53,7 +60,12 @@ class SCNExporter(bpy.types.Operator, ExportHelper):
             output = export_manager.get_output(obj.eu07_include_identifier)
 
             element = self._create_element_from_object(obj)
-            output.dump_element(element)
+
+            if isinstance(element, Iterable):
+                for el in element:
+                    output.dump_element(el)
+            else:
+                output.dump_element(element)
 
         # export_manager.master_buffer.write(firstinit.get_firstinit())
 
@@ -65,8 +77,50 @@ class SCNExporter(bpy.types.Operator, ExportHelper):
         element = None
         if "node:track" in obj.eu07_scn_entity_type:
             element = self._create_node_track(obj)
+        elif "node:triangles" in obj.eu07_scn_entity_type:
+            element = self._create_node_triangles(obj)
 
         return element
+
+
+    def _create_node_triangles(self, terrain_object):
+        depsgraph = bpy.context.evaluated_depsgraph_get()
+        obj_eval = terrain_object.evaluated_get(depsgraph)
+
+        mesh = bpy.data.meshes.new_from_object(obj_eval)
+        bm = bmesh.new()
+        bm.from_mesh(mesh)
+        bmesh.ops.triangulate(bm, faces=bm.faces)
+        bm.to_mesh(mesh)
+        bm.free()
+
+        uv_layer = mesh.uv_layers.active
+        if uv_layer:
+            uv_data = uv_layer.data[:]
+
+        mesh.validate_material_indices()
+        mesh.calc_normals_split()
+        for polygon in mesh.polygons:
+            node = eu07_tools.scn.create_element("node:triangles")
+
+            try:
+                material = mesh.materials[polygon.material_index]
+            except IndexError:
+                pass
+            else:
+                node.map = get_shortpath_from_material(material)
+
+            for loop_index in polygon.loop_indices:
+                loop = mesh.loops[loop_index]
+
+                xyz = eu07_tools.utils.swizzle_coords(terrain_object.matrix_world @ mesh.vertices[loop.vertex_index].co)
+                ijk = eu07_tools.utils.swizzle_coords(loop.normal)
+                uv = uv_data[loop_index].uv if uv_layer else [0, 0]
+
+                node.vertices.new((*xyz, *ijk, *uv))
+            yield node
+
+        bpy.data.meshes.remove(mesh)
 
     def _create_node_track(self, obj):
         track = eu07_tools.scn.create_element("node:track")
