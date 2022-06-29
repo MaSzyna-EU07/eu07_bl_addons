@@ -31,22 +31,10 @@ def get_shortpath_from_material(material):
         wrapper = MaterialWrapper(material)
         image = wrapper.get_diffusemap()
         if image:
-            return eu07_tools.utils.shorten_asset_path(image.filepath)
-        else:
-            return "none"
-
-
-def get_filename_from_material(material):
-    if material is None:
-        return "none"
-
-    if material.eu07_properties.is_imported:
-        return str(pathlib.Path(material.eu07_properties.source_path).with_suffix("").stem)
-    else:
-        wrapper = MaterialWrapper(material)
-        image = wrapper.get_diffusemap()
-        if image:
-            return pathlib.Path(image.filepath).stem
+            try:
+                return eu07_tools.utils.shorten_asset_path(image.filepath)
+            except ValueError:
+                return str(pathlib.Path(image.filepath).stem)
         else:
             return "none"
 

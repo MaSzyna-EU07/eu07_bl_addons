@@ -36,7 +36,6 @@ class EU07_OT_GameEnginePreviewModel(bpy.types.Operator):
             aggregate_includes=True,
             embed_skins=True,
             objects_range='VISIBLE',
-            path_mode='FILENAME',
             #use_generated_img_name=True
         )
 
