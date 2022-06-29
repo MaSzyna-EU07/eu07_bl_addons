@@ -45,6 +45,20 @@ class EU07_OT_ExportT3D(bpy.types.Operator, ExportHelper):
         description="Remove .00x suffixes from object names",
     )
 
+    path_mode: bpy.props.EnumProperty(
+        name="Path mode",
+        items=[
+            ("FILENAME", "File name", "Write only file name"),
+            ("RELATIVE_ROOT", "Relative to root", "Write file path relative to root")
+        ],
+        default="RELATIVE_ROOT"
+    )
+
+    use_generated_img_name: bpy.props.BoolProperty(
+        default=False,
+        options={'HIDDEN'}
+    )
+
     def execute(self, context):
         exporter = T3DExporter()
         exporter.objects_range = self.objects_range
@@ -52,6 +66,8 @@ class EU07_OT_ExportT3D(bpy.types.Operator, ExportHelper):
         exporter.aggregate_includes = self.aggregate_includes
         exporter.embed_skins = self.embed_skins
         exporter.remove_name_suffixes = self.remove_name_suffixes
+        exporter.path_mode = self.path_mode
+        exporter.use_generated_img_name = self.use_generated_img_name
 
         exporter.export_to_file(self.filepath)
 
