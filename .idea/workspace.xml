@@ -3,6 +3,11 @@
   <component name="ChangeListManager">
     <list default="true" id="e0b16479-e3a7-48fe-9202-654047234a47" name="Default Changelist" comment="meshes without geometry are imported as empties">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/eu07_bl_addons.zip" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/eu07_tools" beforeDir="false" afterPath="$PROJECT_DIR$/eu07_tools" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/eu07_tools/utils/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/eu07_tools/utils/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/material_tools/utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/material_tools/utils.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/preview/common.py" beforeDir="false" afterPath="$PROJECT_DIR$/preview/common.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/t3d/output/exporter.py" beforeDir="false" afterPath="$PROJECT_DIR$/t3d/output/exporter.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />

@@ -35,6 +35,8 @@ def transfer_external_textures(tex_subdir):
         diffuse_filepath = pathlib.Path(bpy.path.abspath(diffuse.filepath))
         dst = pathlib.Path(tex_subdir, diffuse_filepath.name)
 
+        print(f"Symlink: {diffuse_filepath}\n Destination: {dst}")
+
         if diffuse.packed_file:
             data = diffuse.packed_file.data
             with open(dst, "wb+") as outimage:

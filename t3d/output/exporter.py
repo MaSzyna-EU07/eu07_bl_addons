@@ -56,7 +56,7 @@ class T3DExporter:
 
         # HACK: To make external-environment export possible, we need to do this...
         try:
-            environment_path = get_environment_path(),
+            environment_path = get_environment_path()
         except ValueError:
             environment_path = pathlib.Path(filepath).parent
 
