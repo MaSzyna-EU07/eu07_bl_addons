@@ -1,3 +1,5 @@
+import pathlib
+
 import bpy
 
 import eu07_tools
@@ -52,7 +54,13 @@ class T3DExporter:
             if output:
                 output.dump_element(submodel)
 
-        export_manager.flush_buffers_to_files(get_environment_path(), filepath)
+        # HACK: To make external-environment export possible, we need to do this...
+        try:
+            environment_path = get_environment_path(),
+        except ValueError:
+            environment_path = pathlib.Path(filepath).parent
+
+        export_manager.flush_buffers_to_files(environment_path, filepath)
 
     def _create_submodel_to_export(self, obj):
         builder = output_builders.get_builder(obj)
