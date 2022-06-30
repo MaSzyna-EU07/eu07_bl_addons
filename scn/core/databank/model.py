@@ -64,6 +64,16 @@ class ModelBank(bpy.types.PropertyGroup):
         return model
 
 
+    def get_by_relpath(self, relpath, load_if_missing=False):
+        for model in self.models:
+            if model.relpath == relpath:
+                return model
+
+        if load_if_missing:
+            return self.load_from_relpath(relpath)
+
+        return None
+
 classes = (
     Model,
     ModelBank

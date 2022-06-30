@@ -1,5 +1,6 @@
 import bpy
 
+from . import callbacks
 from scn.core.entity.node import NodeProperties
 
 
@@ -20,30 +21,21 @@ class ModelLightColorProperties(bpy.types.PropertyGroup):
 
 
 class ModelProperties(NodeProperties):
-    name: bpy.props.StringProperty(
-        name="Name",
-        default="model",
-        get=None,
-        set=None,
-    )
-
     location: bpy.props.FloatVectorProperty(
         name="Location",
-        get=None,
-        set=None,
+        get=callbacks.get_location,
+        set=callbacks.set_location,
     )
 
     rotation: bpy.props.FloatVectorProperty(
         name="Rotation",
-        get=None,
-        set=None,
+        get=callbacks.get_rotation,
+        set=callbacks.set_rotation,
     )
 
     model_path: bpy.props.StringProperty(
         name="Asset path",
-        get=None,
-        set=None,
-        update=None,
+        update=callbacks.update_geometry,
         subtype="FILE_PATH"
     )
 
@@ -70,6 +62,7 @@ class ModelProperties(NodeProperties):
     )
 
 
+
 classes = (
     ModelLightProperties,
     ModelLightColorProperties,
@@ -81,9 +74,11 @@ def register():
     for cls in classes:
         bpy.utils.register_class(cls)
 
-    bpy.types.Object.eu07_model = bpy.props.PointerProperty(type=ModelProperties)
+    bpy.types.Object.eu07_scn_model = bpy.props.PointerProperty(type=ModelProperties)
 
 
 def unregister():
     for cls in classes:
         bpy.utils.register_class(cls)
+
+    del bpy.types.Object.eu07_scn_model
