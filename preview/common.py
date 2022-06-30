@@ -91,3 +91,5 @@ def run_preview_command(root, command):
 
     subprocess.Popen(args)
 
+    os.chdir(cwd)
+

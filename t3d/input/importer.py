@@ -16,7 +16,8 @@ class T3DImporter:
         self.import_stars = True
         self.asset_searcher = asset_searcher
         self.include_identifier = includes.MASTER_IDENTIFIER
-        self.link_objects_adhoc = True
+        self.join_into_one = False
+        self.import_lod = True
 
     def import_from_filepath(self, filepath):
         with open(filepath, "r", encoding="latin-1") as file:
@@ -29,8 +30,16 @@ class T3DImporter:
     def import_from_elements(self, elements):
         objects = []
 
+        if self.join_into_one:
+            self.import_spots = False
+            self.import_stars = False
+            self.import_lod = False
+
         for element in elements:
             if element.element_type == "submodel":
+                if not self.import_lod and element.min_distance > 0:
+                    continue
+
                 obj = self.import_from_submodel_element(element)
 
                 if obj:
@@ -39,6 +48,20 @@ class T3DImporter:
             elif element.element_type == "include":
                 included_objects = self.import_from_include_element(element)
                 objects.extend(included_objects)
+
+        if self.join_into_one and objects:
+            c = {}
+            c["object"] = c["active_object"] = objects[0]
+            c["selected_objects"] = c["selected_editable_objects"] = objects
+
+            meshes_to_remove = [o.data for o in c["selected_objects"] if o is not c["object"]]
+
+            bpy.ops.object.join(c)
+
+            for m in meshes_to_remove:
+                bpy.data.meshes.remove(m)
+
+            return [c["object"]]
 
         return objects
 
@@ -50,7 +73,7 @@ class T3DImporter:
         ):
             return None
 
-        builder = input_builders.get_builder(element)
+        builder = input_builders.get_builder(element, banan_as_mesh=self.join_into_one)
 
         builder.create_submodel(element.name)
         builder.set_parent(element.parent_name)
@@ -85,8 +108,7 @@ class T3DImporter:
         obj = builder.obj
         obj.eu07_include_identifier = self.include_identifier
 
-        if self.link_objects_adhoc:
-            bpy.context.scene.collection.objects.link(obj)
+        bpy.context.scene.collection.objects.link(obj)
 
         return obj
 

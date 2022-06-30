@@ -5,10 +5,9 @@ import subprocess
 
 import bpy
 
+from common import get_environment_path
+from preview.common import SCENERY_FILENAME, create_camera_from_viewport, run_preview_command, SUBDIR_NAME
 import eu07_tools
-from animation_tools.output.eventize import eventize_object_animation
-from common import get_environment_path, get_viewport_camera_location, get_viewport_camera_rotation
-from preview.common import SCENERY_FILENAME, MODEL_FILENAME
 
 
 class EU07_OT_GameEnginePreviewScenery(bpy.types.Operator):
@@ -19,33 +18,16 @@ class EU07_OT_GameEnginePreviewScenery(bpy.types.Operator):
         settings = bpy.context.scene.eu07_scenery_preview
 
         root = get_environment_path()
+        scenery_subdir = pathlib.Path(root, "scenery", SUBDIR_NAME)
 
-        scenery_outpath = str(pathlib.Path(root, "scenery", SCENERY_FILENAME))
+        scenery_outpath = str(pathlib.Path(scenery_subdir, SCENERY_FILENAME))
         bpy.ops.export_scene.scn(filepath=scenery_outpath)
 
-        camera = eu07_tools.scn.create_element("camera")
+        with open(scenery_outpath, encoding="windows-1250", mode="a") as outfile:
+            camera = create_camera_from_viewport()
+            eu07_tools.scn.dump([camera], outfile)
 
-        camera.location = eu07_tools.utils.swizzle_coords(get_viewport_camera_location())
-
-        camera_rotation = get_viewport_camera_rotation()
-        degrees = [math.degrees(x) for x in camera_rotation]
-        swizzled = [
-            degrees[1],
-            degrees[2] + 90,
-            degrees[0]
-        ]
-
-        camera.rotation = swizzled
-
-
-        cwd = os.getcwd()
-        os.chdir(root)
-
-        args = [*settings.executable_command.split(" "), "-s", SCENERY_FILENAME]
-
-        subprocess.Popen(args)
-
-        os.chdir(cwd)
+        run_preview_command(root, settings.executable_command)
 
         return {'FINISHED'}
 

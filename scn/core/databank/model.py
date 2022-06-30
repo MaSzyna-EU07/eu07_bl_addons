@@ -8,6 +8,7 @@ import eu07_tools
 from e3d.input import E3DImporter
 from t3d.input import T3DImporter
 
+
 class Model(bpy.types.PropertyGroup):
     relpath: bpy.props.StringProperty()
 
@@ -34,8 +35,36 @@ class ModelBank(bpy.types.PropertyGroup):
             importer.load_included_objects = True
             importer.import_stars = False
             importer.import_spots = False
-            importer.join_to_one_mesh = True
+            importer.join_into_one = True
+            importer.import_lod = False
         else:
             pass
 
+        objects = importer.import_from_filepath(fullpath)
+        if objects:
+            model = self.models.add()
+            model.relpath = relpath
+            model.mesh = objects[0].data
+            model.mesh.name = relpath
 
+            objects[0].data.use_fake_user = True
+            bpy.data.objects.remove(objects[0])
+
+
+classes = (
+    Model,
+    ModelBank
+)
+
+
+def register():
+    for cls in classes:
+        bpy.utils.register_class(cls)
+
+    bpy.types.Scene.eu07_scn_model_bank = bpy.props.PointerProperty(type=ModelBank)
+
+def unregister():
+    for cls in classes:
+        bpy.utils.unregister_class(cls)
+
+    del bpy.types.Scene.eu07_scn_model_bank

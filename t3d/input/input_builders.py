@@ -13,13 +13,13 @@ from material_tools.utils import get_qualified_material_name
 from material_tools.wrapper import MaterialWrapper
 
 
-def get_builder(element):
+def get_builder(element, banan_as_mesh=False):
     if element is None:
         return None
 
     if element.type == 'Mesh':
         cls = MeshInputBuilder
-        if element.geometry.is_empty:
+        if element.geometry.is_empty and not banan_as_mesh:
             cls = BananMeshInputBuilder
     elif element.type == 'FreeSpotLight':
         cls = FreeSpotLightInputBuilder
