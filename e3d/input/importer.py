@@ -7,6 +7,8 @@ from t3d.input import input_builders
 
 import mathutils
 
+from t3d.utils import join_meshes_into_one
+
 
 class E3DImporter:
     def __init__(self, asset_searcher):
@@ -14,6 +16,8 @@ class E3DImporter:
         self.import_spots = True
         self.import_stars = True
         self.asset_searcher = asset_searcher
+        self.join_into_one = False
+        self.import_lod = True
 
     def import_from_filepath(self, filepath):
         with open(filepath, "rb") as file:
@@ -26,11 +30,33 @@ class E3DImporter:
     def import_from_model(self, model):
         objects = []
 
+        if self.join_into_one:
+            self.import_spots = False
+            self.import_stars = False
+            self.import_lod = False
+
         for submodel in model.submodels:
+            if not self.import_lod and submodel.min_distance > 0:
+                continue
+
             obj = self.import_from_submodel_element(submodel)
 
             if obj:
                 objects.append(obj)
+
+        if self.join_into_one and objects:
+            combined = join_meshes_into_one(objects)
+
+            correction_matrix = (
+                mathutils.Matrix.Rotation(math.radians(-90), 4, 'X') @
+                mathutils.Matrix.Rotation(math.radians(180), 4, 'Z')
+            )
+
+            for vert in combined.data.vertices:
+                vert.co = vert.co @ correction_matrix
+
+
+            return [combined]
 
         return objects
 
@@ -42,7 +68,7 @@ class E3DImporter:
         ):
             return None
 
-        builder = input_builders.get_builder(submodel)
+        builder = input_builders.get_builder(submodel, self.join_into_one)
 
         builder.create_submodel(submodel.name)
         builder.set_parent(submodel.parent_name)

@@ -28,8 +28,14 @@ class ModelBank(bpy.types.PropertyGroup):
 
         fullpath = asset_searcher.models.find(relpath)
 
+        importer = None
         if fullpath.endswith(".e3d"):
             importer = E3DImporter(asset_searcher)
+            importer.import_stars = False
+            importer.import_spots = False
+            importer.join_into_one = True
+            importer.import_lod = False
+
         elif fullpath.endswith(".t3d"):
             importer = T3DImporter(asset_searcher)
             importer.load_included_objects = True
@@ -40,15 +46,22 @@ class ModelBank(bpy.types.PropertyGroup):
         else:
             pass
 
+        if importer is None:
+            return
+
         objects = importer.import_from_filepath(fullpath)
+
         if objects:
             model = self.models.add()
             model.relpath = relpath
+            model.name = relpath
             model.mesh = objects[0].data
             model.mesh.name = relpath
 
             objects[0].data.use_fake_user = True
             bpy.data.objects.remove(objects[0])
+
+        return model
 
 
 classes = (
