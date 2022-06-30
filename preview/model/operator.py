@@ -10,7 +10,6 @@ from preview.common import SCENERY_FILENAME, MODEL_FILENAME, SUBDIR_NAME, transf
     create_camera_from_viewport, run_preview_command
 
 
-# TODO: Split this to shorter functions
 class EU07_OT_GameEnginePreviewModel(bpy.types.Operator):
     bl_idname = "eu07.model_preview"
     bl_label = "Preview model in MaSzyna"
@@ -104,11 +103,10 @@ def create_node_model(lights, transition, angles):
     node_model.rotation = eu07_tools.utils.swizzle_coords(angles)
 
     return node_model
-        args = [*settings.executable_command.split(" "), "-s", pathlib.Path(SUBDIR_NAME, SCENERY_FILENAME)]
-=======
+
+
 def create_animation_elements():
     elements = []
->>>>>>> master
 
     launcher = eu07_tools.scn.create_element("node:eventlauncher")
     launcher.key = "A"
