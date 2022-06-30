@@ -79,6 +79,8 @@ class SCNExporter(bpy.types.Operator, ExportHelper):
             element = self._create_node_track(obj)
         elif "node:triangles" in obj.eu07_scn_entity_type:
             element = self._create_node_triangles(obj)
+        elif "node:model" in obj.eu07_scn_entity_type:
+            element = self._create_node_model(obj)
 
         return element
 
@@ -195,3 +197,19 @@ class SCNExporter(bpy.types.Operator, ExportHelper):
 
         return track
 
+
+    def _create_node_model(self, obj):
+        model = eu07_tools.scn.create_element("node:model")
+
+        mp = obj.eu07_scn_model
+
+        model.name = mp.name
+        model.location = mp.location
+        model.location.swizzle()
+        model.rotation = mp.rotation
+        model.rotation.swizzle()
+        model.path = mp.model_path
+        # TODO: Lights, light states, replacableskins
+        model.notransition = mp.notransition
+
+        return model
