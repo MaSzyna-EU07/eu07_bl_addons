@@ -5,7 +5,7 @@ import bmesh
 import bpy
 
 import eu07_tools
-from material_tools.utils import get_shortpath_from_material, get_filename_from_material
+from material_tools.utils import get_shortpath_from_material
 from material_tools.wrapper import MaterialWrapper
 from common.utils import remove_name_suffix
 
@@ -100,7 +100,7 @@ class MeshOutputBuilder(SubmodelOutputBuilder):
                 if wrapper.get_diffusemap() is not None:
                     self.submodel.opacity = wrapper.get_opacity()
 
-    def set_map(self, embed_skins=False, path_mode="RELATIVE_ROOT", use_generated_img_name=False):
+    def set_map(self, embed_skins=False, use_generated_img_name=False):
         mtl = self.obj.active_material
 
         is_replacable = self.obj.t3d_properties.replacableskin_id != "None"
@@ -117,10 +117,7 @@ class MeshOutputBuilder(SubmodelOutputBuilder):
             self.submodel.map = self.obj.t3d_properties.replacableskin_id
             return
 
-        if path_mode == "RELATIVE_ROOT":
-            self.submodel.map = get_shortpath_from_material(mtl)
-        elif path_mode == "FILENAME":
-            self.submodel.map = get_filename_from_material(mtl)
+        self.submodel.map = get_shortpath_from_material(mtl)
 
     def set_geometry(self, apply_modifiers):
         mesh = None
@@ -191,7 +188,7 @@ class BananMeshOutputBuilder(MeshOutputBuilder):
         super().__init__(obj)
         self.submodel = eu07_tools.t3d.create_submodel("Mesh", obj.name)
 
-    def set_map(self, embed_skins=False, path_mode="RELATIVE_ROOT", use_generated_img_name=False):
+    def set_map(self, embed_skins=False, use_generated_img_name=False):
         self.submodel.map = "none"
 
     def set_geometry(self, apply_modifiers):

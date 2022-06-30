@@ -1,3 +1,5 @@
+import pathlib
+
 import bpy
 
 import eu07_tools
@@ -15,7 +17,6 @@ class T3DExporter:
         self.aggregate_includes = False
         self.embed_skins = False
         self.remove_name_suffixes = False
-        self.path_mode = "RELATIVE_ROOT"
         self.use_generated_img_name = False
 
     def export_to_file(self, filepath):
@@ -53,7 +54,13 @@ class T3DExporter:
             if output:
                 output.dump_element(submodel)
 
-        export_manager.flush_buffers_to_files(get_environment_path(), filepath)
+        # HACK: To make external-environment export possible, we need to do this...
+        try:
+            environment_path = get_environment_path()
+        except ValueError:
+            environment_path = pathlib.Path(filepath).parent
+
+        export_manager.flush_buffers_to_files(environment_path, filepath)
 
     def _create_submodel_to_export(self, obj):
         builder = output_builders.get_builder(obj)
@@ -77,7 +84,7 @@ class T3DExporter:
             builder.set_wire()
             builder.set_wire_size()
             builder.set_opacity()
-            builder.set_map(self.embed_skins, self.path_mode, self.use_generated_img_name)
+            builder.set_map(self.embed_skins, self.use_generated_img_name)
             builder.set_geometry(self.apply_modifiers)
         elif submodel_type == "FreeSpotLight":
             builder.set_near_atten_start()
