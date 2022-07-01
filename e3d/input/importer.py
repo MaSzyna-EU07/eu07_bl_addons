@@ -1,4 +1,5 @@
 import math
+import pathlib
 
 import bpy
 import eu07_tools
@@ -20,8 +21,15 @@ class E3DImporter:
         self.import_lod = True
 
     def import_from_filepath(self, filepath):
+        original_basedir = self.asset_searcher.basedir
+        self.asset_searcher.basedir = pathlib.Path(filepath).parent
+
         with open(filepath, "rb") as file:
             return self.import_from_file(file)
+
+        self.asset_searcher.basedir = original_basedir
+
+        return imported
 
     def import_from_file(self, file):
         model = eu07_tools.e3d.load(file)

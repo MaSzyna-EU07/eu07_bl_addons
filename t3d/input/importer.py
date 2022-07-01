@@ -22,8 +22,15 @@ class T3DImporter:
         self.import_lod = True
 
     def import_from_filepath(self, filepath):
+        original_basedir = self.asset_searcher.basedir
+        self.asset_searcher.basedir = pathlib.Path(filepath).parent
+
         with open(filepath, "r", encoding="latin-1") as file:
-            return self.import_from_file(file)
+            imported = self.import_from_file(file)
+
+        self.asset_searcher.basedir = original_basedir
+
+        return imported
 
     def import_from_file(self, file):
         elements = eu07_tools.t3d.load(file)
