@@ -28,10 +28,15 @@ class KeyframeDataStorage:
     def fill_from_action(self, action):
         fps = bpy.context.scene.render.fps
 
+        frames_range = range(bpy.context.scene.frame_start, bpy.context.scene.frame_end + 1)
+
         for fcurve in action.fcurves:
             delays = [kf.co[0] / fps for kf in fcurve.keyframe_points]
 
             for kf_idx, kf in enumerate(fcurve.keyframe_points):
+                if kf.co[0] not in frames_range:
+                    continue
+
                 delay = delays[kf_idx]
                 try:
                     next_delay = delays[kf_idx + 1]
@@ -40,10 +45,8 @@ class KeyframeDataStorage:
                 else:
                     time_to_next = next_delay - delay
 
-
                 vector = mathutils.Vector()
                 vector[fcurve.array_index] = kf.co[1]
-
 
                 kf_data = KeyframeData(fcurve.data_path, delay, time_to_next, vector)
                 self._store(kf_data)
@@ -83,6 +86,7 @@ def eventize_object_animation(object, model_name, name_prefix=""):
         prev_data = None
 
         for kf_index, kf_data in enumerate(keyframe_group):
+
             if prev_data is None:
                 prev_data = kf_data
                 continue
