@@ -2,7 +2,6 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="e0b16479-e3a7-48fe-9202-654047234a47" name="Default Changelist" comment="meshes without geometry are imported as empties">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/animation_tools/output/eventize.py" beforeDir="false" afterPath="$PROJECT_DIR$/animation_tools/output/eventize.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />

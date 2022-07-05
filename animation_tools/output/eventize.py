@@ -48,6 +48,9 @@ class KeyframeDataStorage:
                 vector = mathutils.Vector()
                 vector[fcurve.array_index] = kf.co[1]
 
+                if fcurve.data_path == "rotation_euler":
+                    vector = mathutils.Vector([math.degrees(x) for x in vector])
+
                 kf_data = KeyframeData(fcurve.data_path, delay, time_to_next, vector)
                 self._store(kf_data)
 
@@ -91,9 +94,6 @@ def eventize_object_animation(object, model_name, name_prefix=""):
                 prev_data = kf_data
                 continue
 
-            if kf_data.animated_property == "rotation_euler":
-                kf_data.vector = mathutils.Vector([math.degrees(x) for x in kf_data.vector])
-
             event = eu07_tools.scn.create_element("event:animation")
             event.delay = prev_data.delay
             event.anim_type = "translate" if kf_data.animated_property == "location" else "rotate"
@@ -102,7 +102,7 @@ def eventize_object_animation(object, model_name, name_prefix=""):
             event.model_name = model_name
             event.submodel_name = object.name
             event.speed = kf_data.vector.magnitude / prev_data.time_to_next
-            event.vector = kf_data.vector
+            event.vector = kf_data.vector - prev_data.vector
 
             prev_data = kf_data
 
