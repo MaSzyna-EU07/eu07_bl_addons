@@ -3,6 +3,8 @@ import mathutils
 
 import bpy
 
+import eu07_tools
+
 
 def update_geometry(self, context):
     obj = self.id_data

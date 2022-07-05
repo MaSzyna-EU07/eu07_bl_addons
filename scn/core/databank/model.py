@@ -9,6 +9,7 @@ from e3d.input import E3DImporter
 from t3d.input import T3DImporter
 
 
+
 class Model(bpy.types.PropertyGroup):
     relpath: bpy.props.StringProperty()
 
@@ -62,6 +63,7 @@ class ModelBank(bpy.types.PropertyGroup):
             bpy.data.objects.remove(objects[0])
 
         return model
+
 
 
     def get_by_relpath(self, relpath, load_if_missing=False):
