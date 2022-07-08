@@ -25,12 +25,23 @@ class TrackNormalGeometryManager(GeometryManager):
 
     # TODO: This is problematic while duplicating curves - geometry container reference is shared...
     def get(self, entity):
-        return entity.eu07_track.geometry_container.data if entity.eu07_track.geometry_container else self.create(entity)
+        container = self.get_container_from(entity)
+        return container.data if container else self.create(entity)
 
     def get_container_from(self, entity, default=None):
-        return entity.eu07_track.geometry_container if entity.eu07_track.geometry_container else default
+        for obj in entity.children:
+            if "TrackGeometry" in obj.name:
+                return obj
 
     def set(self, entity, geometry):
+        # TODO: Move limit scale to better place
+        limit_scale = entity.constraints.new("LIMIT_SCALE")
+        limit_scale.use_max_x, limit_scale.use_max_y, limit_scale.use_max_z = True, True, True
+        limit_scale.use_min_x, limit_scale.use_min_y, limit_scale.use_min_z = True, True, True
+        limit_scale.use_transform_limit = True
+        limit_scale.max_x, limit_scale.max_y, limit_scale.max_z = 1, 1, 1
+        limit_scale.min_x, limit_scale.min_y, limit_scale.min_z = 1, 1, 1
+
         geometry_container = self.get_container_from(entity)
         if geometry_container:
             old_geometry = geometry_container.data
@@ -38,8 +49,9 @@ class TrackNormalGeometryManager(GeometryManager):
             self._purge_if_needed(old_geometry)
         else:
             geometry_container = bpy.data.objects.new(f"TrackGeometry({entity.name})", geometry)
+
             bpy.context.scene.collection.objects.link(geometry_container)
-            entity.eu07_track.geometry_container = geometry_container
+            geometry_container.parent = entity
 
             curve_mod = geometry_container.modifiers.new('Curve', type='CURVE')
             curve_mod.object = entity
@@ -48,8 +60,15 @@ class TrackNormalGeometryManager(GeometryManager):
             entity.data.use_stretch = True
             entity.data.use_deform_bounds = True
 
-        geometry_container.location = entity.location
-        geometry_container.hide_select = True
+            #geometry_container.hide_select = True
+
+            copy_location = geometry_container.constraints.new("COPY_LOCATION")
+            copy_location.target = entity
+            copy_location.use_x, copy_location.use_y, copy_location.use_z = True, True, True
+
+            copy_rotation = geometry_container.constraints.new("COPY_ROTATION")
+            copy_rotation.target = entity
+            copy_rotation.use_x, copy_rotation.use_y, copy_rotation.use_z = True, True, True
 
     def _purge_if_needed(self, geometry):
         if geometry:

@@ -153,7 +153,7 @@ def get_pX(obj, x):
 
     if validate.is_curve(obj):
         try:
-            return obj.data.splines[spline_idx].bezier_points[point_idx].co
+            return obj.matrix_world @ obj.data.splines[spline_idx].bezier_points[point_idx].co
         except:
             pass
 
@@ -196,9 +196,9 @@ def get_cvX(obj, x):
             return mathutils.Vector((0, 0, 0))
 
         if x % 2 == 0:
-            return point.handle_left
+            return obj.matrix_world @ point.handle_left
         else:
-            return point.handle_right
+            return obj.matrix_world @ point.handle_right
 
 
 def set_cvX(obj, x, value):

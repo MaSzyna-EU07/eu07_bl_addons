@@ -321,10 +321,6 @@ class TrackProperties(NodeProperties):
         type=bpy.types.Object
     )
 
-    geometry_container: bpy.props.PointerProperty(
-        type=bpy.types.Object
-    )
-
     def get_cv1_local(self):
         return callbacks.get_cvX_local(self.id_data, 1)
 
