@@ -16,7 +16,7 @@ class NodeProperties(bpy.types.PropertyGroup):
 
     min_distance: bpy.props.FloatProperty(
         name="Min Distance",
-        default=-1,
+        default=0,
         unit="LENGTH",
     )
 

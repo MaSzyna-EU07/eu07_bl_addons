@@ -2,6 +2,7 @@ import bpy
 
 from . import track
 from . import model
+from . import lines
 
 class SCN_PT_entity(bpy.types.Panel):
     bl_idname = "SCN_PT_entity"
@@ -27,3 +28,5 @@ class SCN_PT_entity(bpy.types.Panel):
             track.draw(context, self.layout)
         elif obj.eu07_scn_entity_type == "node:model":
             model.draw(context, self.layout)
+        elif obj.eu07_scn_entity_type == "node:lines":
+            lines.draw(context, self.layout)

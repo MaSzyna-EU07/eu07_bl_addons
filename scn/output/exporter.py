@@ -81,6 +81,8 @@ class SCNExporter(bpy.types.Operator, ExportHelper):
             element = self._create_node_triangles(obj)
         elif "node:model" in obj.eu07_scn_entity_type:
             element = self._create_node_model(obj)
+        elif "node:lines" in obj.eu07_scn_entity_type:
+            element = self._create_node_lines(obj)
 
         return element
 
@@ -204,6 +206,8 @@ class SCNExporter(bpy.types.Operator, ExportHelper):
         mp = obj.eu07_scn_model
 
         model.name = mp.name
+        model.max_distance = mp.max_distance
+        model.min_distance = mp.min_distance
         model.location = mp.location
         model.location.swizzle()
         model.rotation = mp.rotation
@@ -213,3 +217,27 @@ class SCNExporter(bpy.types.Operator, ExportHelper):
         model.notransition = mp.notransition
 
         return model
+
+    def _create_node_lines(self, obj):
+        lines = eu07_tools.scn.create_element("node:lines")
+
+        lp = obj.eu07_scn_lines
+
+        lines.name = lp.name
+        lines.max_distance = lp.max_distance
+        lines.min_distance = lp.min_distance
+        lines.thickness = lp.thickness * 100
+        lines.color = lp.color * 255
+
+        for spline in obj.data.splines:
+            first_index = 0
+            last_index = len(spline.bezier_points) - 1
+            for point_idx, point in enumerate(spline.bezier_points):
+                co = obj.matrix_world @ point.co
+                point1 = lines.points.new(co)
+                point1.swizzle()
+                if point_idx not in (first_index, last_index):
+                    point2 = lines.points.new(co)
+                    point2.swizzle()
+
+        return lines

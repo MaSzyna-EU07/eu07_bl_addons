@@ -3,6 +3,7 @@ import bpy
 from . import camera
 from . import track
 from . import model
+from . import lines
 from . import traction
 
 
@@ -11,6 +12,7 @@ def register():
     track.register()
     model.register()
     traction.register()
+    lines.register()
 
     bpy.types.Object.eu07_scn_entity_type = bpy.props.EnumProperty(
         name="Entity Type",
@@ -38,5 +40,6 @@ def unregister():
     track.unregister()
     model.unregister()
     traction.unregister()
+    lines.unregister()
 
 
