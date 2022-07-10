@@ -50,7 +50,7 @@ def draw(context, layout):
         row.operator("eu07.import_material", text="", icon="PLUS")
 
         row = layout.row()
-        row.prop(props, "geometry_params", text="Ballast geometry")
+        row.prop(props, "geometry_params", text="Ballast mesh_data")
 
     row = layout.row()
     row.prop(props, "p1", text="P1")

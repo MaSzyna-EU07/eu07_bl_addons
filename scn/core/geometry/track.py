@@ -1,3 +1,4 @@
+import abc
 import math
 
 import bpy
@@ -22,218 +23,279 @@ class TrackNormalGeometryManager(GeometryManager):
     def __init__(self):
         super().__init__()
         self.type = "node:track:normal"
+        self.prefix = "TrackGeometry"
 
-    # TODO: This is problematic while duplicating curves - geometry container reference is shared...
-    def get(self, entity):
-        container = self.get_container_from(entity)
-        return container.data if container else self.create(entity)
+    def get(self, obj):
+        container = self.get_container_from(obj)
+        return container.data if container else self.create(obj)
 
-    def get_container_from(self, entity, default=None):
-        for obj in entity.children:
-            if "TrackGeometry" in obj.name:
-                return obj
+    def get_container_from(self, obj, default=None):
+        for child in obj.children:
+            if "TrackGeometry" in child.name:
+                return child
 
-    def set(self, entity, geometry):
-        # TODO: Move limit scale to better place
-        limit_scale = entity.constraints.new("LIMIT_SCALE")
+    def set(self, obj, mesh_data):
+        # TODO: Move constrains setup to better place
+        limit_scale = obj.constraints.new("LIMIT_SCALE")
         limit_scale.use_max_x, limit_scale.use_max_y, limit_scale.use_max_z = True, True, True
         limit_scale.use_min_x, limit_scale.use_min_y, limit_scale.use_min_z = True, True, True
         limit_scale.use_transform_limit = True
         limit_scale.max_x, limit_scale.max_y, limit_scale.max_z = 1, 1, 1
         limit_scale.min_x, limit_scale.min_y, limit_scale.min_z = 1, 1, 1
 
-        geometry_container = self.get_container_from(entity)
+        geometry_container = self.get_container_from(obj)
         if geometry_container:
             old_geometry = geometry_container.data
-            geometry_container.data = geometry
+            geometry_container.data = mesh_data
             self._purge_if_needed(old_geometry)
         else:
-            geometry_container = bpy.data.objects.new(f"TrackGeometry({entity.name})", geometry)
+            geometry_container = bpy.data.objects.new(f"TrackGeometry({obj.name})", mesh_data)
 
             bpy.context.scene.collection.objects.link(geometry_container)
-            geometry_container.parent = entity
+            geometry_container.parent = obj
 
             curve_mod = geometry_container.modifiers.new('Curve', type='CURVE')
-            curve_mod.object = entity
+            curve_mod.object = obj
 
-            entity.data.dimensions = "3D"
-            entity.data.use_stretch = True
-            entity.data.use_deform_bounds = True
+            obj.data.dimensions = "3D"
+            obj.data.use_stretch = True
+            obj.data.use_deform_bounds = True
 
             #geometry_container.hide_select = True
 
             copy_location = geometry_container.constraints.new("COPY_LOCATION")
-            copy_location.target = entity
+            copy_location.target = obj
             copy_location.use_x, copy_location.use_y, copy_location.use_z = True, True, True
 
             copy_rotation = geometry_container.constraints.new("COPY_ROTATION")
-            copy_rotation.target = entity
+            copy_rotation.target = obj
             copy_rotation.use_x, copy_rotation.use_y, copy_rotation.use_z = True, True, True
+
+    def create(self, obj):
+        entity_props = obj.eu07_track
+
+        # TODO: Get profile from neighbours in case of transition
+        height1, side1, slope1 = entity_props.geometry_params
+        height2, side2, slope2 = entity_props.geometry_params
+
+        profile_p1 = TrapezoidProfile(height1, side1, slope1, entity_props.width, entity_props.p1_roll)
+        profile_p2 = TrapezoidProfile(height2, side2, slope2, entity_props.width, entity_props.p2_roll)
+
+        builder1 = CrossSectionBuilderNormal()
+        builder1.build_cross_section(profile_p1, x_offset=0)
+        builder1.build_uv(profile_p1, map_length=entity_props.map1_length, tex_ratio=1)
+        cross_section1 = builder1.finish()
+
+        builder2 = CrossSectionBuilderNormal()
+        builder2.build_cross_section(profile_p2, x_offset=entity_props.length)
+        builder2.build_uv(profile_p2, map_length=entity_props.map1_length, tex_ratio=1)
+        cross_section2 = builder2.finish()
+
+        mesh_data = bpy.data.meshes.new(f"{self.prefix}")
+        mesh_maker = MeshMaker(mesh_data, entity_props.length)
+        mesh_maker.extrude_between(cross_section1, cross_section2, material_index=1)
+        mesh_maker.finish()
+
+        return mesh_data
 
     def _purge_if_needed(self, geometry):
         if geometry:
             if geometry.users == 0:
                 bpy.data.meshes.remove(geometry)
 
-    def create(self, entity):
-        geometry = bpy.data.meshes.new(f"{self.prefix}")
+# TODO: ROLLFIX!
 
-        self.mesh = bmesh.new()
-        self.uv_layer = self.mesh.loops.layers.uv.new()
 
-        profile1 = self.create_profile(entity, entity.eu07_track.p1_roll)
-        # TODO: Guess why we need to negate yOffset?
-        profile2 = self.create_profile(entity, entity.eu07_track.p2_roll, -entity.eu07_track.length)
-        self.create_mesh(entity.eu07_track.length, profile1, profile2)
+class TrapezoidProfile:
+    def __init__(self, height, side, slope, width, roll):
+        self.height = height
+        self.side = side
+        self.slope = slope
+        self.width = width
+        self.roll = roll
 
-        #TODO: Why i must pass negative value of rolls? That's bad :(
-        if entity.eu07_track.material1:
-            right_rail1 = self.create_rail_profile(entity, -entity.eu07_track.p1_roll)
-            right_rail2 = self.create_rail_profile(entity, -entity.eu07_track.p2_roll, -entity.eu07_track.length)
-            self.create_mesh(entity.eu07_track.length, right_rail1, right_rail2, num_faces=len(right_rail1) - 1, material_index=0)
+    @property
+    def htw(self):
+        return self.width / 2
 
-            left_rail1 = self.create_rail_profile(entity, -entity.eu07_track.p1_roll, side=-1)
-            left_rail2 = self.create_rail_profile(entity, -entity.eu07_track.p2_roll, -entity.eu07_track.length, side=-1)
-            self.create_mesh(entity.eu07_track.length, left_rail1, left_rail2, num_faces=len(right_rail1) - 1, material_index=0)
+    @property
+    def outer_span(self):
+        return self.htw + self.side + self.slope
 
-        self.mesh.to_mesh(geometry)
-        self.mesh.free()
+    @property
+    def mid_span(self):
+        return self.htw + self.side
 
-        return geometry
+    @property
+    def sin(self):
+        return math.sin(math.radians(self.roll))
 
-    def create_mesh(self, length, profile1, profile2, fidelity=1, num_faces=4, material_index=1):
-        segment_length = 2 / fidelity
-        step = segment_length / length
-        num_segments = math.ceil(length / segment_length) + 1
+    @property
+    def cos(self):
+        return math.cos(math.radians(self.roll))
 
-        profiles = []
+    @property
+    def hypot(self):
+        return math.hypot([self.slope, self.height])
 
-        for i in range(num_segments):
-            profile_interpolated = self.interpolate_profiles(profile1, profile2, i * step)
-            profiles.append(profile_interpolated)
 
- 
-        for segment_index in range(num_segments-1):
-            p_verts = []
-            p_uvs = []
-            profileA, profileB = profiles[segment_index], profiles[segment_index+1]
-            for pointA, pointB in zip(profileA, profileB):
-                locA, nrmA, uvA = pointA[:3], pointA[3:6], pointA[6:8]
-                locB, nrmB, uvB = pointB[:3], pointB[3:6], pointB[6:8]
+class CrossSectionBuilder(abc.ABC):
+    @abc.abstractmethod
+    def build_cross_section(self, profile, x_offset):
+        pass
 
-                print(locA)
-                p_verts.extend((
-                    self.mesh.verts.new(locA), 
-                    self.mesh.verts.new(locB)
-                ))
-                p_uvs.extend((uvA, uvB))
+    @abc.abstractmethod
+    def build_uv(self, profile, map_length, tex_ratio):
+        pass
 
-            self._make_faces(p_verts, p_uvs, material_index, num_faces)
 
-    def interpolate_profiles(self, profile1, profile2, x):
-        x = 1 if x > 1 else x
+class CrossSectionBuilderNormal(CrossSectionBuilder):
+    def __init__(self):
+        self.cs = CrossSection()
 
-        output = []
-
-        for vert1, vert2 in zip(profile1, profile2):
-            co1, co2 = mathutils.Vector(vert1[:3]), mathutils.Vector(vert2[:3])
-
-            co_out = co1.lerp(co2, x)
-
-            vert_data = [
-                *co_out,
-                0, 0, 1,
-                0, 0
-            ]
-
-            output.append(vert_data)
-
-        return output
-
-    def create_profile(self, entity, roll, xOffset=0):
-        width = entity.eu07_track.width
-        htw = width * 0.5
-        height, side, slope = entity.eu07_track.geometry_params
-        span = htw + side + slope
-        rail_height = 0.18 #TODO: Grab from profile
-        total_height = height + rail_height
-        med_y = htw + side
-
-        sin = math.sin(math.radians(roll))
-        cos = math.cos(math.radians(roll))
-
-        output = [
-            [
-                xOffset, -span, -total_height,
-                0, 0, 1,
-                0, 0,
-            ],
-            [
-                xOffset, -(med_y * cos), -med_y * sin - rail_height,
-                0, 0, 1,
-                0, 0
-            ],
-            [
-                xOffset, 0, -rail_height + 0.01,
-                0, 0, 1,
-                0, 0
-            ],
-            [
-                xOffset, med_y * cos, med_y * sin - rail_height,
-                0, 0, 1,
-                0, 0
-            ],
-            [
-                xOffset, span, -total_height,
-                0, 0, 1,
-                0, 0
-            ]
+    def build_cross_section(self, profile, x_offset):
+        self.cs.vertices = [
+            TrapezoidVertex(
+                [x_offset, -profile.outer_span, -profile.height],
+                [0, 0]
+            ),
+            TrapezoidVertex(
+                [x_offset, -(profile.mid_span * profile.cos), -profile.mid_span * profile.sin],
+                [0, 0]
+            ),
+            TrapezoidVertex(
+                [x_offset, 0, 0.01],
+                [0, 0]
+            ),
+            TrapezoidVertex(
+                [x_offset, profile.mid_span * profile.cos, profile.mid_span * profile.sin],
+                [0, 0]
+            ),
+            TrapezoidVertex(
+                [x_offset, profile.outer_span, -profile.height],
+                [0, 0]
+            ),
         ]
 
-        return output
+    def build_uv(self, profile, map_length, tex_ratio):
+        use_legacy_mapping = (map_length == 4)
 
-
-    def calc_ballast_uv(self, mapping_length, tex_ratio=1, xOffset=0):
-        if mapping_length == 4:
-            return [
+        if use_legacy_mapping:
+            uv_list = [
                 [0, 0],
                 [0.33, 0],
                 [0.5, 0],
                 [0.67, 0],
-                [1, 0]
+                [0.1, 0]
+            ]
+        else:
+            map_length_y = tex_ratio * map_length
+            u_med = (profile.htw + profile.side) / map_length_y if map_length_y > 0 else 0.25
+            u_outer = (profile.htw + profile.side + profile.hypot) / map_length_y if map_length_y > 0 else 0.5
+
+            uv_list = [
+                [0.5 - u_outer, 0],
+                [0.5 - u_med],
+                [0.5, 0],
+                [0.5 + u_med, 0],
+                [0.5 + u_outer, 0]
             ]
 
-        else:
-            # NOTE: This code is highly inspired by Track.cpp from EU07 source code
-            max = tex_ratio * mapping_length
+        for vertex, uv in zip(self.cs.vertices, uv_list):
+            vertex.uv = uv
 
-    def create_rail_profile(self, entity, roll, xOffset=0, side=1):
-        profile_bank = bpy.context.scene.eu07_rail_profile_bank
+    def finish(self):
+        return self.cs
 
-        profile_data = profile_bank.get(entity.eu07_track.railprofile)
-        if not profile_data:
-            profile_data = profile_bank.add_from_name(entity.eu07_track.railprofile)
 
-        htw = entity.eu07_track.width / 2
-        sin = math.sin(math.radians(roll))
-        cos = math.cos(math.radians(roll))
+class CrossSection:
+    def __init__(self):
+        self.vertices = []
 
-        output = []
+    @property
+    def num_verts(self):
+        return len(self.vertices)
 
-        for i, point in enumerate(profile_data.rail_points):
-
-            # TODO: Fix normals and UV
-            output.append(
-                [
-                    xOffset,
-                    (htw + point.location[0]) * side * cos + point.location[1] * sin,
-                    -(htw + point.location[0]) * side * sin + point.location[1] * cos,
-                    1,
-                    point.normal[0],
-                    point.normal[1],
-                    point.mapping,
-                    point.mapping
-                ]
+    def interpolate_locations(self, other, x):
+        new_cs = CrossSection()
+        for vertex, other_vertex in zip(self.vertices, other.vertices):
+            self.vertices.append(
+                vertex.location.lerp(other_vertex.location, x)
             )
 
-        return output
+        return new_cs
+
+
+class TrapezoidVertex:
+    def __init__(self, location, uv):
+        self.location = mathutils.Vector(location)
+        self.uv = mathutils.Vector(uv)
+
+
+class MeshMaker:
+    # TODO: Make it possible to extrude along the bezier - it will be needed for crossings and switches
+    def __init__(self, target_mesh, length, fidelity=4):
+        self._bm = bmesh.new()
+        self._target_mesh = target_mesh
+
+        self._length = length
+        self._fidelity = 4
+        self._segment_length = 2 / fidelity
+        self._step = self._segment_length / length
+        self._num_cross_sections = math.ceil(length / self._segment_length) + 1
+
+    def clear_mesh(self):
+        self._bm.clear()
+
+    def extrude_between(self, cs1, cs2, material_index=0):
+        extrusion = []
+
+        for cs_i in range(self._num_cross_sections):
+            offset = cs_i * self._step
+            t = offset / self._length
+            cs = cs1.interpolate_locations(cs2, t)
+            extrusion.append(cs)
+
+        # TODO: Manipulate UV to fix proportional mapping
+
+        self._make_geometry(extrusion, material_index)
+
+    def _make_geometry(self, cross_sections, material_index=0):
+        bm_verts = []
+        uvs = []
+
+        cs_size = cross_sections[0].num_verts
+        num_faces = cs_size - 1
+
+        for cs in cross_sections:
+            for cs_vert in cs.vertices:
+                bm_verts.append(self._bm.verts.new(cs_vert.location))
+                uvs.append(cs_vert.uv)
+
+        for cs_i in range(self._num_cross_sections - 1):
+            for face_idx in range(num_faces):
+                face_uvs = []
+                face_bmverts = []
+
+                vert_indices = [
+                    0 + face_idx,
+                    cs_size + face_idx,
+                    cs_size + face_idx + 1,
+                    1 + face_idx
+                ]
+
+                for idx in vert_indices:
+                    face_bmverts.append(bm_verts[idx])
+                    face_uvs.append(face_uvs[idx])
+
+                bm_face = self._bm.faces.new(face_bmverts)
+                bm_face.material_index = material_index
+
+                for vertex_index, loop in enumerate(bm_face.loops):
+                    loop[self.uv_layer].uv = face_uvs[vertex_index]
+
+    def finish(self):
+        self._bm.to_mesh(self._target_mesh)
+        self._bm.free()
+        return self._target_mesh
+

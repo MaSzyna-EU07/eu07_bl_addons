@@ -27,7 +27,7 @@ class SceneryImporter:
         pass
 
 #TODO: Material lookup
-#TODO: Prevent geometry from regeneration after each property update
+#TODO: Prevent mesh_data from regeneration after each property update
     def _import_track(self, track_element):
         track_entity = factory.create_entity(track_element.type, track_element.name)
         track_entity.width = track_element.width
