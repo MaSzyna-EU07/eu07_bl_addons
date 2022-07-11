@@ -104,8 +104,11 @@ class SCNExporter(bpy.types.Operator, ExportHelper):
 
         mesh.validate_material_indices()
         mesh.calc_normals_split()
-        for polygon in mesh.polygons:
+        for poly_index, polygon in enumerate(mesh.polygons):
             node = eu07_tools.scn.create_element("node:triangles")
+            node.name = f"{terrain_object.name}{poly_index}"
+            node.max_distance = terrain_object.eu07_scn_triangles.max_distance
+            node.min_distance = terrain_object.eu07_scn_triangles.min_distance
 
             try:
                 material = mesh.materials[polygon.material_index]

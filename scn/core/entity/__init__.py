@@ -5,6 +5,7 @@ from . import track
 from . import model
 from . import lines
 from . import traction
+from . import triangles
 
 
 def register():
@@ -13,6 +14,7 @@ def register():
     model.register()
     traction.register()
     lines.register()
+    triangles.register()
 
     bpy.types.Object.eu07_scn_entity_type = bpy.props.EnumProperty(
         name="Entity Type",
@@ -41,5 +43,6 @@ def unregister():
     model.unregister()
     traction.unregister()
     lines.unregister()
+    triangles.unregister()
 
 

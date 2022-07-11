@@ -3,6 +3,7 @@ import bpy
 from . import track
 from . import model
 from . import lines
+from . import triangles
 
 class SCN_PT_entity(bpy.types.Panel):
     bl_idname = "SCN_PT_entity"
@@ -30,3 +31,5 @@ class SCN_PT_entity(bpy.types.Panel):
             model.draw(context, self.layout)
         elif obj.eu07_scn_entity_type == "node:lines":
             lines.draw(context, self.layout)
+        elif obj.eu07_scn_entity_type == "node:triangles":
+            triangles.draw(context, self.layout)
