@@ -83,6 +83,8 @@ class SCNExporter(bpy.types.Operator, ExportHelper):
             element = self._create_node_model(obj)
         elif "node:lines" in obj.eu07_scn_entity_type:
             element = self._create_node_lines(obj)
+        elif "node:traction" in obj.eu07_scn_entity_type:
+            element = self._create_node_traction(obj)
 
         return element
 
@@ -202,7 +204,6 @@ class SCNExporter(bpy.types.Operator, ExportHelper):
 
         return track
 
-
     def _create_node_model(self, obj):
         model = eu07_tools.scn.create_element("node:model")
 
@@ -244,3 +245,41 @@ class SCNExporter(bpy.types.Operator, ExportHelper):
                     point2.swizzle()
 
         return lines
+
+    def _create_node_traction(self, obj):
+        tp = obj.eu07_scn_traction
+
+        traction = eu07_tools.scn.create_element("node:traction")
+
+        traction.name = tp.name
+        traction.max_distance = tp.max_distance
+        traction.min_distance = tp.min_distance
+        traction.powersource_name = tp.power_supply_name
+        traction.nominal_voltage = tp.nominal_voltage
+        traction.max_current = tp.max_current
+        traction.resistance = tp.resistivity
+        traction.wire_material_type = tp.material
+        traction.wire_thickness = tp.wire_thickness
+        traction.damage_flag = tp.damage_flag
+
+        traction.p1 = tp.p1
+        traction.p1.swizzle()
+
+        traction.p2 = tp.p2
+        traction.p2.swizzle()
+
+        traction.p3 = tp.p3
+        traction.p3.swizzle()
+
+        traction.p4 = tp.p4
+        traction.p4.swizzle()
+
+        traction.min_height = tp.min_height
+        traction.segment_length = tp.segment_length
+        traction.wires_type = tp.wires
+        traction.wire_offset = tp.wires_offset
+        traction.is_visible = (tp.visible == "vis")
+        traction.parallel_name = tp.parallel
+
+        return traction
+

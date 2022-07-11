@@ -102,7 +102,7 @@ def register():
     for cls in classes:
         bpy.utils.register_class(cls)
 
-    bpy.types.Object.eu07_traction = bpy.props.PointerProperty(type=TractionProperties)
+    bpy.types.Object.eu07_scn_traction = bpy.props.PointerProperty(type=TractionProperties)
 
 
 def unregister():
