@@ -154,23 +154,23 @@ class CrossSectionBuilderNormal(CrossSectionBuilder):
 
     def build_cross_section(self, profile, x_offset):
         self.cs.vertices = [
-            TrapezoidVertex(
+            CrossSectionVertex(
                 [x_offset, -profile.outer_span, -profile.height],
                 [0, 0]
             ),
-            TrapezoidVertex(
+            CrossSectionVertex(
                 [x_offset, -(profile.mid_span * profile.cos), -profile.mid_span * profile.sin],
                 [0, 0]
             ),
-            TrapezoidVertex(
+            CrossSectionVertex(
                 [x_offset, 0, 0.01],
                 [0, 0]
             ),
-            TrapezoidVertex(
+            CrossSectionVertex(
                 [x_offset, profile.mid_span * profile.cos, profile.mid_span * profile.sin],
                 [0, 0]
             ),
-            TrapezoidVertex(
+            CrossSectionVertex(
                 [x_offset, profile.outer_span, -profile.height],
                 [0, 0]
             ),
@@ -219,7 +219,7 @@ class CrossSection:
     def interpolate(self, other, x):
         new_cs = CrossSection()
         for self_vertex, other_vertex in zip(self.vertices, other.vertices):
-            new_vertex = TrapezoidVertex(
+            new_vertex = CrossSectionVertex(
                 self_vertex.location.lerp(other_vertex.location, x),
                 self_vertex.uv.lerp(other_vertex.uv, x)
             )
@@ -228,7 +228,7 @@ class CrossSection:
         return new_cs
 
 
-class TrapezoidVertex:
+class CrossSectionVertex:
     def __init__(self, location, uv):
         self._location = mathutils.Vector(location)
         self._uv = mathutils.Vector(uv)
@@ -321,4 +321,3 @@ class MeshMaker:
         self._bm.to_mesh(self._target_mesh)
         self._bm.free()
         return self._target_mesh
-

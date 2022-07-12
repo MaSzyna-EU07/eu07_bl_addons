@@ -1,4 +1,6 @@
 import math
+import pathlib
+
 import mathutils
 
 import bpy
@@ -14,6 +16,17 @@ def update_geometry(self, context):
         obj.data = model_geo.mesh
     else:
         obj.data = bpy.data.meshes.get("EmptyMesh", bpy.data.meshes.new("EmptyMesh"))
+
+
+def update_path(self, context):
+    obj = self.id_data
+
+    path = pathlib.Path(obj.eu07_scn_model.model_path).with_suffix("")
+    if path.is_absolute():
+        obj.eu07_scn_model.model_path = eu07_tools.utils.shorten_asset_path(path)
+        return
+
+    update_geometry(self, context)
 
 
 def get_location(self):

@@ -1,5 +1,7 @@
 import bpy
 
+from . import callbacks
+
 from scn.core.entity.node import NodeProperties
 
 class TractionProperties(NodeProperties):
@@ -43,22 +45,30 @@ class TractionProperties(NodeProperties):
 
     p1: bpy.props.FloatVectorProperty(
         name="P1",
-        size=3
+        size=3,
+        get=callbacks.get_p1,
+        set=callbacks.set_p1,
     )
 
     p2: bpy.props.FloatVectorProperty(
         name="P2",
-        size=3
+        size=3,
+        get=callbacks.get_p2,
+        set=callbacks.set_p2,
     )
 
     p3: bpy.props.FloatVectorProperty(
         name="P3",
-        size=3
+        size=3,
+        get=callbacks.get_p3,
+        set=callbacks.set_p3,
     )
 
     p4: bpy.props.FloatVectorProperty(
         "P4",
-        size=3
+        size=3,
+        get=callbacks.get_p4,
+        set=callbacks.set_p4,
     )
 
     min_height: bpy.props.FloatProperty(

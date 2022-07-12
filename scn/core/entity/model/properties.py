@@ -35,7 +35,7 @@ class ModelProperties(NodeProperties):
 
     model_path: bpy.props.StringProperty(
         name="Asset path",
-        update=callbacks.update_geometry,
+        update=callbacks.update_path,
         subtype="FILE_PATH"
     )
 
