@@ -217,8 +217,15 @@ class SCNExporter(bpy.types.Operator, ExportHelper):
         model.rotation = mp.rotation
         model.rotation.swizzle()
         model.path = mp.model_path
-        # TODO: Lights, light states, replacableskins
         model.notransition = mp.notransition
+
+        model.map = "|".join((
+            get_shortpath_from_material(mat) for mat in mp.replacableskin_materials.values()
+            if mat is not None
+        ))
+
+        # TODO: Lights, light states
+
 
         return model
 

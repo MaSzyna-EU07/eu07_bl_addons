@@ -39,12 +39,28 @@ class ModelProperties(NodeProperties):
         subtype="FILE_PATH"
     )
 
-    replacableskin_path: bpy.props.StringProperty(
-        name="Replacableskin path",
-        get=None,
-        set=None,
-        update=None,
-        subtype="FILE_PATH"
+    replacableskin_1: bpy.props.PointerProperty(
+        type=bpy.types.Material,
+        name="Skin #1",
+        update=callbacks.update_replacableskin_1,
+    )
+
+    replacableskin_2: bpy.props.PointerProperty(
+        type=bpy.types.Material,
+        name="Skin #2",
+        update=callbacks.update_replacableskin_2,
+    )
+
+    replacableskin_3: bpy.props.PointerProperty(
+        type=bpy.types.Material,
+        name="Skin #3",
+        update=callbacks.update_replacableskin_3,
+    )
+
+    replacableskin_4: bpy.props.PointerProperty(
+        type=bpy.types.Material,
+        name="Skin #4",
+        update=callbacks.update_replacableskin_4,
     )
 
     lights: bpy.props.CollectionProperty(
@@ -60,6 +76,15 @@ class ModelProperties(NodeProperties):
     notransition: bpy.props.BoolProperty(
         name="NoTransition",
     )
+
+    @property
+    def replacableskin_materials(self):
+        return {
+            -1: self.replacableskin_1,
+            -2: self.replacableskin_2,
+            -3: self.replacableskin_3,
+            -4: self.replacableskin_4
+        }
 
 
 

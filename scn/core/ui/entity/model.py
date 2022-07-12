@@ -19,8 +19,27 @@ def draw(context, layout):
     row = layout.row()
     row.prop(props, "model_path")
 
-    row = layout.row()
-    row.label(text="replacables todo")
+    box = layout.box()
+    row = box.row()
+    row.label(text="Replaceable skins")
+
+    skin_ids = [skin.skin_id for skin in context.object.data.eu07_scn_model_skins]
+
+    if -1 in skin_ids:
+        row = box.row()
+        row.prop(props, "replacableskin_1")
+
+    if -2 in skin_ids:
+        row = box.row()
+        row.prop(props, "replacableskin_2")
+
+    if -3 in skin_ids:
+        row = box.row()
+        row.prop(props, "replacableskin_3")
+
+    if -4 in skin_ids:
+        row = box.row()
+        row.prop(props, "replacableskin_4")
 
     row = layout.row()
     row.label(text="lights todo")

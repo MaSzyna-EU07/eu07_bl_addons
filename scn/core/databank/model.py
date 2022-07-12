@@ -9,6 +9,18 @@ from e3d.input import E3DImporter
 from t3d.input import T3DImporter
 
 
+class ModelSkinData(bpy.types.PropertyGroup):
+    skin_id: bpy.props.IntProperty(
+        name="Skin ID",
+        min=-4,
+        max=-1,
+    )
+
+    material_index: bpy.props.IntProperty(
+        name="Material index",
+        min=0,
+    )
+
 
 class Model(bpy.types.PropertyGroup):
     relpath: bpy.props.StringProperty()
@@ -59,7 +71,14 @@ class ModelBank(bpy.types.PropertyGroup):
             model.mesh = objects[0].data
             model.mesh.name = relpath
 
-            objects[0].data.use_fake_user = True
+            for material_slot in objects[0].material_slots:
+                is_skinslot = material_slot.material and "replacableskin" in material_slot.material.name
+                if is_skinslot:
+                    skins = model.mesh.eu07_scn_model_skins
+                    skin = skins.add()
+                    skin.material_index = material_slot.slot_index
+                    skin.skin_id = int(material_slot.material.name[-3:-1])
+
             bpy.data.objects.remove(objects[0])
 
         return model
@@ -77,6 +96,7 @@ class ModelBank(bpy.types.PropertyGroup):
         return None
 
 classes = (
+    ModelSkinData,
     Model,
     ModelBank
 )
@@ -87,6 +107,7 @@ def register():
         bpy.utils.register_class(cls)
 
     bpy.types.Scene.eu07_scn_model_bank = bpy.props.PointerProperty(type=ModelBank)
+    bpy.types.Mesh.eu07_scn_model_skins = bpy.props.CollectionProperty(type=ModelSkinData)
 
 def unregister():
     for cls in classes:
