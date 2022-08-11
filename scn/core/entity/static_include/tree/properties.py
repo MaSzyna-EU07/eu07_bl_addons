@@ -1,5 +1,8 @@
 import bpy
 
+from material_tools.utils import get_shortpath_from_material
+
+
 class StaticInclude_TreeProperties(bpy.types.PropertyGroup):
     skin: bpy.props.PointerProperty(
         name="Skin",
@@ -31,6 +34,15 @@ class StaticInclude_TreeProperties(bpy.types.PropertyGroup):
         get=None,
         set=None,
     )
+
+    def get_parameters_list(self):
+        return [
+            get_shortpath_from_material(self.skin),
+            *self.location,
+            self.rotation,
+            self.height,
+            self.span
+        ]
 
 
 def register():

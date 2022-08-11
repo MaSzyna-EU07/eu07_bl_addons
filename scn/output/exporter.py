@@ -85,6 +85,8 @@ class SCNExporter(bpy.types.Operator, ExportHelper):
             element = self._create_node_lines(obj)
         elif "node:traction" in obj.eu07_scn_entity_type:
             element = self._create_node_traction(obj)
+        elif "include" in obj.eu07_scn_entity_type:
+            element = self._create_static_include(obj)
 
         return element
 
@@ -293,6 +295,14 @@ class SCNExporter(bpy.types.Operator, ExportHelper):
 
         return traction
 
+    def _create_static_include(self, obj):
+        incprops = obj.eu07_scn_staticinc
+
+        inc = eu07_tools.scn.create_element("include")
+        inc.path = incprops.path
+        inc.parameters = [str(p) for p in incprops.get_parameters_list()]
+
+        return inc
 
 classes = (
     SCNExporter,

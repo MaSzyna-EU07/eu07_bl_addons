@@ -21,6 +21,8 @@ class StaticIncludeProperties(bpy.types.PropertyGroup):
         elif self.subtype == "tree":
             return self.id_data.eu07_scn_staticinc_tree
 
+    def get_parameters_list(self):
+        return self.subprops.get_parameters_list()
 
 def register():
     bpy.utils.register_class(StaticIncludeProperties)

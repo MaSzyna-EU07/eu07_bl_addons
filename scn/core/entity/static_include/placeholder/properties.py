@@ -5,6 +5,9 @@ class StaticInclude_PlaceholderProperties(bpy.types.PropertyGroup):
         name="Parameters text",
     )
 
+    def get_parameters_list(self):
+        return self.params_text.strip().split(" ")
+
 
 def register():
     bpy.utils.register_class(StaticInclude_PlaceholderProperties)
