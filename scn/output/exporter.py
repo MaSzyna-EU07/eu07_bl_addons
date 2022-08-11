@@ -224,6 +224,9 @@ class SCNExporter(bpy.types.Operator, ExportHelper):
             if mat is not None
         ))
 
+        if not model.map:
+            model.map = "none"
+
         # TODO: Lights, light states
 
 

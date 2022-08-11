@@ -5,6 +5,7 @@ from . import model
 from . import lines
 from . import triangles
 from . import traction
+from . import static_include
 
 class SCN_PT_entity(bpy.types.Panel):
     bl_idname = "SCN_PT_entity"
@@ -36,3 +37,5 @@ class SCN_PT_entity(bpy.types.Panel):
             triangles.draw(context, self.layout)
         elif obj.eu07_scn_entity_type == "node:traction":
             traction.draw(context, self.layout)
+        elif obj.eu07_scn_entity_type == "include":
+            static_include.draw(context, self.layout)

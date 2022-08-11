@@ -1,14 +1,13 @@
-from scn.core.entity.track.validate import is_track_junction
+# NOTE: Main method is at the bottom
 
-from .common import draw_node_ui
-
-def draw(context, layout):
-    props = context.object.eu07_scn_model
-
+def _draw_placeholder(context, layout, props):
     row = layout.row()
-    row.operator("wm.url_open", text="Documentation", icon='QUESTION').url = "https://wiki.eu07.pl/index.php/Obiekt_node::model"
+    row.prop(props, "params_text")
 
-    draw_node_ui(layout, props)
+
+def _draw_tree(context, layout, props):
+    row = layout.row()
+    row.prop(props, "skin")
 
     row = layout.row()
     row.prop(props, "location")
@@ -17,36 +16,30 @@ def draw(context, layout):
     row.prop(props, "rotation")
 
     row = layout.row()
-    row.prop(props, "model_path")
-
-    box = layout.box()
-    row = box.row()
-    row.label(text="Replaceable skins")
-
-    skin_ids = [skin.skin_id for skin in context.object.data.eu07_scn_model_skins]
-
-    if -1 in skin_ids:
-        row = box.row()
-        row.prop(props, "replacableskin_1")
-
-    if -2 in skin_ids:
-        row = box.row()
-        row.prop(props, "replacableskin_2")
-
-    if -3 in skin_ids:
-        row = box.row()
-        row.prop(props, "replacableskin_3")
-
-    if -4 in skin_ids:
-        row = box.row()
-        row.prop(props, "replacableskin_4")
+    row.prop(props, "height")
 
     row = layout.row()
-    row.label(text="lights todo")
+    row.prop(props, "span")
+
+
+_subdraws = {
+    "placeholder": _draw_placeholder,
+    "tree": _draw_tree,
+}
+
+def draw(context, layout):
+    props = context.object.eu07_scn_staticinc
 
     row = layout.row()
-    row.label(text="lightcolors todo")
+    row.prop(props, "subtype")
 
     row = layout.row()
-    row.prop(props, "notransition")
+    row.prop(props, "path")
+
+    subdraw = _subdraws.get(props.subtype)
+    if subdraw:
+        subdraw(context, layout, props.subprops)
+
+
+
 
