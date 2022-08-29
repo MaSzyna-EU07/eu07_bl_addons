@@ -7,10 +7,9 @@ import eu07_tools
 import bmesh
 import bpy
 
-from eu07_tools.utils.geometry import VertexStorageSectored
+from common.geometry_builder import GeometryBuilder
 from material_tools.input import MaterialImporter
 from material_tools.utils import get_qualified_material_name
-from material_tools.wrapper import MaterialWrapper
 
 
 def get_builder(element, banan_as_mesh=False):
@@ -127,66 +126,9 @@ class MeshInputBuilder(SubmodelInputBuilder):
                 self.obj.active_material = material
 
     def set_geometry(self, geometry):
-        bm = bmesh.new()
-        uv_layer = bm.loops.layers.uv.new()
-
-        geometry.to_triangles()
-
-        try:
-            geometry.calc_smooth_groups_normals()
-        except ValueError:
-            pass
-
-        unique_vertices = VertexStorageSectored()
-
-        indices = []
-        per_face_vertex_normals = []
-        per_face_uvs = []
-
-        for triangle in geometry.triangles:
-            for vertex in triangle.vertices:
-
-                try:
-                    index = unique_vertices.find(vertex)
-                except KeyError:
-                    index = unique_vertices.push(vertex)
-                finally:
-                    indices.append(index)
-
-                per_face_vertex_normals.append(vertex.normal)
-                per_face_uvs.append(vertex.mapping)
-
-        for vertex in unique_vertices:
-            bm.verts.new(vertex.location)
-
-        bm.verts.ensure_lookup_table()
-
-        num_triangles = len(geometry.triangles)
-
-        custom_normals = []
-
-        for i in range(num_triangles):
-            bm_verts = []
-
-            for index in indices[i*3:i*3+3]:
-                bm_verts.append(bm.verts[index])
-
-            try:
-                bm_face = bm.faces.new(bm_verts)
-                for normal in per_face_vertex_normals[i * 3: i * 3 + 3]:
-                    custom_normals.append(normal)
-            except ValueError:
-                pass
-            else:
-                for vertex_index, loop in enumerate(bm_face.loops):
-                    loop[uv_layer].uv = per_face_uvs[i * 3 + vertex_index]
-
-        bm.to_mesh(self.obj.data)
-        bm.free()
-
-        self.obj.data.use_auto_smooth = True
-        self.obj.data.normals_split_custom_set(custom_normals)
-
+        geo_builder = GeometryBuilder()
+        mesh_data = geo_builder.build_from_geometry(geometry, self.obj.data, calc_normals=True)
+        self.obj.data = mesh_data
 
 
 class BananMeshInputBuilder(MeshInputBuilder):

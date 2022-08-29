@@ -44,6 +44,10 @@ class EU07_OT_GameEnginePreviewModel(bpy.types.Operator):
 
         scn_elements = []
 
+        sky = eu07_tools.scn.create_element("sky")
+        sky.model_path = "skydome_clouds.t3d"
+        scn_elements.append(sky)
+
         node_model = create_node_model(settings.lights, settings.transition, settings.angles)
         scn_elements.append(node_model)
 
