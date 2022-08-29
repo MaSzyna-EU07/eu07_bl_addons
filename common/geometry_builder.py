@@ -8,7 +8,7 @@ class GeometryBuilder:
     def __init__(self):
         pass
 
-    def build_from_geometry(self, eu07_geometry, mesh_data=None, calc_normals=False):
+    def build_from_geometry(self, eu07_geometry, mesh_data=None, calc_normals=False, swizzle=False):
         bm = bmesh.new()
         uv_layer = bm.loops.layers.uv.new()
 
@@ -40,7 +40,8 @@ class GeometryBuilder:
                 per_face_uvs.append(vertex.mapping)
 
         for vertex in unique_vertices:
-            bm.verts.new(vertex.location)
+            loc = vertex.location.swizzled() if swizzle else vertex.location
+            bm.verts.new(loc)
 
         bm.verts.ensure_lookup_table()
 
