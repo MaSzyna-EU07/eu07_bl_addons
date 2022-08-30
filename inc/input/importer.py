@@ -3,9 +3,13 @@ import pathlib
 import eu07_tools
 
 import bpy
+import mathutils
 
 from common.geometry_builder import GeometryBuilder
 from material_tools.input import MaterialImporter
+
+from e3d.input import E3DImporter
+from t3d.input import T3DImporter
 
 
 class INCImporter:
@@ -49,4 +53,33 @@ class INCImporter:
         return tri_object
 
     def import_from_node_model_element(self, element):
-        print("import nmodel")
+        fullpath = self.asset_searcher.models.find(element.path)
+
+        importer = None
+        if fullpath.endswith(".e3d"):
+            importer = E3DImporter(self.asset_searcher)
+            importer.import_stars = False
+            importer.import_spots = False
+            importer.join_into_one = True
+            importer.import_lod = False
+
+        elif fullpath.endswith(".t3d"):
+            importer = T3DImporter(self.asset_searcher)
+            importer.load_included_objects = True
+            importer.import_stars = False
+            importer.import_spots = False
+            importer.join_into_one = True
+            importer.import_lod = False
+        else:
+            pass
+
+        if importer is None:
+            return
+
+        objects = importer.import_from_filepath(fullpath)
+
+        for object in objects:
+            object.location += mathutils.Vector(element.location.swizzled())
+            #object.rotation += mathutils.Vector(element.rotation)
+
+            bpy.context.scene.collection.objects.link(object)
