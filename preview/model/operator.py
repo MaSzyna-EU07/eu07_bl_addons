@@ -1,3 +1,4 @@
+import copy
 import os
 import pathlib
 
@@ -7,7 +8,7 @@ import eu07_tools
 from animation_tools.output.eventize import eventize_object_animation
 from common import get_environment_path
 from preview.common import SCENERY_FILENAME, MODEL_FILENAME, SUBDIR_NAME, transfer_external_textures, \
-    create_camera_from_viewport, run_preview_command
+    create_camera_from_viewport, run_preview_command, NODE_MODEL_NAME
 
 
 class EU07_OT_GameEnginePreviewModel(bpy.types.Operator):
@@ -97,7 +98,7 @@ def create_ground_plane(level):
 
 def create_node_model(lights, transition, angles):
     node_model = eu07_tools.scn.create_element("node:model")
-    node_model.name = "model_preview"
+    node_model.name = NODE_MODEL_NAME
     node_model.path = str(pathlib.Path(SUBDIR_NAME, MODEL_FILENAME))
 
     if lights:
@@ -121,10 +122,54 @@ def create_animation_elements():
 
     elements.extend([launcher, multiple])
 
+    resetables = []
+
     for obj in bpy.context.visible_objects:
-        anim_events = eventize_object_animation(obj, "model_preview")
-        multiple.events_names.extend(ev.name for ev in anim_events)
-        elements.extend(anim_events)
+        anim_events = eventize_object_animation(obj, NODE_MODEL_NAME)
+
+        if anim_events:
+            multiple.events_names.extend(ev.name for ev in anim_events)
+            elements.extend(anim_events)
+            resetables.append(obj)
+
+    reset_elements = create_reset_anim_elements(resetables)
+    elements.extend(reset_elements)
+
+    return elements
+
+
+def create_reset_anim_elements(resetables):
+    reset_launcher = eu07_tools.scn.create_element("node:eventlauncher")
+    reset_launcher.key = "R"
+    reset_launcher.first_event_name = "reset_anim"
+
+    reset_multiple = eu07_tools.scn.create_element("event:multiple")
+    reset_multiple.name = "reset_anim"
+
+    elements = [
+        reset_launcher, reset_multiple
+    ]
+
+    for obj in resetables:
+        reset_rotate = eu07_tools.scn.create_element("event:animation")
+        reset_rotate.name = f"{obj.name}_reset_rotate"
+        reset_rotate.vector = 0, 0, 0
+        reset_rotate.speed = 100
+        reset_rotate.anim_type = "rotate"
+        reset_rotate.model_name = NODE_MODEL_NAME
+        reset_rotate.submodel_name = obj.name
+
+        reset_translate = eu07_tools.scn.create_element("event:animation")
+        reset_translate.name = f"{obj.name}_reset_translate"
+        reset_translate.vector = 0, 0, 0
+        reset_translate.speed = 100
+        reset_translate.anim_type = "translate"
+        reset_translate.model_name = NODE_MODEL_NAME
+        reset_translate.submodel_name = obj.name
+
+        elements.extend([reset_rotate, reset_translate])
+
+        reset_multiple.events_names.extend([reset_rotate.name, reset_translate.name])
 
     return elements
 

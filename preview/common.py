@@ -14,6 +14,7 @@ from material_tools.wrapper import MaterialWrapper
 SCENERY_FILENAME = "_blender_preview.scn"
 MODEL_FILENAME = "_blender_preview.t3d"
 SUBDIR_NAME = "_blender_preview"
+NODE_MODEL_NAME = "model_preview"
 
 
 def transfer_external_textures(tex_subdir):
