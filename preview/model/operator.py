@@ -90,7 +90,7 @@ def create_ground_plane(level):
     ]
 
     for vertex in vertices:
-        plane.vertices.new(vertex)
+        plane.geometry.vertices.new(vertex)
 
     return plane
 
