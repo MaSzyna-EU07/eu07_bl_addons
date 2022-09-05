@@ -128,7 +128,7 @@ class SCNExporter(bpy.types.Operator, ExportHelper):
                 ijk = eu07_tools.utils.swizzle_coords(loop.normal)
                 uv = uv_data[loop_index].uv if uv_layer else [0, 0]
 
-                node.vertices.new((*xyz, *ijk, *uv))
+                node.geometry.vertices.new((*xyz, *ijk, *uv))
             yield node
 
         bpy.data.meshes.remove(mesh)
