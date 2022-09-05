@@ -192,7 +192,7 @@ class BananMeshOutputBuilder(MeshOutputBuilder):
         self.submodel.map = "none"
 
     def set_geometry(self, apply_modifiers):
-        # "Banan" is a mesh without geometry, so no implementation here
+        # "Banan" is a mesh without mesh_data, so no implementation here
         pass
 
 

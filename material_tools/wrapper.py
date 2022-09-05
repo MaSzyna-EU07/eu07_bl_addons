@@ -35,6 +35,10 @@ class MaterialWrapper:
         bsdf = self._get_bsdf_node()
         bsdf.inputs[BSDF_COLOR_INPUT].default_value = [*diffuse_color, 1]
 
+    def get_diffuse_color(self):
+        bsdf = self._get_bsdf_node()
+        return bsdf.inputs[BSDF_COLOR_INPUT].default_value
+
     def set_diffusemap(self, image: bpy.types.Image):
         bsdf = self._get_bsdf_node()
 

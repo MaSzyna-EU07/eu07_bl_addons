@@ -1,5 +1,11 @@
+from . import ui
+from . import operator
+from . import settings
+
 def register():
-    pass
+    operator.register()
+    settings.register()
 
 def unregister():
-    pass
+    operator.unregister()
+    settings.unregister()

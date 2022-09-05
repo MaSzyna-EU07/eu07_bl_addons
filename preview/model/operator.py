@@ -11,7 +11,6 @@ from preview.common import SCENERY_FILENAME, MODEL_FILENAME, SUBDIR_NAME, transf
     create_camera_from_viewport, run_preview_command, NODE_MODEL_NAME
 
 
-# TODO: Split this to shorter functions
 class EU07_OT_GameEnginePreviewModel(bpy.types.Operator):
     bl_idname = "eu07.model_preview"
     bl_label = "Preview model in MaSzyna"
@@ -45,6 +44,10 @@ class EU07_OT_GameEnginePreviewModel(bpy.types.Operator):
         transfer_external_textures(tex_subdir)
 
         scn_elements = []
+
+        sky = eu07_tools.scn.create_element("sky")
+        sky.model_path = "skydome_clouds.t3d"
+        scn_elements.append(sky)
 
         node_model = create_node_model(settings.lights, settings.transition, settings.angles)
         scn_elements.append(node_model)
@@ -88,7 +91,7 @@ def create_ground_plane(level):
     ]
 
     for vertex in vertices:
-        plane.vertices.new(vertex)
+        plane.geometry.vertices.new(vertex)
 
     return plane
 

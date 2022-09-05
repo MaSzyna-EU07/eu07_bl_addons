@@ -25,7 +25,7 @@ class EU07_OT_ExportT3D(bpy.types.Operator, ExportHelper):
     apply_modifiers: bpy.props.BoolProperty(
         name="Apply modifiers",
         default=True,
-        description="Export geometry with applied modifiers"
+        description="Export mesh_data with applied modifiers"
     )
     aggregate_includes: bpy.props.BoolProperty(
         name="Aggregate includes",

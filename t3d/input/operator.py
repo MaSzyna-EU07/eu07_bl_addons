@@ -40,6 +40,16 @@ class T3DImportOperator(bpy.types.Operator, ImportHelper):
         default=True,
         options={'HIDDEN'}
     )
+    join_into_one: BoolProperty(
+        name="Join to one mesh",
+        default=False,
+        #options={'HIDDEN'}
+    )
+    import_lod: BoolProperty(
+        name="Import LODs",
+        default=True,
+        #options={'HIDDEN'}
+    )
 
     def execute(self, context):
         root = get_environment_path(self.filepath)
@@ -52,6 +62,8 @@ class T3DImportOperator(bpy.types.Operator, ImportHelper):
         importer.import_meshes = self.import_meshes
         importer.import_spots = self.import_spots
         importer.import_stars = self.import_stars
+        importer.join_into_one = self.join_into_one
+        importer.import_lod = self.import_lod
 
         objects = importer.import_from_filepath(self.filepath)
 
