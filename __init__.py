@@ -27,7 +27,7 @@ def register():
 
 def unregister():
     common.unregister()
-    project.register()
+    project.unregister()
     t3d.unregister()
     e3d.unregister()
     scn.unregister()
