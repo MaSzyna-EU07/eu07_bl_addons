@@ -55,13 +55,16 @@ class SubmodelInputBuilder(abc.ABC):
     def set_min_distance(self, min_distance):
         self.obj.t3d_properties.min_distance = min_distance
 
-    def set_transform(self, transform):
+    def set_transform(self, transform, initialrotate_matrix=None):
         self.obj.matrix_basis = [
             transform[:4],
             transform[4:8],
             transform[8:12],
             transform[12:]
         ]
+
+        if initialrotate_matrix is not None and self.obj.parent is None:
+            self.obj.matrix_basis = initialrotate_matrix @ self.obj.matrix_basis
 
 class MeshInputBuilder(SubmodelInputBuilder):
     def create_submodel(self, name: str):
