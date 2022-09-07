@@ -8,6 +8,7 @@ import eu07_tools
 from material_tools.utils import get_shortpath_from_material
 from material_tools.wrapper import MaterialWrapper
 from common.utils import remove_name_suffix
+from mathutils import Matrix
 
 from native.mikktspace import MikkContext
 
@@ -16,7 +17,14 @@ def get_builder(exporter, obj):
     cls = None
 
     if obj.type == 'MESH' and not exporter.flatten_mesh_hierarchy:
-        cls = MeshOutputBuilder
+        materials = set()
+        materials = materials.union(filter(lambda mtl: mtl is not None, map(lambda slot: slot.material, obj.material_slots)))
+        if len(materials) == 0:
+            cls = BananMeshOutputBuilder
+        elif len(materials) == 1:
+            cls = SingleMaterialMeshOutputBuilder
+        else:
+            cls = MultiMaterialMeshOutputBuilder
     elif obj.type == 'LIGHT' and obj.data.type == 'SPOT':
         cls = FreeSpotLightOutputBuilder
     elif obj.type == 'EMPTY':
@@ -27,9 +35,9 @@ def get_builder(exporter, obj):
             if len(materials) == 0:
                 cls = BananMeshOutputBuilder
             elif len(materials) == 1:
-                cls = SingleMaterialMergedMeshOutputBuilder
+                cls = SingleMaterialMeshOutputBuilder
             else:
-                cls = MultiMaterialMergedMeshOutputBuilder
+                cls = MultiMaterialMeshOutputBuilder
         else:
             for child in obj.children:
                 if child.type == 'LIGHT' and child.data.type == 'POINT':
@@ -110,33 +118,64 @@ class MeshOutputBuilder(SubmodelOutputBuilder):
         self.submodel.wire_size = self.obj.t3d_properties.wire_size
 
     def set_opacity(self):
-        self.submodel.opacity = self.obj.t3d_properties.opacity
-
-        if self.obj.t3d_properties.opacity_source == "MATERIAL":
-            if self.obj.active_material:
-                wrapper = MaterialWrapper(self.obj.active_material)
-
-                if wrapper.get_diffusemap() is not None:
-                    self.submodel.opacity = wrapper.get_opacity()
+        pass
 
     def set_map(self, embed_skins=False, use_generated_img_name=False):
-        mtl = self.obj.active_material
+        pass
 
-        is_replacable = self.obj.t3d_properties.replacableskin_id != "None"
+    def get_meshes(self, apply_modifiers):
 
-        if mtl and use_generated_img_name:
-            wrapper = MaterialWrapper(mtl)
-            diffusemap = wrapper.get_diffusemap()
+        meshes = []
 
-            if diffusemap and diffusemap.source == 'GENERATED':
-                self.submodel.map = diffusemap.name.replace(".", "_")
-                return
+        if self.obj.type == 'MESH':
+            mesh_obj = self.obj
+            if apply_modifiers:
+                depsgraph = bpy.context.evaluated_depsgraph_get()
+                obj_eval = mesh_obj.evaluated_get(depsgraph)
+    
+                mesh = bpy.data.meshes.new_from_object(obj_eval)
+            else:
+                mesh = mesh_obj.data.copy()
+    
+            if mesh.uv_layers.active is None:
+                self.report({'WARNING'}, "{0} has no active UV layer, skipping object.".format(mesh_obj.name))
+                bpy.data.meshes.remove(mesh)
+            
+            try:
+                mesh.calc_normals_split()
+                mesh.calc_loop_triangles()
+            except:
+                bpy.data.meshes.remove(mesh)
 
-        if is_replacable and not embed_skins:
-            self.submodel.map = self.obj.t3d_properties.replacableskin_id
-            return
+            meshes.append((mesh_obj, mesh, Matrix.Identity(4)))
+        else:
+            for mesh_obj in self.obj.children:
+                if mesh_obj.type != 'MESH':
+                    continue
+            
+                if apply_modifiers:
+                    depsgraph = bpy.context.evaluated_depsgraph_get()
+                    obj_eval = mesh_obj.evaluated_get(depsgraph)
+        
+                    mesh = bpy.data.meshes.new_from_object(obj_eval)
+                else:
+                    mesh = mesh_obj.data.copy()
+        
+                if mesh.uv_layers.active is None:
+                    self.report({'WARNING'}, "{0} has no active UV layer, skipping object.".format(mesh_obj.name))
+                    bpy.data.meshes.remove(mesh)
+                    continue
+                
+                try:
+                    mesh.calc_normals_split()
+                    mesh.calc_loop_triangles()
+                except:
+                    bpy.data.meshes.remove(mesh)
+                    continue
 
-        self.submodel.map = get_shortpath_from_material(mtl)
+                meshes.append((mesh_obj, mesh, mesh_obj.matrix_local))
+        
+        return meshes
 
     def set_geometry(self, apply_modifiers):
         mesh = None
@@ -185,14 +224,16 @@ class MeshOutputBuilder(SubmodelOutputBuilder):
             self.submodel.geometry.vertices.new(vert_data)
 
 
-class MultiMaterialMergedMeshOutputBuilder(MeshOutputBuilder):
+class MultiMaterialMeshOutputBuilder(MeshOutputBuilder):
     def __init__(self, obj):
         super().__init__(obj)
 
         materials = set()
-        for o in filter(lambda child: child.type == 'MESH', obj.children):
-            materials = materials.union(filter(lambda mtl: mtl is not None, map(lambda slot: slot.material, o.material_slots)))
-                
+        if obj.type == 'MESH':
+            materials = set(filter(lambda mtl: mtl is not None, map(lambda slot: slot.material, obj.material_slots)))
+        else:
+            for o in filter(lambda child: child.type == 'MESH', obj.children):
+                materials = materials.union(filter(lambda mtl: mtl is not None, map(lambda slot: slot.material, o.material_slots)))
                 
         self.mtl_to_submodels = {}
         for material in materials:
@@ -275,33 +316,7 @@ class MultiMaterialMergedMeshOutputBuilder(MeshOutputBuilder):
 
     def set_geometry(self, apply_modifiers):
 
-        meshes = {}
-
-        for mesh_obj in self.obj.children:
-            if mesh_obj.type != 'MESH':
-                continue
-        
-            if apply_modifiers:
-                depsgraph = bpy.context.evaluated_depsgraph_get()
-                obj_eval = mesh_obj.evaluated_get(depsgraph)
-    
-                mesh = bpy.data.meshes.new_from_object(obj_eval)
-            else:
-                mesh = mesh_obj.data.copy()
-    
-            if mesh.uv_layers.active is None:
-                self.report({'WARNING'}, "{0} has no active UV layer, skipping object.".format(mesh_obj.name))
-                bpy.data.meshes.remove(mesh)
-                continue
-            
-            try:
-                mesh.calc_normals_split()
-                mesh.calc_loop_triangles()
-            except:
-                bpy.data.meshes.remove(mesh)
-                continue
-
-            meshes[mesh_obj] = mesh
+        meshes = self.get_meshes(apply_modifiers)
 
         for mtl, submodel in self.mtl_to_submodels.items():
         
@@ -311,20 +326,14 @@ class MultiMaterialMergedMeshOutputBuilder(MeshOutputBuilder):
             
             context = MikkContext()
                 
-            for mesh_obj in self.obj.children:
-                if mesh_obj not in meshes:
-                    continue
+            for (mesh_obj, mesh, local_transform) in meshes:
                     
                 allowed_indices = set(filter(lambda slot : mesh_obj.material_slots[slot].material == mtl, range(len(mesh_obj.material_slots))))
                 
                 if not allowed_indices:
                     continue
                 
-                local_transform = mesh_obj.matrix_local
-                
                 flip_normals = local_transform.determinant() < 0
-                
-                mesh = meshes[mesh_obj]
                     
                 for triangle in mesh.loop_triangles:
                     if triangle.material_index not in allowed_indices:
@@ -347,7 +356,7 @@ class MultiMaterialMergedMeshOutputBuilder(MeshOutputBuilder):
             for vert_data in vertices:
                 submodel.geometry.vertices.new(vert_data)
 
-        for [obj, mesh] in meshes.items():
+        for (obj, mesh, transform) in meshes:
             bpy.data.meshes.remove(mesh)
         
     def submodels(self):
@@ -355,13 +364,16 @@ class MultiMaterialMergedMeshOutputBuilder(MeshOutputBuilder):
         result.extend(self.mtl_to_submodels.values())
         return result
 
-class SingleMaterialMergedMeshOutputBuilder(MeshOutputBuilder):
+class SingleMaterialMeshOutputBuilder(MeshOutputBuilder):
     def __init__(self, obj):
         super().__init__(obj)
 
         materials = set()
-        for o in filter(lambda child: child.type == 'MESH', obj.children):
-            materials = materials.union(filter(lambda mtl: mtl is not None, map(lambda slot: slot.material, o.material_slots)))
+        if obj.type == 'MESH':
+            materials = set(filter(lambda mtl: mtl is not None, map(lambda slot: slot.material, obj.material_slots)))
+        else:
+            for o in filter(lambda child: child.type == 'MESH', obj.children):
+                materials = materials.union(filter(lambda mtl: mtl is not None, map(lambda slot: slot.material, o.material_slots)))
 
         self.material = next(iter(materials))
         
@@ -399,31 +411,9 @@ class SingleMaterialMergedMeshOutputBuilder(MeshOutputBuilder):
             
         context = MikkContext()
 
-        for mesh_obj in self.obj.children:
-            if mesh_obj.type != 'MESH':
-                continue
-        
-            if apply_modifiers:
-                depsgraph = bpy.context.evaluated_depsgraph_get()
-                obj_eval = mesh_obj.evaluated_get(depsgraph)
-    
-                mesh = bpy.data.meshes.new_from_object(obj_eval)
-            else:
-                mesh = mesh_obj.data.copy()
-    
-            if mesh.uv_layers.active is None:
-                self.report({'WARNING'}, "{0} has no active UV layer, skipping object.".format(mesh_obj.name))
-                bpy.data.meshes.remove(mesh)
-                continue
-            
-            try:
-                mesh.calc_normals_split()
-                mesh.calc_loop_triangles()
-            except:
-                bpy.data.meshes.remove(mesh)
-                continue
-                
-            local_transform = mesh_obj.matrix_local
+        meshes = self.get_meshes(apply_modifiers)
+
+        for (mesh_obj, mesh, local_transform) in meshes:
             
             flip_normals = local_transform.determinant() < 0
                 
@@ -438,6 +428,7 @@ class SingleMaterialMergedMeshOutputBuilder(MeshOutputBuilder):
                     
                     context.addVertex(co, normal, uv)
 
+        for (obj, mesh, transform) in meshes:
             bpy.data.meshes.remove(mesh)
             
         context.calculate()
