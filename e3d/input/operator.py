@@ -18,6 +18,11 @@ class E3DImportOperator(bpy.types.Operator, ImportHelper):
         default="*.e3d",
         options={'HIDDEN'}
     )
+    join_into_one: bpy.props.BoolProperty(
+        name="Join to one mesh",
+        default=False,
+        #options={'HIDDEN'}
+    )
     import_meshes: bpy.props.BoolProperty(
         name="Import Meshes",
         default=True,
@@ -46,6 +51,7 @@ class E3DImportOperator(bpy.types.Operator, ImportHelper):
             importer.import_meshes = self.import_meshes
             importer.import_spots = self.import_spots
             importer.import_stars = self.import_stars
+            importer.join_into_one = self.join_into_one
 
             objects = importer.import_from_filepath(self.filepath)
 

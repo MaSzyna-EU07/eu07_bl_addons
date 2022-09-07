@@ -106,8 +106,6 @@ class T3DImporter:
         obj = builder.obj
         obj.eu07_include_identifier = self.include_identifier
 
-        bpy.context.scene.collection.objects.link(obj)
-
         return obj
 
     def import_from_include_element(self, element):
