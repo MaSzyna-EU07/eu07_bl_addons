@@ -13,28 +13,26 @@ sys.path.append(os.path.dirname(__file__))
 from . import common, t3d, e3d, scn, material_tools, project, preview, animation_tools, inc
 
 
+modules = (
+    common,
+    project,
+    t3d,
+    e3d,
+    scn,
+    material_tools,
+    animation_tools,
+    preview,
+    inc
+)
+
 def register():
-    common.register()
-    project.register()
-    t3d.register()
-    e3d.register()
-    scn.register()
-    material_tools.register()
-    animation_tools.register()
-    preview.register()
-    inc.register()
+    for mod in modules:
+        mod.register()
 
 
 def unregister():
-    common.unregister()
-    project.unregister()
-    t3d.unregister()
-    e3d.unregister()
-    scn.unregister()
-    animation_tools.unregister()
-    material_tools.unregister()
-    preview.unregister()
-    inc.unregister()
+    for mod in modules:
+        mod.unregister()
 
 
 if __name__ == "__main__":

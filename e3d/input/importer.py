@@ -55,15 +55,6 @@ class E3DImporter:
         if self.join_into_one and objects:
             combined = join_meshes_into_one(objects)
 
-            correction_matrix = (
-                mathutils.Matrix.Rotation(math.radians(-90), 4, 'X') @
-                mathutils.Matrix.Rotation(math.radians(180), 4, 'Z')
-            )
-
-            for vert in combined.data.vertices:
-                vert.co = vert.co @ correction_matrix
-
-
             return [combined]
 
         return objects
@@ -86,7 +77,14 @@ class E3DImporter:
         builder.set_selfillum(submodel.selfillum)
         builder.set_max_distance(submodel.max_distance)
         builder.set_min_distance(submodel.min_distance)
-        builder.set_transform(submodel.transform)
+
+        initialrotate_matrix = mathutils.Matrix((
+            (-1, 0, 0, 0),
+            (0, 0, 1, 0),
+            (0, 1, 0, 0),
+            (0, 0, 0, 1),
+        ))
+        builder.set_transform(submodel.transform, initialrotate_matrix)
 
         if submodel.type == 'Mesh':
             builder.set_ambient(submodel.ambient_color[:3] * 255)
@@ -98,10 +96,6 @@ class E3DImporter:
                 opacity = 0
 
             builder.set_map(submodel.map, self.asset_searcher, opacity, submodel.diffuse_color[:3] * 255)
-
-            # Because weird rotations are made by EU07.exe during e3d generation,
-            # we need to compensate them
-            matrix = mathutils.Matrix.Rotation(math.radians(90), 4, 'X')
             builder.set_geometry(submodel.get_geometry())
 
         elif submodel.type == 'FreeSpotLight':
