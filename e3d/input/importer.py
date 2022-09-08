@@ -19,6 +19,7 @@ class E3DImporter:
         self.asset_searcher = asset_searcher
         self.join_into_one = False
         self.import_lod = True
+        self.name_prefix = ""
 
     def import_from_filepath(self, filepath):
         original_basedir = self.asset_searcher.basedir
@@ -69,8 +70,8 @@ class E3DImporter:
 
         builder = input_builders.get_builder(submodel, self.join_into_one)
 
-        builder.create_submodel(submodel.name)
-        builder.set_parent(submodel.parent_name)
+        builder.create_submodel(f"{self.name_prefix}{submodel.name}")
+        builder.set_parent(f"{self.name_prefix}{submodel.parent_name}")
         builder.set_anim(submodel.anim)
         # All colors are multiplied, because in E3D they are in range 0-1, while in T3D in range 0-255
         builder.set_diffuse(submodel.diffuse_color[:3] * 255)
