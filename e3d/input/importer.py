@@ -76,8 +76,8 @@ class E3DImporter:
         # All colors are multiplied, because in E3D they are in range 0-1, while in T3D in range 0-255
         builder.set_diffuse(submodel.diffuse_color[:3] * 255)
         builder.set_selfillum(submodel.selfillum)
-        builder.set_max_distance(submodel.max_distance)
-        builder.set_min_distance(submodel.min_distance)
+        builder.set_max_distance(math.sqrt(submodel.max_distance))
+        builder.set_min_distance(math.sqrt(submodel.min_distance))
 
         initialrotate_matrix = mathutils.Matrix((
             (-1, 0, 0, 0),
