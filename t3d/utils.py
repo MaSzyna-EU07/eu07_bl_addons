@@ -1,6 +1,9 @@
 import bpy
 
 def join_meshes_into_one(objects):
+    if not objects:
+        return None
+
     for obj in objects:
         bpy.context.scene.collection.objects.link(obj)
 

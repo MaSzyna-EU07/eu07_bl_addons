@@ -42,4 +42,7 @@ class INCImportOperator(bpy.types.Operator, ImportHelper):
 
         objects = importer.import_from_filepath(self.filepath)
 
+        for obj in objects:
+            bpy.context.scene.collection.objects.link(obj)
+
         return {'FINISHED'}

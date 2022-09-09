@@ -49,9 +49,12 @@ class INCImporter:
 
             if obj:
                 objects.append(obj)
-                bpy.context.scene.collection.objects.link(obj)
 
-        merged = join_meshes_into_one(objects)
+        if self.join_into_one and objects:
+            merged = join_meshes_into_one(objects)
+            objects = [merged]
+
+        return objects
 
 
     def import_from_node_triangles_element(self, element):
@@ -73,6 +76,7 @@ class INCImporter:
             importer.import_spots = False
             importer.join_into_one = True
             importer.import_lod = False
+            importer.name_prefix = "SCN-MODELVIS-"
 
         elif fullpath.endswith(".t3d"):
             importer = T3DImporter(self.asset_searcher)
@@ -81,6 +85,7 @@ class INCImporter:
             importer.import_spots = False
             importer.join_into_one = True
             importer.import_lod = False
+            importer.name_prefix = "SCN-MODELVIS-"
         else:
             pass
 

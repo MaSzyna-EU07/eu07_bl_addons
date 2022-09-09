@@ -50,6 +50,10 @@ class T3DImportOperator(bpy.types.Operator, ImportHelper):
         default=True,
         #options={'HIDDEN'}
     )
+    name_prefix: StringProperty(
+        name="Name Prefix",
+        description="Additional name prefix for imported submodels to prevent parenting issues"
+    )
 
     def execute(self, context):
         root = get_environment_path(self.filepath)
@@ -64,6 +68,7 @@ class T3DImportOperator(bpy.types.Operator, ImportHelper):
         importer.import_stars = self.import_stars
         importer.join_into_one = self.join_into_one
         importer.import_lod = self.import_lod
+        importer.name_prefix = self.name_prefix
 
         objects = importer.import_from_filepath(self.filepath)
 

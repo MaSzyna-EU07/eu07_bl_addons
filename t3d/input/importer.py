@@ -20,6 +20,7 @@ class T3DImporter:
         self.include_identifier = includes.MASTER_IDENTIFIER
         self.join_into_one = False
         self.import_lod = True
+        self.name_prefix = ""
 
     def import_from_filepath(self, filepath):
         original_basedir = self.asset_searcher.basedir
@@ -73,8 +74,8 @@ class T3DImporter:
 
         builder = input_builders.get_builder(element, banan_as_mesh=self.join_into_one)
 
-        builder.create_submodel(element.name)
-        builder.set_parent(element.parent_name)
+        builder.create_submodel(f"{self.name_prefix}{element.name}")
+        builder.set_parent(f"{self.name_prefix}{element.parent_name}")
         builder.set_anim(element.anim)
         builder.set_diffuse(element.diffuse_color)
         builder.set_selfillum(element.selfillum)
