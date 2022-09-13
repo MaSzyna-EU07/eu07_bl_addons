@@ -24,6 +24,9 @@ class StaticIncludeProperties(bpy.types.PropertyGroup):
     def get_parameters_list(self):
         return self.subprops.get_parameters_list()
 
+    def get_param_string(self):
+        return self.subprops.get_param_string()
+
 def register():
     bpy.utils.register_class(StaticIncludeProperties)
     bpy.types.Object.eu07_scn_staticinc = bpy.props.PointerProperty(type=StaticIncludeProperties)

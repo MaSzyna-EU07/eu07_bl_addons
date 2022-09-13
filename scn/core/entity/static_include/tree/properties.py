@@ -47,6 +47,9 @@ class StaticInclude_TreeProperties(bpy.types.PropertyGroup):
             self.span
         ]
 
+    def get_param_string(self):
+        return "XXX 0 0 0 0 1 1"
+
 
 def register():
     bpy.utils.register_class(StaticInclude_TreeProperties)
