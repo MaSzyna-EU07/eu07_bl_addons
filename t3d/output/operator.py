@@ -27,6 +27,11 @@ class EU07_OT_ExportT3D(bpy.types.Operator, ExportHelper):
         default=True,
         description="Export mesh_data with applied modifiers"
     )
+    flatten_mesh_hierarchy: bpy.props.BoolProperty(
+        name="Flatten mesh hierarchy",
+        default=True,
+        description="Treat empties with mesh children as a single mesh"
+    )
     aggregate_includes: bpy.props.BoolProperty(
         name="Aggregate includes",
         default=False,
@@ -40,9 +45,9 @@ class EU07_OT_ExportT3D(bpy.types.Operator, ExportHelper):
         options={'HIDDEN'}
     )
     remove_name_suffixes: bpy.props.BoolProperty(
-        name="Remove name suffixes",
+        name="Remove name suffices",
         default=False,
-        description="Remove .00x suffixes from object names",
+        description="Remove .00x suffices from object names",
     )
 
     use_generated_img_name: bpy.props.BoolProperty(
@@ -58,6 +63,7 @@ class EU07_OT_ExportT3D(bpy.types.Operator, ExportHelper):
         exporter.embed_skins = self.embed_skins
         exporter.remove_name_suffixes = self.remove_name_suffixes
         exporter.use_generated_img_name = self.use_generated_img_name
+        exporter.flatten_mesh_hierarchy = self.flatten_mesh_hierarchy
 
         exporter.export_to_file(self.filepath)
 

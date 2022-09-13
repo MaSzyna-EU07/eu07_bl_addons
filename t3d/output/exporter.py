@@ -18,6 +18,7 @@ class T3DExporter:
         self.embed_skins = False
         self.remove_name_suffixes = False
         self.use_generated_img_name = False
+        self.flatten_mesh_hierarchy = False
 
     def export_to_file(self, filepath):
         export_manager = ExportManager(bpy.context.scene.eu07_includes, self.aggregate_includes)
@@ -32,7 +33,7 @@ class T3DExporter:
         elif self.objects_range == "ACTIVE_COLLECTION":
             objects_to_export = bpy.context.collection.objects
 
-        objects_to_export = HierarchyMaker().make_hierarchy(objects_to_export)
+        objects_to_export = HierarchyMaker(self).make_hierarchy(objects_to_export, self.flatten_mesh_hierarchy)
 
         identifiers_written_includes = set()
 
@@ -49,10 +50,11 @@ class T3DExporter:
             identifier = includes.MASTER_IDENTIFIER if self.aggregate_includes else obj.eu07_include_identifier
 
             output = export_manager.get_output(identifier)
-            submodel = self._create_submodel_to_export(obj)
+            submodels = self._create_submodels_to_export(obj)
 
             if output:
-                output.dump_element(submodel)
+                for submodel in submodels:
+                    output.dump_element(submodel)
 
         # HACK: To make external-environment export possible, we need to do this...
         try:
@@ -62,8 +64,8 @@ class T3DExporter:
 
         export_manager.flush_buffers_to_files(environment_path, filepath)
 
-    def _create_submodel_to_export(self, obj):
-        builder = output_builders.get_builder(obj)
+    def _create_submodels_to_export(self, obj):
+        builder = output_builders.get_builder(self, obj)
         if not builder:
             return None
 
@@ -76,7 +78,7 @@ class T3DExporter:
         builder.set_min_distance()
         builder.set_transform()
 
-        submodel_type = builder.submodel.type
+        submodel_type = builder.type()
 
         if submodel_type == "Mesh":
             builder.set_ambient()
@@ -97,4 +99,4 @@ class T3DExporter:
         elif submodel_type == "Stars":
             builder.set_geometry()
 
-        return builder.submodel
+        return builder.submodels()
