@@ -10,7 +10,7 @@ from material_tools.wrapper import MaterialWrapper
 from common.utils import remove_name_suffix
 from mathutils import Matrix
 
-from native.mikktspace import MikkContext
+from native.eu07_tools_native import MikkContext
 
 
 def get_builder(exporter, obj):
