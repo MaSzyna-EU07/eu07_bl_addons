@@ -10,7 +10,11 @@ from material_tools.wrapper import MaterialWrapper
 from common.utils import remove_name_suffix
 from mathutils import Matrix
 
-from native.eu07_tools_native import MikkContext
+from sys import platform
+if platform == "linux":
+    from native.eu07_tools_native_Linux import MikkContext
+elif platform == "win32":
+    from native.eu07_tools_native_Windows import MikkContext
 
 
 def get_builder(exporter, obj):
