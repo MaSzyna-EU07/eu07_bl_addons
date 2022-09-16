@@ -375,7 +375,7 @@ class SingleMaterialMeshOutputBuilder(MeshOutputBuilder):
             for o in filter(lambda child: child.type == 'MESH', obj.children):
                 materials = materials.union(filter(lambda mtl: mtl is not None, map(lambda slot: slot.material, o.material_slots)))
 
-        self.material = next(iter(materials))
+        self.material = next(iter(materials)) if len(materials) else None
         
         self.submodel = eu07_tools.t3d.create_submodel("Mesh", remove_name_suffix(obj.name))
 
