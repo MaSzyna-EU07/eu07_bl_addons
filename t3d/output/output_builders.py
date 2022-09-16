@@ -23,9 +23,7 @@ def get_builder(exporter, obj):
     if obj.type == 'MESH' and not exporter.flatten_mesh_hierarchy:
         materials = set()
         materials = materials.union(filter(lambda mtl: mtl is not None, map(lambda slot: slot.material, obj.material_slots)))
-        if len(materials) == 0:
-            cls = BananMeshOutputBuilder
-        elif len(materials) == 1:
+        if len(materials) <= 1:
             cls = SingleMaterialMeshOutputBuilder
         else:
             cls = MultiMaterialMeshOutputBuilder
@@ -36,9 +34,7 @@ def get_builder(exporter, obj):
             materials = set()
             for o in filter(lambda child: child.type == 'MESH', obj.children):
                 materials = materials.union(filter(lambda mtl: mtl is not None, map(lambda slot: slot.material, o.material_slots)))
-            if len(materials) == 0:
-                cls = BananMeshOutputBuilder
-            elif len(materials) == 1:
+            if len(materials) <= 1:
                 cls = SingleMaterialMeshOutputBuilder
             else:
                 cls = MultiMaterialMeshOutputBuilder
