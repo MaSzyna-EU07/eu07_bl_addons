@@ -6,6 +6,7 @@ import eu07_tools
 
 def create_material(name):
     bl_material = bpy.data.materials.new(name)
+    bl_material.eu07_material.configure()
     return bl_material.eu07_material
 
 def get_qualified_material_name(abspath, opacity=1):

@@ -26,9 +26,9 @@ class EU07_Texture(bpy.types.PropertyGroup):
 
 def register():
     bpy.utils.register_class(EU07_Texture)
-    bpy.types.Node.eu07_texture = bpy.props.PointerProperty(type=EU07_Texture)
+    bpy.types.ShaderNodeTexImage.eu07_texture = bpy.props.PointerProperty(type=EU07_Texture)
 
 
 def unregister():
     bpy.utils.unregister_class(EU07_Texture)
-    del bpy.types.Node.eu07_texture
+    del bpy.types.ShaderNodeTexImage.eu07_texture

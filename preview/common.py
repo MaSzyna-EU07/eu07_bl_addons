@@ -9,8 +9,6 @@ import bpy
 import eu07_tools
 from common import get_viewport_camera_location, get_viewport_camera_rotation
 
-from material_tools.wrapper import MaterialWrapper
-
 SCENERY_FILENAME = "_blender_preview.scn"
 MODEL_FILENAME = "_blender_preview.t3d"
 SUBDIR_NAME = "_blender_preview"
@@ -27,8 +25,7 @@ def transfer_external_textures(tex_subdir):
 
         # TODO: .mat support
 
-        wrapper = MaterialWrapper(obj.active_material)
-        diffuse = wrapper.get_diffusemap()
+        diffuse = obj.active_material.eu07_material.get_
 
         if not diffuse:
             break

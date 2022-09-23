@@ -1,28 +1,28 @@
-import random
-
-import bpy
-
 import eu07_tools
 
-import common
 from material_tools import utils
 
 
 class MaterialImporter:
-    def __init__(self):
-        self.asset_searcher = None
-        self.load_mat_for_texture = False
+    def __init__(self, asset_searcher):
+        self.asset_searcher = asset_searcher
+        self.do_mat_lookup = False
 
     def import_from_shortpath(self, shortpath, material=None):
         abspath = self.asset_searcher.textures.find(shortpath)
         if abspath:
-            return self.import_from_abspath(abspath, material)
+            return self.import_from_abspath(abspath, material, skip_mat_lookup=True)
 
         return None
 
-    def import_from_abspath(self, abspath, material=None):
+    def import_from_abspath(self, abspath, material=None, skip_mat_lookup=False):
+        shortpath = eu07_tools.utils.shorten_asset_path(abspath)
+
+        if not abspath.endswith(".mat") and self.do_mat_lookup and (not skip_mat_lookup):
+            abspath = self.asset_searcher.textures.find(shortpath)
+
         if material is None:
-            material = utils.create_material()
+            material = utils.create_material(shortpath)
 
         if abspath.endswith(".mat"):
             self.asset_searcher.textures.remove_extension(".mat")
@@ -44,7 +44,7 @@ class MaterialImporter:
 
         for key, value in mapping.items():
             if key == "shader":
-                matblock.shader = value
+                matblock.shader_name = value
 
             elif key == "opacity":
                 matblock.opacity = value
@@ -72,11 +72,11 @@ class MaterialImporter:
 
                     for tex_path in texset:
                         texture = material.create_texture()
-                        self._init_texture_from_shortpath(tex_path)
+                        self._init_texture_from_shortpath(texture, tex_path)
                         entity.append_texture(texture)
                 else:
                     entity = material.create_texture()
-                    self._init_texture_from_shortpath(value)
+                    self._init_texture_from_shortpath(entity, value)
 
                 matblock.set_to_texture_slot(entity, key)
 

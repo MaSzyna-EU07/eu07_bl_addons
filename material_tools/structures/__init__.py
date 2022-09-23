@@ -1,9 +1,9 @@
-from . import matblock, material, randomset, texture
+from . import matblock, material, randomtextureset, texture
 
 modules = (
     matblock,
     material,
-    randomset,
+    randomtextureset,
     texture
 )
 
@@ -15,4 +15,4 @@ def register():
 
 def unregister():
     for mod in modules:
-        mod.unregister
+        mod.unregister()

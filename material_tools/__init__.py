@@ -2,21 +2,24 @@ from . import utils
 from . import input as input_
 from . import panel
 from . import skins
-from . import properties
+from . import structures
+
+modules = (
+    input_,
+    skins,
+    panel,
+    structures
+)
 
 
 def register():
-    properties.register()
-    input_.register()
-    skins.register()
-    panel.register()
+    for mod in modules:
+        mod.register()
 
 
 def unregister():
-    input_.unregister()
-    skins.unregister()
-    panel.unregister()
-    properties.unregister()
+    for mod in modules:
+        mod.unregister()
 
 
 

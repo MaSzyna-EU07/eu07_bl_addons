@@ -112,10 +112,10 @@ class EU07_MATBlock(bpy.types.PropertyGroup):
 
 
 def get_template():
-    ng = bpy.data.node_groups.get(NODE_GROUP_NAME)
+    ng = bpy.data.node_groups.get(NODEGROUP_NAME)
 
     if ng is None:
-        ng = bpy.data.node_groups.new(NODE_GROUP_NAME, 'ShaderNodeTree')
+        ng = bpy.data.node_groups.new(NODEGROUP_NAME, 'ShaderNodeTree')
 
         ng_output = ng.nodes.new("NodeGroupOutput")
         ng.outputs.new("NodeSocketShader", "Output")
@@ -158,9 +158,9 @@ def get_template():
 
 def register():
     bpy.utils.register_class(EU07_MATBlock)
-    bpy.types.Node.eu07_matblock = bpy.props.PointerProperty(type=EU07_MATBlock)
+    bpy.types.ShaderNodeGroup.eu07_matblock = bpy.props.PointerProperty(type=EU07_MATBlock)
 
 
 def unregister():
     bpy.utils.unregister_class(EU07_MATBlock)
-    del bpy.types.Node.eu07_matblock
+    del bpy.types.ShaderNodeGroup.eu07_matblock

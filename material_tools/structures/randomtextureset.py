@@ -3,7 +3,7 @@ import bpy
 RANDOM_TEXTURESET_NAME = "[EU07] Random Texture Set"
 MAX_TEXTURESET_SIZE = 4
 
-class EU07_RandomSet(bpy.types.PropertyGroup):
+class EU07_RandomTextureSet(bpy.types.PropertyGroup):
     def append_texture(self, texture):
         pass
 
@@ -27,9 +27,9 @@ def create_template():
 
 def register():
     bpy.utils.register_class(EU07_RandomTextureSet)
-    bpy.types.Node.eu07_randomtextureset = bpy.props.PointerProperty(type=EU07_RandomTextureSet)
+    bpy.types.ShaderNodeGroup.eu07_randomtextureset = bpy.props.PointerProperty(type=EU07_RandomTextureSet)
 
 
 def unregister():
     bpy.utils.unregister_class(EU07_RandomTextureSet)
-    del bpy.types.Node.eu07_randomtextureset
+    del bpy.types.ShaderNodeGroup.eu07_randomtextureset

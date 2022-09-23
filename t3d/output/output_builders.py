@@ -6,7 +6,6 @@ import bpy
 
 import eu07_tools
 from material_tools.utils import get_shortpath_from_material
-from material_tools.wrapper import MaterialWrapper
 from common.utils import remove_name_suffix
 from mathutils import Matrix
 
@@ -290,23 +289,12 @@ class MultiMaterialMeshOutputBuilder(MeshOutputBuilder):
             submodel.opacity = self.obj.t3d_properties.opacity
 
             if mtl and self.obj.t3d_properties.opacity_source == "MATERIAL":
-                wrapper = MaterialWrapper(mtl)
-
-                if wrapper.get_diffusemap() is not None:
-                    submodel.opacity = wrapper.get_opacity()
+                submodel.opacity = mtl.eu07_material.get_opacity_for_submodel()
 
     def set_map(self, embed_skins=False, use_generated_img_name=False):
         for mtl, submodel in self.mtl_to_submodels.items():
             
             is_replacable = self.obj.t3d_properties.replacableskin_id != "None"
-    
-            if mtl and use_generated_img_name:
-                wrapper = MaterialWrapper(mtl)
-                diffusemap = wrapper.get_diffusemap()
-    
-                if diffusemap and diffusemap.source == 'GENERATED':
-                    submodel.map = diffusemap.name.replace(".", "_")
-                    return
     
             if is_replacable and not embed_skins:
                 submodel.map = self.obj.t3d_properties.replacableskin_id
@@ -383,21 +371,10 @@ class SingleMaterialMeshOutputBuilder(MeshOutputBuilder):
         self.submodel.opacity = self.obj.t3d_properties.opacity
 
         if self.material and self.obj.t3d_properties.opacity_source == "MATERIAL":
-            wrapper = MaterialWrapper(self.material)
-
-            if wrapper.get_diffusemap() is not None:
-                self.submodel.opacity = wrapper.get_opacity()
+                self.submodel.opacity = self.material.eu07_material.get_opacity_for_submodel()
 
     def set_map(self, embed_skins=False, use_generated_img_name=False):
         is_replacable = self.obj.t3d_properties.replacableskin_id != "None"
-
-        if self.material and use_generated_img_name:
-            wrapper = MaterialWrapper(self.material)
-            diffusemap = wrapper.get_diffusemap()
-
-            if diffusemap and diffusemap.source == 'GENERATED':
-                self.submodel.map = diffusemap.name.replace(".", "_")
-                return
 
         if is_replacable and not embed_skins:
             self.submodel.map = self.obj.t3d_properties.replacableskin_id
