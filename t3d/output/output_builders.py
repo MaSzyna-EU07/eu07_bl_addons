@@ -10,7 +10,11 @@ from material_tools.wrapper import MaterialWrapper
 from common.utils import remove_name_suffix
 from mathutils import Matrix
 
-from native.mikktspace import MikkContext
+from sys import platform
+if platform == "linux":
+    from native.eu07_tools_native_Linux import MikkContext
+elif platform == "win32":
+    from native.eu07_tools_native_Windows import MikkContext
 
 
 def get_builder(exporter, obj):
@@ -19,9 +23,7 @@ def get_builder(exporter, obj):
     if obj.type == 'MESH' and not exporter.flatten_mesh_hierarchy:
         materials = set()
         materials = materials.union(filter(lambda mtl: mtl is not None, map(lambda slot: slot.material, obj.material_slots)))
-        if len(materials) == 0:
-            cls = BananMeshOutputBuilder
-        elif len(materials) == 1:
+        if len(materials) <= 1:
             cls = SingleMaterialMeshOutputBuilder
         else:
             cls = MultiMaterialMeshOutputBuilder
@@ -32,9 +34,7 @@ def get_builder(exporter, obj):
             materials = set()
             for o in filter(lambda child: child.type == 'MESH', obj.children):
                 materials = materials.union(filter(lambda mtl: mtl is not None, map(lambda slot: slot.material, o.material_slots)))
-            if len(materials) == 0:
-                cls = BananMeshOutputBuilder
-            elif len(materials) == 1:
+            if len(materials) <= 1:
                 cls = SingleMaterialMeshOutputBuilder
             else:
                 cls = MultiMaterialMeshOutputBuilder
@@ -375,7 +375,7 @@ class SingleMaterialMeshOutputBuilder(MeshOutputBuilder):
             for o in filter(lambda child: child.type == 'MESH', obj.children):
                 materials = materials.union(filter(lambda mtl: mtl is not None, map(lambda slot: slot.material, o.material_slots)))
 
-        self.material = next(iter(materials))
+        self.material = next(iter(materials)) if len(materials) else None
         
         self.submodel = eu07_tools.t3d.create_submodel("Mesh", remove_name_suffix(obj.name))
 

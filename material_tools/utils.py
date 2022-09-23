@@ -4,8 +4,9 @@ import bpy
 import common
 import eu07_tools
 
-from .wrapper import MaterialWrapper
-
+def create_material(name):
+    bl_material = bpy.data.materials.new(name)
+    return bl_material.eu07_material
 
 def get_qualified_material_name(abspath, opacity=1):
     root = common.utils.get_environment_path(abspath)
@@ -49,6 +50,18 @@ def get_filename_from_material(material):
             return pathlib.Path(image.filepath).stem
         else:
             return "none"
+
+def clean_nodegroups():
+    ng_names = [
+        MATERIAL_BLOCK_NAME,
+        RANDOM_TEXTURESET_NAME
+    ]
+
+    for ng_name in ng_names:
+        ng = bpy.data.node_groups.get(ng_name)
+        if ng:
+            bpy.data.node_groups.remove(ng)
+
 
 
 

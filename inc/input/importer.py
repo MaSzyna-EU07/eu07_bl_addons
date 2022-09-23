@@ -62,7 +62,7 @@ class INCImporter:
         mesh_data = GeometryBuilder().build_from_geometry(element.geometry, mesh_data=mesh_data, swizzle=True)
 
         tri_object = bpy.data.objects.new(element.name, mesh_data)
-        tri_object.active_material = MaterialImporter(self.asset_searcher).import_from_relpath(element.map)
+        tri_object.active_material = MaterialImporter(self.asset_searcher).import_from_shortpath(element.map)
 
         return tri_object
 
