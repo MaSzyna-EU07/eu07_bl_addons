@@ -16,12 +16,18 @@ VARIANT_NAMES = [
 MAX_TEXTURES_NUM = 8
 
 class EU07_MATBlock(bpy.types.PropertyGroup):
-    @property
-    def bl_node_tree(self):
-        return self.bl_node.id_data
-
+    # HACK: self.id_data returns main node tree so i took this workaround from
+    # https://blender.stackexchange.com/questions/214446/adding-properties-to-a-shader-node
     @property
     def bl_node(self):
+        nodes = [n for n in self.id_data.nodes if n.type == 'GROUP']
+        for n in nodes:
+            n.eu07_matblock.name = n.name
+
+        return self.id_data.nodes.get(self.name)
+
+    @property
+    def bl_node_tree(self):
         return self.id_data
 
     def set_to_texture_slot(self, entity, slot_name):
@@ -102,6 +108,7 @@ class EU07_MATBlock(bpy.types.PropertyGroup):
 
     def _get_texture_slot_input(self, slot_name):
         for input in self.bl_node.inputs:
+            print(slot_name, input.name)
             if input.name.lower() == slot_name.lower():
                 return input
 

@@ -1,6 +1,7 @@
 import eu07_tools
 
 from material_tools import utils
+from .shaderparser import ShaderParser
 
 
 class MaterialImporter:
@@ -26,6 +27,7 @@ class MaterialImporter:
 
         if abspath.endswith(".mat"):
             self.asset_searcher.textures.remove_extension(".mat")
+            material.is_mat = True
 
             with open(abspath, encoding="latin-1") as matfile:
                 mapping = eu07_tools.mat.load(matfile)
@@ -41,6 +43,24 @@ class MaterialImporter:
         matblock = material.create_matblock()
 
         shader_params = {}
+        shader_data = None
+        tex_counter = 0
+
+        num_textures = len([k for k in mapping.keys() if k.startswith("texture")])
+        use_default_shader = ("shader" not in mapping.keys())
+
+        shader_name = f"default_{num_textures}" if use_default_shader else mapping["shader"]
+
+        shaderparser = ShaderParser(self.asset_searcher)
+        self.asset_searcher.shaders.remove_extension(".vert")
+
+        abspath = self.asset_searcher.shaders.find("mat_" + shader_name)
+        print(abspath)
+
+        self.asset_searcher.shaders.add_extension(".vert")
+
+        if abspath:
+            shader_data = shaderparser.parse_from_abspath(abspath)
 
         for key, value in mapping.items():
             if key == "shader":
@@ -63,9 +83,11 @@ class MaterialImporter:
 
             elif key in eu07_tools.mat.NESTED_MAPPING_KEYS:
                 subblock = self._import_matblock(value, material)
-                material.set_subblock(subblock, key)
+                material.mat_root.set_subblock(subblock, key)
 
             elif key.startswith("texture"):
+                tex_counter += 1
+
                 if value.value_type == "TEXTURE_SET":
                     entity = material.create_randomtextureset()
                     texset = value
@@ -76,9 +98,19 @@ class MaterialImporter:
                         entity.append_texture(texture)
                 else:
                     entity = material.create_texture()
-                    self._init_texture_from_shortpath(entity, value)
+                    self._init_texture_from_shortpath(entity, value.value)
 
-                matblock.set_to_texture_slot(entity, key)
+                slot_name = key
+                if "_" in key:
+                    _, alias = key.split("_")
+                    entity.mat_alias = alias
+
+                if shader_data:
+                    slot_name = self._get_slot_name_for_alias(alias, shader_data)
+                    if not slot_name:
+                        slot_name = f"texture{tex_counter}"
+
+                matblock.set_to_texture_slot(entity, slot_name)
 
         matblock.shader_params = ";".join((
             f"{k}:{v}"
@@ -90,6 +122,15 @@ class MaterialImporter:
     def _init_texture_from_shortpath(self, texture, shortpath):
         abspath = self.asset_searcher.textures.find(shortpath)
         texture.set_image_from_abspath(abspath)
+
+    def _get_slot_name_for_alias(self, alias, shader_data):
+        id_ = shader_data.alias_map.get(alias)
+
+        if id_:
+            return f"texture{id_}"
+
+
+
 
 
 

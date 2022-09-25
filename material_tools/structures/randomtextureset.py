@@ -4,11 +4,29 @@ RANDOM_TEXTURESET_NAME = "[EU07] Random Texture Set"
 MAX_TEXTURESET_SIZE = 4
 
 class EU07_RandomTextureSet(bpy.types.PropertyGroup):
+    # HACK: self.id_data returns main node tree so i took this workaround from
+    # https://blender.stackexchange.com/questions/214446/adding-properties-to-a-shader-node
+    @property
+    def bl_node(self):
+        nodes = (n for n in self.id_data.nodes if n.type == 'GROUP')
+        for n in nodes:
+            n.eu07_randomtextureset.name = n.name
+
+        return self.id_data.nodes.get(self.name)
+
     def append_texture(self, texture):
         pass
 
     def remove_texture(self, texture):
         pass
+
+    @property
+    def mat_alias(self):
+        return self.bl_node.label
+
+    @mat_alias.setter
+    def mat_alias(self, alias):
+        self.bl_node.label = alias
 
 
 def create_template():

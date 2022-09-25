@@ -26,14 +26,17 @@ class EU07_Material(bpy.types.PropertyGroup):
 
     @property
     def mat_root(self):
-        if self.type != 'MAT':
+        if not self.is_mat:
             return None
 
         for node in self.bl_material.node_tree.nodes:
-            if node.label == matblock_mod.NODEGROUP_NAME:
+            if node.type == 'GROUP' and node.node_tree.name == matblock_mod.NODEGROUP_NAME:
                 output = node.outputs[0]
 
-                is_nested = any([link.to_node.label == matblock_mod.NODEGROUP_NAME for link in output.links])
+                is_nested = any([
+                    link.to_node.type == 'GROUP' and node.node_tree.name == matblock_mod.NODEGROUP_NAME
+                    for link in output.links
+                ])
                 if not is_nested:
                     return node.eu07_matblock
 
