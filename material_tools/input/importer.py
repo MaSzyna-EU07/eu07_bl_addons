@@ -34,6 +34,11 @@ class MaterialImporter:
                 matblock = self._import_matblock(mapping, material)
 
             self.asset_searcher.textures.add_extension(".mat")
+
+            diffuse = material.mat_root.get_from_texture_slot("texture1")
+            if diffuse:
+                material.set_active_color_texture(diffuse)
+
         else:
             texture = material.create_texture()
             texture.set_image_from_abspath(abspath)
@@ -55,7 +60,6 @@ class MaterialImporter:
         self.asset_searcher.shaders.remove_extension(".vert")
 
         abspath = self.asset_searcher.shaders.find("mat_" + shader_name)
-        print(abspath)
 
         self.asset_searcher.shaders.add_extension(".vert")
 
@@ -83,14 +87,14 @@ class MaterialImporter:
 
             elif key in eu07_tools.mat.NESTED_MAPPING_KEYS:
                 subblock = self._import_matblock(value, material)
-                material.mat_root.set_subblock(subblock, key)
+                matblock.set_subblock(subblock, key)
 
             elif key.startswith("texture"):
                 tex_counter += 1
 
                 if value.value_type == "TEXTURE_SET":
                     entity = material.create_randomtextureset()
-                    texset = value
+                    texset = value.value
 
                     for tex_path in texset:
                         texture = material.create_texture()

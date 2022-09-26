@@ -15,10 +15,13 @@ class EU07_RandomTextureSet(bpy.types.PropertyGroup):
         return self.id_data.nodes.get(self.name)
 
     def append_texture(self, texture):
-        pass
-
-    def remove_texture(self, texture):
-        pass
+        for input_ in self.bl_node.inputs:
+            if not input_.links:
+                self.bl_node.id_data.links.new(
+                    texture.bl_node.outputs[0],
+                    input_
+                )
+                return
 
     @property
     def mat_alias(self):
@@ -29,10 +32,12 @@ class EU07_RandomTextureSet(bpy.types.PropertyGroup):
         self.bl_node.label = alias
 
 
-def create_template():
+def get_template():
     ng = bpy.data.node_groups.get(RANDOM_TEXTURESET_NAME)
 
     if ng is None:
+        ng = bpy.data.node_groups.new(RANDOM_TEXTURESET_NAME, 'ShaderNodeTree')
+
         ng_output = ng.nodes.new("NodeGroupOutput")
         ng_input = ng.nodes.new("NodeGroupInput")
 

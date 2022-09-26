@@ -108,7 +108,6 @@ class EU07_MATBlock(bpy.types.PropertyGroup):
 
     def _get_texture_slot_input(self, slot_name):
         for input in self.bl_node.inputs:
-            print(slot_name, input.name)
             if input.name.lower() == slot_name.lower():
                 return input
 
