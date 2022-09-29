@@ -6,6 +6,10 @@ class EU07_Texture(bpy.types.PropertyGroup):
     # HACK: self.id_data returns main node tree so i took this workaround from
     # https://blender.stackexchange.com/questions/214446/adding-properties-to-a-shader-node
     @property
+    def entity_type(self):
+        return "TEXTURE"
+
+    @property
     def bl_node(self):
         nodes = [n for n in self.id_data.nodes if n.type == 'TEX_IMAGE']
         for n in nodes:

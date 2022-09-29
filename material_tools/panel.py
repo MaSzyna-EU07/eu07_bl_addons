@@ -8,17 +8,18 @@ class EU07_PT_MaterialToolsPanel(bpy.types.Panel):
     bl_label = "[EU07] Material Tools"
 
     def draw(self, context):
-        active_material = context.view_layer.objects.active.active_material
+        active_bl_material = context.view_layer.objects.active.active_material
+        eu07_material = active_bl_material.eu07_material if active_bl_material else None
 
-        if active_material:
+
+        if eu07_material:
             is_imported_row = self.layout.row()
-            is_imported_row.prop(active_material.eu07_properties, "is_imported")
-            is_imported_row.enabled = False
+            is_imported_row.prop(eu07_material, "is_mat")
 
-            if active_material.eu07_properties.is_imported:
-                source_row = self.layout.row()
-                source_row.prop(active_material.eu07_properties, "source_path")
-                source_row.enabled = False
+            if eu07_material.is_mat:
+                row = self.layout.row()
+                row.prop(eu07_material, "mat_source_path")
+
 
         import_op = self.layout.operator("eu07.import_material", text="New Material", icon="PLUS")
         import_op.import_into_active = False
@@ -27,7 +28,7 @@ class EU07_PT_MaterialToolsPanel(bpy.types.Panel):
         row = self.layout.row()
         import_op_repl = row.operator("eu07.import_material", text="Replace Material", icon="OVERLAY")
         import_op_repl.import_into_active = True
-        row.enabled = (active_material is not None)
+        row.enabled = (eu07_material is not None)
 
         self.layout.operator("eu07.broadcast_skin", text="Broadcast Skin", icon="PARTICLES")
 

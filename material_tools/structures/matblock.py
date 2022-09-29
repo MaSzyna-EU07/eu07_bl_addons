@@ -1,4 +1,5 @@
 import bpy
+import eu07_tools
 
 from . import randomtextureset as randomtextureset_mod
 
@@ -140,24 +141,25 @@ def get_template():
         shadow_rank_socket = ng.inputs.new("NodeSocketInt", "Shadow Rank")
         shadow_rank_socket.min_value = 1
         shadow_rank_socket.max_value = 3
+        shadow_rank_socket.default_value = eu07_tools.mat.DEFAULT_VALUES["shadow_rank"]
 
         size_x_socket = ng.inputs.new("NodeSocketFloat", "Size X")
         size_x_socket.min_value = -1
-        size_x_socket.default_value = -1
+        size_x_socket.default_value = eu07_tools.mat.DEFAULT_VALUES["size"][0]
 
         size_y_socket = ng.inputs.new("NodeSocketFloat", "Size Y")
         size_y_socket.min_value = -1
-        size_y_socket.default_value = -1
+        size_y_socket.default_value = -eu07_tools.mat.DEFAULT_VALUES["size"][1]
 
         opacity_socket = ng.inputs.new("NodeSocketFloat", "Opacity")
         opacity_socket.min_value = 0
         opacity_socket.max_value = 1
-        opacity_socket.default_value = 1
+        opacity_socket.default_value = eu07_tools.mat.DEFAULT_VALUES["opacity"]
 
         selfillum_socket = ng.inputs.new("NodeSocketFloat", "SelfIllum")
-        selfillum_socket.min_value = 0
+        selfillum_socket.min_value = -1
         selfillum_socket.max_value = 2
-        selfillum_socket.default_value = 0
+        selfillum_socket.default_value = eu07_tools.mat.DEFAULT_VALUES["selfillum"]
 
     return ng
 

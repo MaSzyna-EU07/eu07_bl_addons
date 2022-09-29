@@ -10,7 +10,7 @@ classes = (
 
 
 def menu_func_import(self, context):
-    self.layout.operator(EU07_OT_MaterialImport.bl_idname, text="[EU07] Material (.mat)")
+    self.layout.operator(EU07_OT_MaterialImport.bl_idname, text="[EU07] Material/Texture (.mat, .tga, .dds, .png, .bmp)")
 
 
 def register():

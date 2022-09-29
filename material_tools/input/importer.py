@@ -14,7 +14,6 @@ class MaterialImporter:
         if abspath:
             return self.import_from_abspath(abspath, material, skip_mat_lookup=True)
 
-        return None
 
     def import_from_abspath(self, abspath, material=None, skip_mat_lookup=False):
         shortpath = eu07_tools.utils.shorten_asset_path(abspath)
@@ -28,6 +27,7 @@ class MaterialImporter:
         if abspath.endswith(".mat"):
             self.asset_searcher.textures.remove_extension(".mat")
             material.is_mat = True
+            material.mat_source_path = shortpath
 
             with open(abspath, encoding="latin-1") as matfile:
                 mapping = eu07_tools.mat.load(matfile)
@@ -43,6 +43,10 @@ class MaterialImporter:
             texture = material.create_texture()
             texture.set_image_from_abspath(abspath)
             material.set_active_color_texture(texture)
+
+        material.configure()
+
+        return material
 
     def _import_matblock(self, mapping, material):
         matblock = material.create_matblock()
