@@ -66,6 +66,13 @@ class EU07_MATBlock(bpy.types.PropertyGroup):
         self.bl_node.inputs[0].default_value = shader_name
 
     # TODO: Shader params
+    @property
+    def shader_params_string(self):
+        return self.bl_node.inputs[1].default_value
+
+    @shader_params_string.setter
+    def shader_params_string(self, sps):
+        self.bl_node.inputs[1].default_value = sps
 
     @property
     def shadow_rank(self):
@@ -149,7 +156,7 @@ def get_template():
 
         size_y_socket = ng.inputs.new("NodeSocketFloat", "Size Y")
         size_y_socket.min_value = -1
-        size_y_socket.default_value = -eu07_tools.mat.DEFAULT_VALUES["size"][1]
+        size_y_socket.default_value = eu07_tools.mat.DEFAULT_VALUES["size"][1]
 
         opacity_socket = ng.inputs.new("NodeSocketFloat", "Opacity")
         opacity_socket.min_value = 0

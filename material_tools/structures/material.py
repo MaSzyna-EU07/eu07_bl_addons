@@ -25,6 +25,14 @@ class EU07_Material(bpy.types.PropertyGroup):
         return self.id_data
 
     @property
+    def name(self):
+        return self.bl_material.name
+
+    @name.setter
+    def name(self, name):
+        self.bl_material.name = name
+
+    @property
     def mat_root(self):
         if not self.is_mat:
             return None
@@ -102,6 +110,14 @@ class EU07_Material(bpy.types.PropertyGroup):
 
         return ""
 
+    def reset(self):
+        self.bl_material.node_tree.nodes.clear()
+
+        self.bl_material.node_tree.links.new(
+            self._get_bsdf_node().outputs[0],
+            self._get_output_node().inputs[0]
+        )
+
     def _get_diffuse_texture_node(self, bsdf):
         if bsdf.inputs[BSDF_COLOR_INPUT].links:
             link = bsdf.inputs.links[0]
@@ -113,6 +129,15 @@ class EU07_Material(bpy.types.PropertyGroup):
         for node in self.bl_material.node_tree.nodes:
             if "Bsdf" in node.bl_idname:
                 return node
+
+        return self.bl_material.node_tree.nodes.new("ShaderNodeBsdfPrincipled")
+
+    def _get_output_node(self):
+        for node in self.bl_material.node_tree.nodes:
+            if "OutputMaterial" in node.bl_idname:
+                return node
+
+        return self.bl_material.node_tree.nodes.new("ShaderNodeOutputMaterial")
 
 
 def register():

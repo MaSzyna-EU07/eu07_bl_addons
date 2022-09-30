@@ -26,8 +26,12 @@ class EU07_PT_MaterialToolsPanel(bpy.types.Panel):
         import_op.set_new_as_active = True
 
         row = self.layout.row()
-        import_op_repl = row.operator("eu07.import_material", text="Replace Material", icon="OVERLAY")
+        import_op_repl = row.operator("eu07.import_material", text="Import Material", icon="IMPORT")
         import_op_repl.import_into_active = True
+        row.enabled = (eu07_material is not None)
+        
+        row = self.layout.row()
+        export_op_repl = row.operator("eu07.export_material", text="Export Material", icon="EXPORT")
         row.enabled = (eu07_material is not None)
 
         self.layout.operator("eu07.broadcast_skin", text="Broadcast Skin", icon="PARTICLES")

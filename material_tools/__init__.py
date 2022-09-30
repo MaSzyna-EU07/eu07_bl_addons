@@ -3,12 +3,14 @@ from . import input as input_
 from . import panel
 from . import skins
 from . import structures
+from . import output
 
 modules = (
     input_,
     skins,
     panel,
-    structures
+    structures,
+    output,
 )
 
 

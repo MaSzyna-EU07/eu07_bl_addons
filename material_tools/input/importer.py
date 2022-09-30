@@ -21,8 +21,11 @@ class MaterialImporter:
         if not abspath.endswith(".mat") and self.do_mat_lookup and (not skip_mat_lookup):
             abspath = self.asset_searcher.textures.find(shortpath)
 
+        material.reset()
         if material is None:
             material = utils.create_material(shortpath)
+        else:
+            material.name = shortpath
 
         if abspath.endswith(".mat"):
             self.asset_searcher.textures.remove_extension(".mat")
@@ -96,9 +99,9 @@ class MaterialImporter:
             elif key.startswith("texture"):
                 tex_counter += 1
 
-                if value.value_type == "TEXTURE_SET":
+                if value.use_set:
                     entity = material.create_randomtextureset()
-                    texset = value.value
+                    texset = value.set
 
                     for tex_path in texset:
                         texture = material.create_texture()
@@ -106,7 +109,7 @@ class MaterialImporter:
                         entity.append_texture(texture)
                 else:
                     entity = material.create_texture()
-                    self._init_texture_from_shortpath(entity, value.value)
+                    self._init_texture_from_shortpath(entity, value.path)
 
                 slot_name = key
                 if "_" in key:
@@ -120,7 +123,7 @@ class MaterialImporter:
 
                 matblock.set_to_texture_slot(entity, slot_name)
 
-        matblock.shader_params = ";".join((
+        matblock.shader_params_string = ";".join((
             f"{k}:{v}"
             for k, v in shader_params.items()
         ))

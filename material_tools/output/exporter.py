@@ -11,23 +11,25 @@ class MaterialExporter:
             return
 
         matblock = material.mat_root
-        mapping = self._matblock_to_mapping(matblock)
+        mapping = self.matblock_to_mapping(matblock)
 
         eu07_tools.mat.dump(mapping, file)
 
-    def _matblock_to_mapping(self, matblock, file):
+    def matblock_to_mapping(self, matblock):
         mapping = eu07_tools.mat.create_mapping()
 
-        mapping["shader"] = matblock.shader_name
+        if matblock.shader_name:
+            mapping["shader"] = matblock.shader_name
         mapping["opacity"] = matblock.opacity
         mapping["selfillum"] = matblock.selfillum
         mapping["size"] = [matblock.size_x, matblock.size_y]
         mapping["shadow_rank"] = matblock.shadow_rank
 
-        params_strings = matblock.shader_params.split(";")
-        for param_string in params_strings:
-            key, value = param_string.split(":")
-            mapping[key] = value
+        if matblock.shader_params_string:
+            params_strings = matblock.shader_params_string.split(";")
+            for param_string in params_strings:
+                key, value = param_string.split(":")
+                mapping[key] = value
 
         for i in range(matblock_mod.MAX_TEXTURES_NUM):
             slotname = f"texture{i + 1}"
@@ -44,6 +46,8 @@ class MaterialExporter:
         for key in eu07_tools.mat.NESTED_MAPPING_KEYS:
             subblock = matblock.get_subblock(key)
             if subblock:
-                submapping = self._matblock_to_mapping(subblock)
+                submapping = self.matblock_to_mapping(subblock)
                 mapping[key] = submapping
+
+        return mapping
 
