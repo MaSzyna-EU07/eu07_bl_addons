@@ -38,11 +38,11 @@ class EU07_Material(bpy.types.PropertyGroup):
             return None
 
         for node in self.bl_material.node_tree.nodes:
-            if node.type == 'GROUP' and node.node_tree.name == matblock_mod.NODEGROUP_NAME:
+            if node.type == 'GROUP' and node.eu07_matblock.is_valid:
                 output = node.outputs[0]
 
                 is_nested = any([
-                    link.to_node.type == 'GROUP' and node.node_tree.name == matblock_mod.NODEGROUP_NAME
+                    link.to_node.type == 'GROUP' and node.eu07_matblock.is_valid
                     for link in output.links
                 ])
                 if not is_nested:

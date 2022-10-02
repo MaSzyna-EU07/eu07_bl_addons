@@ -127,11 +127,6 @@ class MaterialImporter:
 
                 matblock.set_to_texture_slot(entity, slot_name)
 
-        matblock.shader_params_string = ";".join((
-            f"{k}:{v}"
-            for k, v in shader_params.items()
-        ))
-
         return matblock
 
     def _init_texture_from_shortpath(self, texture, shortpath):

@@ -16,7 +16,50 @@ VARIANT_NAMES = [
 ]
 MAX_TEXTURES_NUM = 8
 
+class EU07_MATShaderParam(bpy.types.PropertyGroup):
+    id: bpy.props.IntProperty(default=-1)
+    alias: bpy.props.StringProperty(default="")
+    value_alias: bpy.props.FloatProperty()
+    value_id: bpy.props.FloatVectorProperty(size=4)
+
 class EU07_MATBlock(bpy.types.PropertyGroup):
+    shader_name: bpy.props.StringProperty(
+        name="Shader Name",
+        description="Name of shader to be used",
+    )
+    shader_params: bpy.props.CollectionProperty(
+        type=EU07_MATShaderParam,
+    )
+
+    shadow_rank: bpy.props.IntProperty(
+        name="Shadow Rank",
+        description="",
+        default=3,
+        max=3,
+        min=1
+    )
+
+    size: bpy.props.FloatVectorProperty(
+        name="Size",
+        size=2,
+        default=(-1, -1),
+        min=-1,
+    )
+
+    opacity: bpy.props.IntProperty(
+        name="Opacity",
+        default=1,
+        min=0,
+        max=1
+    )
+
+    selfillum: bpy.props.FloatProperty(
+        name="SelfIllum",
+        default=-1,
+        min=-1,
+        max=2
+    )
+
     # HACK: self.id_data returns main node tree so i took this workaround from
     # https://blender.stackexchange.com/questions/214446/adding-properties-to-a-shader-node
     @property
@@ -30,6 +73,10 @@ class EU07_MATBlock(bpy.types.PropertyGroup):
     @property
     def bl_node_tree(self):
         return self.id_data
+
+    @property
+    def is_valid(self):
+        return self.bl_node.node_tree.name == NODEGROUP_NAME
 
     def set_to_texture_slot(self, entity, slot_name):
         self.bl_node_tree.links.new(
@@ -57,62 +104,22 @@ class EU07_MATBlock(bpy.types.PropertyGroup):
         if input_.links:
             return input_.links[0].from_node.eu07_matblock
 
-    @property
-    def shader_name(self):
-        return self.bl_node.inputs[0].default_value
+    def set_shader_param_value(self, key, value):
+        param = self._get_shader_param(key)
 
-    @shader_name.setter
-    def shader_name(self, shader_name):
-        self.bl_node.inputs[0].default_value = shader_name
+    def get_shader_param_value(self):
+        pass
 
-    # TODO: Shader params
-    @property
-    def shader_params_string(self):
-        return self.bl_node.inputs[1].default_value
+    def _get_shader_param(self, key):
+        get_by_id = isinstance(key, int)
 
-    @shader_params_string.setter
-    def shader_params_string(self, sps):
-        self.bl_node.inputs[1].default_value = sps
-
-    @property
-    def shadow_rank(self):
-        return self.bl_node.inputs[18].default_value
-
-    @shadow_rank.setter
-    def shadow_rank(self, shadow_rank):
-        self.bl_node.inputs[18].default_value = shadow_rank
-
-    @property
-    def size_x(self):
-        return self.bl_node.inputs[19].default_value
-
-    @size_x.setter
-    def size_x(self, size_x):
-        self.bl_node.inputs[19].default_value = size_x
-
-    @property
-    def size_y(self):
-        return self.bl_node.inputs[20].default_value
-
-    @size_y.setter
-    def size_y(self, size_y):
-        self.bl_node.inputs[20].default_value = size_y
-
-    @property
-    def opacity(self):
-        return self.bl_node.inputs[21].default_value
-
-    @opacity.setter
-    def opacity(self, opacity):
-        self.bl_node.inputs[21].default_value = opacity
-
-    @property
-    def selfillum(self):
-        return self.bl_node.inputs[22].default_value
-
-    @selfillum.setter
-    def selfillum(self, selfillum):
-        self.bl_node.inputs[22].default_value = selfillum
+        for shader_param in self.shader_params:
+            if get_by_id:
+                if shader_param.id == key:
+                    return shader_param
+            else:
+                if shader_param.alias == key:
+                    return shader_param
 
     def _get_texture_slot_input(self, slot_name):
         for input in self.bl_node.inputs:
@@ -136,46 +143,27 @@ def get_template():
 
         ng_input = ng.nodes.new("NodeGroupInput")
 
-        ng.inputs.new("NodeSocketString", "Shader File")
-        ng.inputs.new("NodeSocketString", "Shader Params")
-
         for texture_index in range(1, MAX_TEXTURES_NUM + 1):
             texture_socket = ng.inputs.new("NodeSocketColor", f"Texture{texture_index}")
 
         for variant_name in VARIANT_NAMES:
             ng.inputs.new("NodeSocketShader", variant_name)
 
-        shadow_rank_socket = ng.inputs.new("NodeSocketInt", "Shadow Rank")
-        shadow_rank_socket.min_value = 1
-        shadow_rank_socket.max_value = 3
-        shadow_rank_socket.default_value = eu07_tools.mat.DEFAULT_VALUES["shadow_rank"]
-
-        size_x_socket = ng.inputs.new("NodeSocketFloat", "Size X")
-        size_x_socket.min_value = -1
-        size_x_socket.default_value = eu07_tools.mat.DEFAULT_VALUES["size"][0]
-
-        size_y_socket = ng.inputs.new("NodeSocketFloat", "Size Y")
-        size_y_socket.min_value = -1
-        size_y_socket.default_value = eu07_tools.mat.DEFAULT_VALUES["size"][1]
-
-        opacity_socket = ng.inputs.new("NodeSocketFloat", "Opacity")
-        opacity_socket.min_value = 0
-        opacity_socket.max_value = 1
-        opacity_socket.default_value = eu07_tools.mat.DEFAULT_VALUES["opacity"]
-
-        selfillum_socket = ng.inputs.new("NodeSocketFloat", "SelfIllum")
-        selfillum_socket.min_value = -1
-        selfillum_socket.max_value = 2
-        selfillum_socket.default_value = eu07_tools.mat.DEFAULT_VALUES["selfillum"]
-
     return ng
 
 
+classes = (
+    EU07_MATShaderParam,
+    EU07_MATBlock,
+)
+
 def register():
-    bpy.utils.register_class(EU07_MATBlock)
+    for cls in classes:
+        bpy.utils.register_class(cls)
     bpy.types.ShaderNodeGroup.eu07_matblock = bpy.props.PointerProperty(type=EU07_MATBlock)
 
 
 def unregister():
-    bpy.utils.unregister_class(EU07_MATBlock)
+    for cls in classes:
+        bpy.utils.unregister_class(cls)
     del bpy.types.ShaderNodeGroup.eu07_matblock

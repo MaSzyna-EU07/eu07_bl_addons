@@ -22,14 +22,8 @@ class MaterialExporter:
             mapping["shader"] = matblock.shader_name
         mapping["opacity"] = matblock.opacity
         mapping["selfillum"] = matblock.selfillum
-        mapping["size"] = [matblock.size_x, matblock.size_y]
+        mapping["size"] = list(matblock.size)
         mapping["shadow_rank"] = matblock.shadow_rank
-
-        if matblock.shader_params_string:
-            params_strings = matblock.shader_params_string.split(";")
-            for param_string in params_strings:
-                key, value = param_string.split(":")
-                mapping[key] = value
 
         for i in range(matblock_mod.MAX_TEXTURES_NUM):
             slotname = f"texture{i + 1}"
