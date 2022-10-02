@@ -2,6 +2,7 @@ import eu07_tools
 
 from material_tools import utils
 from .shaderparser import ShaderParser
+from ..layouter import NodeLayouter
 
 
 class MaterialImporter:
@@ -24,8 +25,10 @@ class MaterialImporter:
         material.reset()
         if material is None:
             material = utils.create_material(shortpath)
-        else:
-            material.name = shortpath
+
+        material.name = shortpath
+
+        visual_texture = None
 
         if abspath.endswith(".mat"):
             self.asset_searcher.textures.remove_extension(".mat")
@@ -38,14 +41,15 @@ class MaterialImporter:
 
             self.asset_searcher.textures.add_extension(".mat")
 
-            diffuse = material.mat_root.get_from_texture_slot("texture1")
-            if diffuse:
-                material.set_active_color_texture(diffuse)
+            visual_texture = material.mat_root.get_from_texture_slot("texture1")
 
         else:
-            texture = material.create_texture()
-            texture.set_image_from_abspath(abspath)
-            material.set_active_color_texture(texture)
+            visual_texture = material.create_texture()
+            visual_texture.set_image_from_abspath(abspath)
+
+        NodeLayouter(material.bl_material).layout_nodes()
+        material.set_active_color_texture(visual_texture)
+
 
         material.configure()
 

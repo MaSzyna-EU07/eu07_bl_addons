@@ -2,13 +2,25 @@ import bpy
 
 import eu07_tools
 
+def _get_alias(self):
+    return self.bl_node.label
+
+def _set_alias(self, alias):
+    self.bl_node.label = alias
+
 class EU07_Texture(bpy.types.PropertyGroup):
-    # HACK: self.id_data returns main node tree so i took this workaround from
-    # https://blender.stackexchange.com/questions/214446/adding-properties-to-a-shader-node
+    mat_alias: bpy.props.StringProperty(
+        name="Alias",
+        get=_get_alias,
+        set=_set_alias
+    )
+
     @property
     def entity_type(self):
         return "TEXTURE"
 
+    # HACK: self.id_data returns main node tree so i took this workaround from
+    # https://blender.stackexchange.com/questions/214446/adding-properties-to-a-shader-node
     @property
     def bl_node(self):
         nodes = [n for n in self.id_data.nodes if n.type == 'TEX_IMAGE']
@@ -32,14 +44,6 @@ class EU07_Texture(bpy.types.PropertyGroup):
             return eu07_tools.utils.shorten_asset_path(self.abspath)
 
         return "none"
-
-    @property
-    def mat_alias(self):
-        return self.bl_node.label
-
-    @mat_alias.setter
-    def mat_alias(self, alias):
-        self.bl_node.label = alias
 
 
 def register():

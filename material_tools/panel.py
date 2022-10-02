@@ -37,8 +37,34 @@ class EU07_PT_MaterialToolsPanel(bpy.types.Panel):
         self.layout.operator("eu07.broadcast_skin", text="Broadcast Skin", icon="PARTICLES")
 
 
+class EU07_PT_MATEntityProperties(bpy.types.Panel):
+    bl_space_type = 'NODE_EDITOR'
+    bl_region_type = 'UI'
+    bl_category = "[EU07] Tools"
+    bl_label = "MAT Entity Properties"
+
+    @classmethod
+    def poll(cls, context):
+        active_object = context.view_layer.objects.active
+        if active_object:
+            active_material = active_object.active_material
+            return active_material and active_material.eu07_material.is_mat
+
+        return False
+
+    def draw(self, context):
+        active_bl_material = context.view_layer.objects.active.active_material
+        eu07_material = active_bl_material.eu07_material if active_bl_material else None
+
+        active_node = active_bl_material.node_tree.nodes.active
+
+        if active_node and active_node.bl_idname == "ShaderNodeTexImage":
+            self.layout.prop(active_node.eu07_texture, "mat_alias")
+
+
 classes = (
     EU07_PT_MaterialToolsPanel,
+    EU07_PT_MATEntityProperties,
 )
 
 

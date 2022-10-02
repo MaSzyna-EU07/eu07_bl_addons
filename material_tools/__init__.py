@@ -8,8 +8,8 @@ from . import output
 modules = (
     input_,
     skins,
-    panel,
     structures,
+    panel,
     output,
 )
 

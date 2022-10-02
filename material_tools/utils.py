@@ -52,16 +52,6 @@ def get_filename_from_material(material):
         else:
             return "none"
 
-def clean_nodegroups():
-    ng_names = [
-        MATERIAL_BLOCK_NAME,
-        RANDOM_TEXTURESET_NAME
-    ]
-
-    for ng_name in ng_names:
-        ng = bpy.data.node_groups.get(ng_name)
-        if ng:
-            bpy.data.node_groups.remove(ng)
 
 
 
