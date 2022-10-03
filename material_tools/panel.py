@@ -68,7 +68,12 @@ class EU07_PT_MATEntityProperties(bpy.types.Panel):
         elif active_node.bl_idname == "ShaderNodeGroup" and active_node.node_tree.name == matblock_mod.NODEGROUP_NAME:
             matblock_data = active_node.eu07_matblock
             self.layout.prop(matblock_data, "shader_name")
-            # TODO: Shader params
+            self.layout.label(text="Shader Parameters:")
+            self.layout.template_list(
+                "EU07_UL_MATShaderParams", "",
+                matblock_data, "shader_params",
+                active_node, "eu07_active_shader_param_index"
+            )
             self.layout.prop(matblock_data, "shadow_rank")
             self.layout.prop(matblock_data, "size")
             self.layout.prop(matblock_data, "opacity")

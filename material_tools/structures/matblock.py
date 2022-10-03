@@ -17,10 +17,20 @@ VARIANT_NAMES = [
 MAX_TEXTURES_NUM = 8
 
 class EU07_MATShaderParam(bpy.types.PropertyGroup):
-    id: bpy.props.IntProperty(default=-1)
-    alias: bpy.props.StringProperty(default="")
-    value_alias: bpy.props.FloatProperty()
-    value_id: bpy.props.FloatVectorProperty(size=4)
+    name: bpy.props.StringProperty()
+    value_string: bpy.props.StringProperty()
+
+    @property
+    def values_list(self):
+        stripped = self.value_string.strip()
+        if stripped:
+            if " " in stripped:
+                return [float(x) for x in stripped.split(" ")]
+            else:
+                return [float(stripped)]
+
+        return []
+
 
 class EU07_MATBlock(bpy.types.PropertyGroup):
     shader_name: bpy.props.StringProperty(
@@ -30,7 +40,6 @@ class EU07_MATBlock(bpy.types.PropertyGroup):
     shader_params: bpy.props.CollectionProperty(
         type=EU07_MATShaderParam,
     )
-
     shadow_rank: bpy.props.IntProperty(
         name="Shadow Rank",
         description="",
@@ -104,22 +113,21 @@ class EU07_MATBlock(bpy.types.PropertyGroup):
         if input_.links:
             return input_.links[0].from_node.eu07_matblock
 
-    def set_shader_param_value(self, key, value):
-        param = self._get_shader_param(key)
+    def set_shader_param_value(self, name, value):
+        param = self._get_shader_param(name)
+        if not param:
+            param = self.shader_params.add()
+            param.name = name
+        param.value_string = " ".join(str(x) for x in value)
 
-    def get_shader_param_value(self):
-        pass
+    def get_shader_param_value(self, name):
+        param = self._get_shader_param(name)
+        return param.values_list
 
-    def _get_shader_param(self, key):
-        get_by_id = isinstance(key, int)
-
+    def _get_shader_param(self, name):
         for shader_param in self.shader_params:
-            if get_by_id:
-                if shader_param.id == key:
-                    return shader_param
-            else:
-                if shader_param.alias == key:
-                    return shader_param
+            if shader_param.name == name:
+                return shader_param
 
     def _get_texture_slot_input(self, slot_name):
         for input in self.bl_node.inputs:
@@ -152,18 +160,35 @@ def get_template():
     return ng
 
 
+class EU07_UL_MATShaderParams(bpy.types.UIList):
+    def draw_item(self, context, layout, data, item, icon, active_data, active_propname, index):
+        custom_icon = 'KEYFRAME'
+
+        if self.layout_type in {'DEFAULT', 'COMPACT'}:
+            row = layout.row()
+            row.prop(item, "name", text="")
+            row.prop(item, "value_string", text="")
+
+        elif self.layout_type in {'GRID'}:
+            layout.alignment = 'CENTER'
+            layout.label(text="", icon=custom_icon)
+
+
 classes = (
     EU07_MATShaderParam,
     EU07_MATBlock,
+    EU07_UL_MATShaderParams,
 )
 
 def register():
     for cls in classes:
         bpy.utils.register_class(cls)
     bpy.types.ShaderNodeGroup.eu07_matblock = bpy.props.PointerProperty(type=EU07_MATBlock)
+    bpy.types.ShaderNodeGroup.eu07_active_shader_param_index = bpy.props.IntProperty()
 
 
 def unregister():
     for cls in classes:
         bpy.utils.unregister_class(cls)
     del bpy.types.ShaderNodeGroup.eu07_matblock
+    del bpy.types.ShaderNodeGroup.eu07_active_shader_param_index

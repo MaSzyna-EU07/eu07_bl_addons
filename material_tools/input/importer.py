@@ -94,7 +94,7 @@ class MaterialImporter:
                 matblock.shadow_rank = value
 
             elif key.startswith("param"):
-                shader_params[key] = value
+                matblock.set_shader_param_value(key, value)
 
             elif key in eu07_tools.mat.NESTED_MAPPING_KEYS:
                 subblock = self._import_matblock(value, material)
