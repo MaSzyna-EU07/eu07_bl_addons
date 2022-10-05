@@ -9,6 +9,19 @@ def create_material(name):
     bl_material.eu07_material.configure()
     return bl_material.eu07_material
 
+
+def get_active_material(context):
+    active_object = context.view_layer.objects.active
+    if active_object:
+        active_material = active_object.active_material
+        return active_material
+
+
+def get_active_material_node(material):
+    if material:
+        return material.node_tree.nodes.active
+
+
 def get_qualified_material_name(abspath, opacity=1):
     root = common.utils.get_environment_path(abspath)
 

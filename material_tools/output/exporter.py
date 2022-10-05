@@ -37,8 +37,8 @@ class MaterialExporter:
                 else:
                     mapping[key] = list(entity.iter_textures())
 
-        for param in matblock.shader_params:
-            mapping[param.name] = param.values_list
+        for param in matblock.iter_shader_params():
+            mapping[param.name] = param.get_values_list()
 
         for key in eu07_tools.mat.NESTED_MAPPING_KEYS:
             subblock = matblock.get_subblock(key)

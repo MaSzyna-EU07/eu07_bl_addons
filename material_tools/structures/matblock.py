@@ -1,7 +1,9 @@
 import bpy
 import eu07_tools
+from common import uilist_safe_index_after_delete
 
 from . import randomtextureset as randomtextureset_mod
+from ..utils import get_active_material, get_active_material_node
 
 NODEGROUP_NAME = "[EU07] Material Block"
 VARIANT_NAMES = [
@@ -16,12 +18,12 @@ VARIANT_NAMES = [
 ]
 MAX_TEXTURES_NUM = 8
 
+
 class EU07_MATShaderParam(bpy.types.PropertyGroup):
     name: bpy.props.StringProperty()
     value_string: bpy.props.StringProperty()
 
-    @property
-    def values_list(self):
+    def get_values_list(self):
         stripped = self.value_string.strip()
         if stripped:
             if " " in stripped:
@@ -31,13 +33,18 @@ class EU07_MATShaderParam(bpy.types.PropertyGroup):
 
         return []
 
+    def set_values_list(self, values):
+        self.value_string = " ".join(str(x) for x in values)
+
+
 
 class EU07_MATBlock(bpy.types.PropertyGroup):
     shader_name: bpy.props.StringProperty(
         name="Shader Name",
         description="Name of shader to be used",
     )
-    shader_params: bpy.props.CollectionProperty(
+    active_shader_param_index: bpy.props.IntProperty()
+    shader_params_internal: bpy.props.CollectionProperty(
         type=EU07_MATShaderParam,
     )
     shadow_rank: bpy.props.IntProperty(
@@ -113,21 +120,31 @@ class EU07_MATBlock(bpy.types.PropertyGroup):
         if input_.links:
             return input_.links[0].from_node.eu07_matblock
 
-    def set_shader_param_value(self, name, value):
-        param = self._get_shader_param(name)
-        if not param:
-            param = self.shader_params.add()
-            param.name = name
-        param.value_string = " ".join(str(x) for x in value)
+    def get_active_shader_param(self):
+        return self.shader_params_internal[self.active_shader_param_index]
 
-    def get_shader_param_value(self, name):
-        param = self._get_shader_param(name)
-        return param.values_list
+    def add_shader_param(self):
+        param = self.shader_params_internal.add()
+        param.name = "param_X"
+        param.set_values_list([0,])
+        return param
 
-    def _get_shader_param(self, name):
-        for shader_param in self.shader_params:
-            if shader_param.name == name:
-                return shader_param
+    def get_shader_param(self, name):
+        for param in self.shader_params_internal:
+            if name == param.name:
+                return param
+
+    def remove_shader_param(self, rem_param):
+        for i, param in enumerate(self.shader_params_internal):
+            if param.name == rem_param.name:
+                self.shader_params_internal.remove(i)
+                self.active_shader_param_index = uilist_safe_index_after_delete(
+                    self.shader_params_internal, self.active_shader_param_index
+                )
+
+    def iter_shader_params(self):
+        for param in self.shader_params_internal:
+            yield param
 
     def _get_texture_slot_input(self, slot_name):
         for input in self.bl_node.inputs:
@@ -165,30 +182,71 @@ class EU07_UL_MATShaderParams(bpy.types.UIList):
         custom_icon = 'KEYFRAME'
 
         if self.layout_type in {'DEFAULT', 'COMPACT'}:
-            row = layout.row()
-            row.prop(item, "name", text="")
-            row.prop(item, "value_string", text="")
+            layout.label(text=item.name)
 
         elif self.layout_type in {'GRID'}:
             layout.alignment = 'CENTER'
             layout.label(text="", icon=custom_icon)
 
 
+def poll_helper(context):
+    active_mat = get_active_material(context)
+    active_node = get_active_material_node(active_mat)
+    return active_node.bl_idname == "ShaderNodeGroup" and active_node.node_tree.name == NODEGROUP_NAME
+
+
+class EU07_OT_MATAddShaderParam(bpy.types.Operator):
+    bl_idname = "eu07.mat_add_shader_param"
+    bl_label = "Add Shader Param"
+
+    @classmethod
+    def poll(cls, context):
+        return poll_helper(context)
+
+    def execute(self, context):
+        material = get_active_material(context)
+        node = get_active_material_node(material)
+
+        param = node.eu07_matblock.add_shader_param()
+        param.name = "param_X"
+        param.set_values_list([0,])
+
+        return {'FINISHED'}
+
+
+class EU07_OT_MATRemoveShaderParam(bpy.types.Operator):
+    bl_idname = "eu07.mat_remove_shader_param"
+    bl_label = "Remove Shader Param"
+
+    @classmethod
+    def poll(cls, context):
+        return poll_helper(context)
+
+    def execute(self, context):
+        material = get_active_material(context)
+        node = get_active_material_node(material)
+
+        active_param = node.eu07_matblock.get_active_shader_param()
+        node.eu07_matblock.remove_shader_param(active_param)
+
+        return {'FINISHED'}
+
+
 classes = (
     EU07_MATShaderParam,
     EU07_MATBlock,
     EU07_UL_MATShaderParams,
+    EU07_OT_MATAddShaderParam,
+    EU07_OT_MATRemoveShaderParam
 )
 
 def register():
     for cls in classes:
         bpy.utils.register_class(cls)
     bpy.types.ShaderNodeGroup.eu07_matblock = bpy.props.PointerProperty(type=EU07_MATBlock)
-    bpy.types.ShaderNodeGroup.eu07_active_shader_param_index = bpy.props.IntProperty()
 
 
 def unregister():
     for cls in classes:
         bpy.utils.unregister_class(cls)
     del bpy.types.ShaderNodeGroup.eu07_matblock
-    del bpy.types.ShaderNodeGroup.eu07_active_shader_param_index

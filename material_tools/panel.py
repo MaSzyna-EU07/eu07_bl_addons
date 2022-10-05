@@ -1,6 +1,7 @@
 import bpy
 
 from material_tools.structures import matblock as matblock_mod
+from material_tools.utils import get_active_material, get_active_material_node
 
 
 class EU07_PT_MaterialToolsPanel(bpy.types.Panel):
@@ -55,25 +56,29 @@ class EU07_PT_MATEntityProperties(bpy.types.Panel):
         return False
 
     def draw(self, context):
-        active_bl_material = context.view_layer.objects.active.active_material
-        eu07_material = active_bl_material.eu07_material if active_bl_material else None
-
-        active_node = active_bl_material.node_tree.nodes.active
+        active_bl_material = get_active_material(context)
+        active_node = get_active_material_node(active_bl_material)
         if not active_node:
             return
 
         if active_node.bl_idname == "ShaderNodeTexImage":
             self.layout.prop(active_node.eu07_texture, "mat_alias")
-        # eu07_matblock.is_valid is not allowed in this context, so workaround:
-        elif active_node.bl_idname == "ShaderNodeGroup" and active_node.node_tree.name == matblock_mod.NODEGROUP_NAME:
+        elif matblock_mod.poll_helper(context):
             matblock_data = active_node.eu07_matblock
             self.layout.prop(matblock_data, "shader_name")
-            self.layout.label(text="Shader Parameters:")
-            self.layout.template_list(
+            sbox = self.layout.box()
+            sbox.label(text="Shader Parameters:")
+            sbox.template_list(
                 "EU07_UL_MATShaderParams", "",
-                matblock_data, "shader_params",
-                active_node, "eu07_active_shader_param_index"
+                matblock_data, "shader_params_internal",
+                matblock_data, "active_shader_param_index"
             )
+            row = sbox.row()
+            row.operator("eu07.mat_add_shader_param", text="Add")
+            row.operator("eu07.mat_remove_shader_param", text="Remove")
+            active_param = matblock_data.get_active_shader_param()
+            sbox.prop(active_param, "name", text="Name")
+            sbox.prop(active_param, "value_string", text="Values")
             self.layout.prop(matblock_data, "shadow_rank")
             self.layout.prop(matblock_data, "size")
             self.layout.prop(matblock_data, "opacity")

@@ -50,7 +50,6 @@ class MaterialImporter:
         NodeLayouter(material.bl_material).layout_nodes()
         material.set_active_color_texture(visual_texture)
 
-
         material.configure()
 
         return material
@@ -58,7 +57,6 @@ class MaterialImporter:
     def _import_matblock(self, mapping, material):
         matblock = material.create_matblock()
 
-        shader_params = {}
         shader_data = None
         tex_counter = 0
 
@@ -94,7 +92,9 @@ class MaterialImporter:
                 matblock.shadow_rank = value
 
             elif key.startswith("param"):
-                matblock.set_shader_param_value(key, value)
+                param = matblock.add_shader_param()
+                param.name = key
+                param.set_values_list(mapping[key])
 
             elif key in eu07_tools.mat.NESTED_MAPPING_KEYS:
                 subblock = self._import_matblock(value, material)
