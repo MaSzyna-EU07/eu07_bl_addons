@@ -10,52 +10,55 @@ class MaterialImporter:
         self.asset_searcher = asset_searcher
         self.do_mat_lookup = False
 
-    def import_from_shortpath(self, shortpath, material=None):
+    def import_from_shortpath(self, shortpath, bl_material=None):
         abspath = self.asset_searcher.textures.find(shortpath)
         if abspath:
             return self.import_from_abspath(abspath, material, skip_mat_lookup=True)
 
 
-    def import_from_abspath(self, abspath, material=None, skip_mat_lookup=False):
+    def import_from_abspath(self, abspath, bl_material=None, skip_mat_lookup=False):
         shortpath = eu07_tools.utils.shorten_asset_path(abspath)
 
         if not abspath.endswith(".mat") and self.do_mat_lookup and (not skip_mat_lookup):
             abspath = self.asset_searcher.textures.find(shortpath)
 
-        material.reset()
-        if material is None:
-            material = utils.create_material(shortpath)
+        if bl_material is None:
+            bl_material = utils.create_material(shortpath)
 
-        material.name = shortpath
+        eu07_material = bl_material.eu07_material
+
+        eu07_material.reset()
+
+        eu07_material.name = shortpath
 
         visual_texture = None
 
         if abspath.endswith(".mat"):
             self.asset_searcher.textures.remove_extension(".mat")
-            material.is_mat = True
-            material.mat_source_path = shortpath
+            eu07_material.is_mat = True
+            eu07_material.mat_source_path = shortpath
 
             with open(abspath, encoding="latin-1") as matfile:
                 mapping = eu07_tools.mat.load(matfile)
-                matblock = self._import_matblock(mapping, material)
+                matblock = self._import_matblock(mapping, eu07_material)
 
             self.asset_searcher.textures.add_extension(".mat")
 
-            visual_texture = material.mat_root.get_from_texture_slot("texture1")
+            visual_texture = eu07_material.mat_root.get_from_texture_slot("texture1")
 
         else:
-            visual_texture = material.create_texture()
+            visual_texture = eu07_material.create_texture()
             visual_texture.set_image_from_abspath(abspath)
 
-        NodeLayouter(material.bl_material).layout_nodes()
-        material.set_active_color_texture(visual_texture)
+        NodeLayouter(bl_material).layout_nodes()
+        eu07_material.set_active_color_texture(visual_texture)
 
-        material.configure()
+        eu07_material.configure()
 
-        return material
+        return bl_material
 
-    def _import_matblock(self, mapping, material):
-        matblock = material.create_matblock()
+    def _import_matblock(self, mapping, eu07_material):
+        matblock = eu07_material.create_matblock()
 
         shader_data = None
         tex_counter = 0
@@ -97,22 +100,22 @@ class MaterialImporter:
                 param.set_values_list(mapping[key])
 
             elif key in eu07_tools.mat.NESTED_MAPPING_KEYS:
-                subblock = self._import_matblock(value, material)
+                subblock = self._import_matblock(value, eu07_material)
                 matblock.set_subblock(subblock, key)
 
             elif key.startswith("texture"):
                 tex_counter += 1
 
                 if value.use_set:
-                    entity = material.create_randomtextureset()
+                    entity = eu07_material.create_randomtextureset()
                     texset = value.set
 
                     for tex_path in texset:
-                        texture = material.create_texture()
+                        texture = eu07_material.create_texture()
                         self._init_texture_from_shortpath(texture, tex_path)
                         entity.append_texture(texture)
                 else:
-                    entity = material.create_texture()
+                    entity = eu07_material.create_texture()
                     self._init_texture_from_shortpath(entity, value.path)
 
                 slot_name = key

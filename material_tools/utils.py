@@ -7,7 +7,7 @@ import eu07_tools
 def create_material(name):
     bl_material = bpy.data.materials.new(name)
     bl_material.eu07_material.configure()
-    return bl_material.eu07_material
+    return bl_material
 
 
 def get_active_material(context):

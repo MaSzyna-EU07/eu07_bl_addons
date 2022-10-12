@@ -6,16 +6,6 @@ from . import randomtextureset as randomtextureset_mod
 from ..utils import get_active_material, get_active_material_node
 
 NODEGROUP_NAME = "[EU07] Material Block"
-VARIANT_NAMES = [
-    "Spring",
-    "Summer",
-    "Autumn",
-    "Winter",
-    "Clear",
-    "Cloudy",
-    "Rain",
-    "Snow"
-]
 MAX_TEXTURES_NUM = 8
 
 
@@ -121,7 +111,10 @@ class EU07_MATBlock(bpy.types.PropertyGroup):
             return input_.links[0].from_node.eu07_matblock
 
     def get_active_shader_param(self):
-        return self.shader_params_internal[self.active_shader_param_index]
+        try:
+            return self.shader_params_internal[self.active_shader_param_index]
+        except IndexError:
+            return None
 
     def add_shader_param(self):
         param = self.shader_params_internal.add()
@@ -171,8 +164,8 @@ def get_template():
         for texture_index in range(1, MAX_TEXTURES_NUM + 1):
             texture_socket = ng.inputs.new("NodeSocketColor", f"Texture{texture_index}")
 
-        for variant_name in VARIANT_NAMES:
-            ng.inputs.new("NodeSocketShader", variant_name)
+        for variant_name in eu07_tools.mat.NESTED_MAPPING_KEYS:
+            ng.inputs.new("NodeSocketShader", variant_name.capitalize())
 
     return ng
 
@@ -227,7 +220,8 @@ class EU07_OT_MATRemoveShaderParam(bpy.types.Operator):
         node = get_active_material_node(material)
 
         active_param = node.eu07_matblock.get_active_shader_param()
-        node.eu07_matblock.remove_shader_param(active_param)
+        if active_param:
+            node.eu07_matblock.remove_shader_param(active_param)
 
         return {'FINISHED'}
 

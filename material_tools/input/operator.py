@@ -54,7 +54,6 @@ class EU07_OT_MaterialImport(bpy.types.Operator, ImportHelper):
 
     def execute(self, context):
         active_bl_material = bpy.context.active_object.active_material if self.import_into_active else None
-        material = active_bl_material.eu07_material if active_bl_material else None
 
         directory = self.directory
         for file_elem in self.files:
@@ -64,8 +63,9 @@ class EU07_OT_MaterialImport(bpy.types.Operator, ImportHelper):
             )
             importer = MaterialImporter(asset_searcher)
             importer.do_mat_lookup = self.do_mat_lookup
-            material = importer.import_from_abspath(filepath, material)
             importer.use_fake_user = self.use_fake_user
+            material = importer.import_from_abspath(filepath, active_bl_material)
+
 
             if not self.import_into_active and self.set_new_as_active:
                 if context.active_object:

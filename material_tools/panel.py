@@ -24,17 +24,17 @@ class EU07_PT_MaterialToolsPanel(bpy.types.Panel):
                 row.prop(eu07_material, "mat_source_path")
 
 
-        import_op = self.layout.operator("eu07.import_material", text="New Material", icon="PLUS")
+        import_op = self.layout.operator("eu07.import_material", text="Import Material as New", icon="PLUS")
         import_op.import_into_active = False
         import_op.set_new_as_active = True
 
         row = self.layout.row()
-        import_op_repl = row.operator("eu07.import_material", text="Import Material", icon="IMPORT")
+        import_op_repl = row.operator("eu07.import_material", text="Import Material to Active", icon="IMPORT")
         import_op_repl.import_into_active = True
         row.enabled = (eu07_material is not None)
         
         row = self.layout.row()
-        export_op_repl = row.operator("eu07.export_material", text="Export Material", icon="EXPORT")
+        export_op_repl = row.operator("eu07.export_material", text="Export Active Material", icon="EXPORT")
         row.enabled = (eu07_material is not None)
 
         self.layout.operator("eu07.broadcast_skin", text="Broadcast Skin", icon="PARTICLES")
@@ -77,8 +77,9 @@ class EU07_PT_MATEntityProperties(bpy.types.Panel):
             row.operator("eu07.mat_add_shader_param", text="Add")
             row.operator("eu07.mat_remove_shader_param", text="Remove")
             active_param = matblock_data.get_active_shader_param()
-            sbox.prop(active_param, "name", text="Name")
-            sbox.prop(active_param, "value_string", text="Values")
+            if active_param:
+                sbox.prop(active_param, "name", text="Name")
+                sbox.prop(active_param, "value_string", text="Values")
             self.layout.prop(matblock_data, "shadow_rank")
             self.layout.prop(matblock_data, "size")
             self.layout.prop(matblock_data, "opacity")

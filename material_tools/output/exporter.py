@@ -7,10 +7,10 @@ class MaterialExporter:
         pass
 
     def export_to_file(self, file, material):
-        if not material.is_mat:
+        if not material.eu07_material.is_mat:
             return
 
-        matblock = material.mat_root
+        matblock = material.eu07_material.mat_root
         mapping = self.matblock_to_mapping(matblock)
 
         eu07_tools.mat.dump(mapping, file)

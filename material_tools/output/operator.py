@@ -19,7 +19,7 @@ class EU07_OT_ExportMAT(bpy.types.Operator, ExportHelper):
         if context.active_object:
             if context.active_object.active_material:
                 with open(self.filepath, "w+", encoding="windows-1250", newline="\r\n") as f:
-                    exporter.export_to_file(f, context.active_object.active_material.eu07_material)
+                    exporter.export_to_file(f, context.active_object.active_material)
 
         return {'FINISHED'}
 
