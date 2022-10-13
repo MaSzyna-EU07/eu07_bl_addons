@@ -1,5 +1,8 @@
+import pathlib
+
 import bpy
 
+import eu07_tools
 from . import matblock as matblock_mod
 from . import randomtextureset as randomtextureset_mod
 
@@ -98,17 +101,23 @@ class EU07_Material(bpy.types.PropertyGroup):
         return 1
 
     @property
-    def path_from_diffuse(self):
-        if self.type != "TEXTURE":
-            return ""
+    def shortpath(self):
+        if self.is_mat:
+            return str(pathlib.Path(self.mat_source_path).with_suffix(".mat"))
+        else:
+            bsdf = self._get_bsdf_node()
+            image_node = self._get_diffuse_texture_node(bsdf)
 
-        bsdf = self._get_bsdf_node()
-        image_node = self._get_diffuse_texture_node(bsdf)
+            if image_node:
+                return eu07_tools.utils.shorten_asset_path(image_node.image.filepath)
 
-        if image_node.image:
-            return "dupa"
+        return "none"
 
-        return ""
+    def iter_image_textures(self):
+        for node in self.bl_material.node_tree.nodes:
+            if node.bl_idname == "ShaderNodeTexImage":
+                if node.image:
+                    yield node.image
 
     def reset(self):
         self.bl_material.node_tree.nodes.clear()
@@ -119,6 +128,9 @@ class EU07_Material(bpy.types.PropertyGroup):
         )
 
     def _get_diffuse_texture_node(self, bsdf):
+        if not bsdf:
+            return None
+
         if bsdf.inputs[BSDF_COLOR_INPUT].links:
             link = bsdf.inputs.links[0]
             node = link.from_node

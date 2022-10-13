@@ -26,49 +26,69 @@ def transfer_external_textures(tex_subdir):
 
         eu07_material = obj.active_material.eu07_material
 
+        for image in eu07_material.iter_image_textures():
+            _transfer_texture(image, tex_subdir)
+
         if eu07_material.is_mat:
             exporter = MaterialExporter()
             mapping = exporter.matblock_to_mapping(eu07_material.mat_root)
-            # All textures from material should be exported to preview dir
-            # All texture paths should be modified to "_blender_preview/{name}
-        else:
-            diffuse = obj.active_material.eu07_material.path_from_diffuse
 
-            if not diffuse:
-                break
+            mapping = _rewrite_texture_paths(mapping, SUBDIR_NAME)
+            outpath = pathlib.Path(tex_subdir) / pathlib.Path(eu07_material.mat_source_path).with_suffix(".mat").name
 
-            diffuse_filepath = pathlib.Path(bpy.path.abspath(diffuse.filepath))
-            dst = pathlib.Path(tex_subdir, diffuse_filepath.name)
+            with open(outpath, "w+", encoding="windows-1250", newline="\r\n") as of:
+                eu07_tools.mat.dump(mapping, of)
 
-            print(f"Symlink: {diffuse_filepath}\n Destination: {dst}")
-
-            if diffuse.packed_file:
-                data = diffuse.packed_file.data
-                with open(dst, "wb+") as outimage:
-                    outimage.write(data)
-            elif diffuse.source == 'GENERATED':
-                name = diffuse.name.replace(".", "_")
-                # TODO: Make it happen xD
-                #
-                # newimg = bpy.data.images.new(
-                #     f"{name}_forpreview",
-                #     width=diffuse.generated_width,
-                #     height=diffuse.generated_height
-                # )
-                #
-                # newimg.pixels = diffuse.pixels
-                # newimg.filepath_raw = str(dst / f"{name}.tga")
-                # newimg.file_format = 'TARGA'
-                # newimg.save()
-                #
-                # bpy.data.images.remove(newimg)
-
+def _rewrite_texture_paths(mapping, tex_subdir):
+    for key, value in mapping.items():
+        if key.startswith("texture"):
+            texobj = value
+            if texobj.use_set:
+                mapping[key] = [_rewrite_path(path, tex_subdir) for path in texobj.set]
             else:
-                try:
-                    dst.symlink_to(diffuse_filepath)
-                except FileExistsError:
-                    pass
+                mapping[key] = _rewrite_path(texobj.path, tex_subdir)
 
+        if key in eu07_tools.mat.NESTED_MAPPING_KEYS:
+            mapping[key] = _rewrite_texture_paths(value, tex_subdir)
+
+    return mapping
+
+def _rewrite_path(path, tex_subdir):
+    filename = pathlib.Path(path).name
+    return str(pathlib.Path(tex_subdir, filename))
+
+def _transfer_texture(image, tex_subdir):
+    texpath = pathlib.Path(bpy.path.abspath(image.filepath))
+    dst = pathlib.Path(tex_subdir, texpath.name)
+
+    print(f"Symlink: {texpath}\n Destination: {dst}")
+
+    if image.packed_file:
+        data = image.packed_file.data
+        with open(dst, "wb+") as outimage:
+            outimage.write(data)
+    elif image.source == 'GENERATED':
+        name = image.name.replace(".", "_")
+        # TODO: Make it happen xD
+        #
+        # newimg = bpy.data.images.new(
+        #     f"{name}_forpreview",
+        #     width=diffuse.generated_width,
+        #     height=diffuse.generated_height
+        # )
+        #
+        # newimg.pixels = diffuse.pixels
+        # newimg.filepath_raw = str(dst / f"{name}.tga")
+        # newimg.file_format = 'TARGA'
+        # newimg.save()
+        #
+        # bpy.data.images.remove(newimg)
+
+    else:
+        try:
+            dst.symlink_to(texpath)
+        except FileExistsError:
+            pass
 
 def create_camera_from_viewport():
     camera = eu07_tools.scn.create_element("camera")

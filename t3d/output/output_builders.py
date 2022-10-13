@@ -300,7 +300,7 @@ class MultiMaterialMeshOutputBuilder(MeshOutputBuilder):
                 submodel.map = self.obj.t3d_properties.replacableskin_id
                 return
     
-            submodel.map = get_shortpath_from_material(mtl)
+            submodel.map = mtl.eu07_material.shortpath
 
     def set_geometry(self, apply_modifiers):
 
@@ -380,7 +380,7 @@ class SingleMaterialMeshOutputBuilder(MeshOutputBuilder):
             self.submodel.map = self.obj.t3d_properties.replacableskin_id
             return
 
-        self.submodel.map = get_shortpath_from_material(self.material)
+        self.submodel.map = self.material.eu07_material.shortpath
 
     def set_geometry(self, apply_modifiers):
         
