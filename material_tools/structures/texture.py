@@ -1,3 +1,5 @@
+import pathlib
+
 import bpy
 
 import eu07_tools
@@ -40,8 +42,13 @@ class EU07_Texture(bpy.types.PropertyGroup):
 
     @property
     def shortpath(self):
-        if self.abspath:
-            return eu07_tools.utils.shorten_asset_path(self.abspath)
+        if self.bl_node.image:
+            if self.bl_node.image.source == 'GENERATED':
+                return self.bl_node.image.name
+
+            return eu07_tools.utils.shorten_asset_path(
+                str(pathlib.Path(self.abspath).with_suffix(""))
+            )
 
         return "none"
 

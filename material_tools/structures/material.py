@@ -109,7 +109,7 @@ class EU07_Material(bpy.types.PropertyGroup):
             image_node = self._get_diffuse_texture_node(bsdf)
 
             if image_node:
-                return eu07_tools.utils.shorten_asset_path(image_node.image.filepath)
+                return image_node.eu07_texture.shortpath
 
         return "none"
 

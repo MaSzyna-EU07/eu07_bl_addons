@@ -7,8 +7,9 @@ import bpy
 import eu07_tools
 from animation_tools.output.eventize import eventize_object_animation
 from common import get_environment_path
-from preview.common import SCENERY_FILENAME, MODEL_FILENAME, SUBDIR_NAME, transfer_external_textures, \
-    create_camera_from_viewport, run_preview_command, NODE_MODEL_NAME
+from preview.common import SCENERY_FILENAME, MODEL_FILENAME, SUBDIR_NAME, transfer_material_assets, \
+    create_camera_from_viewport, run_preview_command, NODE_MODEL_NAME, make_preview_path
+from t3d.output.exporter import T3DExporter
 
 
 class EU07_OT_GameEnginePreviewModel(bpy.types.Operator):
@@ -31,17 +32,24 @@ class EU07_OT_GameEnginePreviewModel(bpy.types.Operator):
         bpy.context.scene.frame_current = bpy.context.scene.frame_start
 
         model_outpath = str(pathlib.Path(model_subdir, MODEL_FILENAME))
-        bpy.ops.export_scene.t3d(
-            filepath=model_outpath,
-            aggregate_includes=True,
-            embed_skins=True,
-            objects_range='VISIBLE',
-            #use_generated_img_name=True
-        )
+
+        exporter = T3DExporter()
+        exporter.aggregate_includes = True
+        exporter.embed_skins = True
+
+        exportable_submodels = exporter.get_submodels(bpy.context.visible_objects)
+
+        unchangeable_map_values = {"none", "-1", "-2", "-3", "-4"}
+        for submodel in exportable_submodels:
+            if submodel.map not in unchangeable_map_values:
+                submodel.map = make_preview_path(submodel.map)
+
+        with open(model_outpath, "w+", encoding="windows-1250", newline="\r\n") as outfile:
+            eu07_tools.t3d.dump(exportable_submodels, outfile)
 
         bpy.context.scene.frame_current = original_frame
 
-        transfer_external_textures(tex_subdir)
+        transfer_material_assets(tex_subdir)
 
         scn_elements = []
 

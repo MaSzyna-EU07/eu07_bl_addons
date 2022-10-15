@@ -16,13 +16,19 @@ SUBDIR_NAME = "_blender_preview"
 NODE_MODEL_NAME = "model_preview"
 
 
-def transfer_external_textures(tex_subdir):
+def make_preview_path(path):
+    filename = pathlib.Path(path).name
+    return str(pathlib.Path(SUBDIR_NAME, filename))
+
+def transfer_material_assets(tex_subdir):
     shutil.rmtree(tex_subdir, ignore_errors=True)
     os.makedirs(tex_subdir, exist_ok=True)
 
+    print(bpy.context.visible_objects)
+
     for obj in bpy.context.visible_objects:
         if not obj.active_material:
-            break
+            continue
 
         eu07_material = obj.active_material.eu07_material
 
@@ -39,29 +45,28 @@ def transfer_external_textures(tex_subdir):
             with open(outpath, "w+", encoding="windows-1250", newline="\r\n") as of:
                 eu07_tools.mat.dump(mapping, of)
 
+
 def _rewrite_texture_paths(mapping, tex_subdir):
     for key, value in mapping.items():
         if key.startswith("texture"):
             texobj = value
             if texobj.use_set:
-                mapping[key] = [_rewrite_path(path, tex_subdir) for path in texobj.set]
+                mapping[key] = [make_preview_path(path) for path in texobj.set]
             else:
-                mapping[key] = _rewrite_path(texobj.path, tex_subdir)
+                mapping[key] = make_preview_path(texobj.path)
 
         if key in eu07_tools.mat.NESTED_MAPPING_KEYS:
             mapping[key] = _rewrite_texture_paths(value, tex_subdir)
 
     return mapping
 
-def _rewrite_path(path, tex_subdir):
-    filename = pathlib.Path(path).name
-    return str(pathlib.Path(tex_subdir, filename))
+
 
 def _transfer_texture(image, tex_subdir):
     texpath = pathlib.Path(bpy.path.abspath(image.filepath))
     dst = pathlib.Path(tex_subdir, texpath.name)
 
-    print(f"Symlink: {texpath}\n Destination: {dst}")
+    print(f"Transfering: {texpath}\n --> {dst}")
 
     if image.packed_file:
         data = image.packed_file.data
@@ -69,20 +74,19 @@ def _transfer_texture(image, tex_subdir):
             outimage.write(data)
     elif image.source == 'GENERATED':
         name = image.name.replace(".", "_")
-        # TODO: Make it happen xD
-        #
-        # newimg = bpy.data.images.new(
-        #     f"{name}_forpreview",
-        #     width=diffuse.generated_width,
-        #     height=diffuse.generated_height
-        # )
-        #
-        # newimg.pixels = diffuse.pixels
-        # newimg.filepath_raw = str(dst / f"{name}.tga")
-        # newimg.file_format = 'TARGA'
-        # newimg.save()
-        #
-        # bpy.data.images.remove(newimg)
+
+        newimg = bpy.data.images.new(
+            f"{name}_forpreview",
+            width=image.size[0],
+            height=image.size[1]
+        )
+
+        newimg.pixels = [pix for pix in image.pixels]
+        newimg.filepath_raw = str(dst / f"{name}.tga")
+        newimg.file_format = 'TARGA'
+        newimg.save()
+
+        bpy.data.images.remove(newimg)
 
     else:
         try:
