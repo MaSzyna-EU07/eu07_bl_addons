@@ -35,7 +35,7 @@ class MaterialExporter:
                 if entity.entity_type == "TEXTURE":
                     mapping[key] = entity.shortpath
                 else:
-                    mapping[key] = list(entity.iter_textures())
+                    mapping[key] = list(tex.shortpath for tex in entity.iter_textures())
 
         for param in matblock.iter_shader_params():
             mapping[param.name] = param.get_values_list()

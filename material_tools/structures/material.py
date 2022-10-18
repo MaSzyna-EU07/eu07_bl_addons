@@ -132,7 +132,7 @@ class EU07_Material(bpy.types.PropertyGroup):
             return None
 
         if bsdf.inputs[BSDF_COLOR_INPUT].links:
-            link = bsdf.inputs.links[0]
+            link = bsdf.inputs[BSDF_COLOR_INPUT].links[0]
             node = link.from_node
 
             return node

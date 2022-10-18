@@ -4,6 +4,7 @@ from . import panel
 from . import skins
 from . import structures
 from . import output
+from . import provide_ng
 
 modules = (
     input_,
@@ -11,6 +12,7 @@ modules = (
     structures,
     panel,
     output,
+    provide_ng,
 )
 
 

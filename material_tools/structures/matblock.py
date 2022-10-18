@@ -94,7 +94,7 @@ class EU07_MATBlock(bpy.types.PropertyGroup):
         input_ = self._get_texture_slot_input(slot_name)
         if input_.links:
             node = input_.links[0].from_node
-            if node.bl_idname == "ShaderNodeGroup" and node.name == randomtextureset_mod.RANDOM_TEXTURESET_NAME:
+            if node.bl_idname == "ShaderNodeGroup" and node.node_tree.name == randomtextureset_mod.RANDOM_TEXTURESET_NAME:
                 return node.eu07_randomtextureset
             else:
                 return node.eu07_texture

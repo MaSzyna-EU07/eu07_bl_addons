@@ -23,7 +23,6 @@ class EU07_PT_MaterialToolsPanel(bpy.types.Panel):
                 row = self.layout.row()
                 row.prop(eu07_material, "mat_source_path")
 
-
         import_op = self.layout.operator("eu07.import_material", text="Import Material as New", icon="PLUS")
         import_op.import_into_active = False
         import_op.set_new_as_active = True
@@ -34,10 +33,14 @@ class EU07_PT_MaterialToolsPanel(bpy.types.Panel):
         row.enabled = (eu07_material is not None)
         
         row = self.layout.row()
-        export_op_repl = row.operator("eu07.export_material", text="Export Active Material", icon="EXPORT")
+        export_op_repl = row.operator("eu07.export_material", text="Export Active Material As...", icon="EXPORT")
         row.enabled = (eu07_material is not None)
 
         self.layout.operator("eu07.broadcast_skin", text="Broadcast Skin", icon="PARTICLES")
+
+        if eu07_material.is_mat:
+            row = self.layout.row()
+            row.operator("eu07.provide_mat_nodes", icon="NODETREE")
 
 
 class EU07_PT_MATEntityProperties(bpy.types.Panel):
