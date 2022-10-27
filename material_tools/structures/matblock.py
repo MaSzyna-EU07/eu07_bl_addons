@@ -52,7 +52,7 @@ class EU07_MATBlock(bpy.types.PropertyGroup):
         min=-1,
     )
 
-    opacity: bpy.props.IntProperty(
+    opacity: bpy.props.FloatProperty(
         name="Opacity",
         default=1,
         min=0,

@@ -123,7 +123,7 @@ class MeshInputBuilder(SubmodelInputBuilder):
                 material = bpy.data.materials.get(get_qualified_material_name(abspath))
 
                 if not material:
-                    material = MaterialImporter(asset_searcher).import_from_abspath(abspath, opacity=opacity)
+                    material = MaterialImporter(asset_searcher).import_from_abspath(abspath)
                     self.obj.t3d_properties.opacity_source = "MATERIAL"
 
                 self.obj.active_material = material

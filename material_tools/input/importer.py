@@ -9,11 +9,12 @@ class MaterialImporter:
     def __init__(self, asset_searcher):
         self.asset_searcher = asset_searcher
         self.do_mat_lookup = False
+        self.do_name_overwrite = True
 
     def import_from_shortpath(self, shortpath, bl_material=None):
         abspath = self.asset_searcher.textures.find(shortpath)
         if abspath:
-            return self.import_from_abspath(abspath, material, skip_mat_lookup=True)
+            return self.import_from_abspath(abspath, bl_material, skip_mat_lookup=True)
 
 
     def import_from_abspath(self, abspath, bl_material=None, skip_mat_lookup=False):
@@ -24,12 +25,12 @@ class MaterialImporter:
 
         if bl_material is None:
             bl_material = utils.create_material(shortpath)
+        else:
+            if self.do_name_overwrite:
+                bl_material.name = shortpath
 
         eu07_material = bl_material.eu07_material
-
         eu07_material.reset()
-
-        eu07_material.name = shortpath
 
         visual_texture = None
 
@@ -119,11 +120,12 @@ class MaterialImporter:
                     self._init_texture_from_shortpath(entity, value.path)
 
                 slot_name = key
+                alias = ""
                 if "_" in key:
                     _, alias = key.split("_")
                     entity.mat_alias = alias
 
-                if shader_data:
+                if alias and shader_data:
                     slot_name = self._get_slot_name_for_alias(alias, shader_data)
                     if not slot_name:
                         slot_name = f"texture{tex_counter}"

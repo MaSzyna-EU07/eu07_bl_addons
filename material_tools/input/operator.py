@@ -28,8 +28,8 @@ class EU07_OT_MaterialImport(bpy.types.Operator, ImportHelper):
         options={'HIDDEN'}
     )
     do_mat_lookup: bpy.props.BoolProperty(
-        name="Do mat lookup",
-        default=False,
+        name="Do MAT lookup",
+        default=True,
     )
     opacity: bpy.props.FloatProperty(
         name="Opacity",
@@ -41,12 +41,15 @@ class EU07_OT_MaterialImport(bpy.types.Operator, ImportHelper):
     import_into_active: bpy.props.BoolProperty(
         name="Import into active",
         default=False,
-        options={'HIDDEN'}
     )
     set_new_as_active: bpy.props.BoolProperty(
         name="Set new as active",
         default=False,
         options={'HIDDEN'}
+    )
+    do_name_overwrite: bpy.props.BoolProperty(
+        name="Overwrite Name",
+        default=True,
     )
 
 
@@ -64,6 +67,7 @@ class EU07_OT_MaterialImport(bpy.types.Operator, ImportHelper):
             importer = MaterialImporter(asset_searcher)
             importer.do_mat_lookup = self.do_mat_lookup
             importer.use_fake_user = self.use_fake_user
+            importer.do_name_overwrite = self.do_name_overwrite
             material = importer.import_from_abspath(filepath, active_bl_material)
 
 
