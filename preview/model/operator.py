@@ -41,7 +41,7 @@ class EU07_OT_GameEnginePreviewModel(bpy.types.Operator):
 
         unchangeable_map_values = {"none", "-1", "-2", "-3", "-4"}
         for submodel in exportable_submodels:
-            if submodel.map not in unchangeable_map_values:
+            if submodel.type == "Mesh" and submodel.map not in unchangeable_map_values:
                 submodel.map = make_preview_path(submodel.map)
 
         with open(model_outpath, "w+", encoding="windows-1250", newline="\r\n") as outfile:
