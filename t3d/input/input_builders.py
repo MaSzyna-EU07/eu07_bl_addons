@@ -87,28 +87,13 @@ class MeshInputBuilder(SubmodelInputBuilder):
         self.obj.t3d_properties.opacity = opacity
 
     def set_map(self, map_, asset_searcher, opacity, diffuse):
-        if map_ == "none":
-            # name = f"Color {' '.join((str(int(x)) for x in diffuse))}"
-            #
-            # try:
-            #     self.obj.active_material = bpy.data.materials[name]
-            # except KeyError:
-            #     material = self.obj.active_material = bpy.data.materials.new(name)
-            #     wrapper = MaterialWrapper(material)
-            #     wrapper.initialize()
-            #     wrapper.set_diffuse_color(diffuse / 255)
-
+        if map_.path == "none":
             return
 
-        is_repl = map_ in ["-1", "-2", "-3", "-4", "replacableskin"]
+        if map_.is_replacableskin:
+            self.obj.t3d_properties.replacableskin_id = map_.path
 
-        if is_repl:
-            if map_ == "replacableskin":
-                map_ = "-1"
-
-            self.obj.t3d_properties.replacableskin_id = map_
-
-            repl_mat_name = f"replacableskin({map_})"
+            repl_mat_name = f"replacableskin({map_.path})"
             if repl_mat_name in bpy.data.materials:
                 self.obj.active_material = bpy.data.materials[repl_mat_name]
             else:
@@ -116,7 +101,7 @@ class MeshInputBuilder(SubmodelInputBuilder):
                 self.obj.active_material.use_nodes = True
 
         else:
-            abspath = asset_searcher.textures.find(map_)
+            abspath = asset_searcher.textures.find(map_.path)
             self.obj.t3d_properties.opacity_source = "OBJECT"
 
             if abspath:

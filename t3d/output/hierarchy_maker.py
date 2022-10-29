@@ -10,10 +10,6 @@ class HierarchyMaker:
 
         full_hierarchy = list(self.iter_default_hierarchy(objects))
 
-        print(full_hierarchy)
-        print("that was full, now selected")
-        print(list(objects))
-
         for o in full_hierarchy:
             if o in objects:
                 yield o

@@ -103,7 +103,7 @@ class EU07_Material(bpy.types.PropertyGroup):
     @property
     def shortpath(self):
         if self.is_mat:
-            return str(pathlib.Path(self.mat_source_path).with_suffix(".mat"))
+            return str(pathlib.Path(self.mat_source_path).with_suffix(""))
         else:
             bsdf = self._get_bsdf_node()
             image_node = self._get_diffuse_texture_node(bsdf)

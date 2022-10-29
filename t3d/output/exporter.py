@@ -34,7 +34,6 @@ class T3DExporter:
             objects_to_export = bpy.context.collection.objects
 
         objects_to_export = HierarchyMaker(self).make_hierarchy(objects_to_export, self.flatten_mesh_hierarchy)
-        exportables = self.get_submodels(objects_to_export)
 
         identifiers_written_includes = set()
 
@@ -53,6 +52,7 @@ class T3DExporter:
             output = export_manager.get_output(identifier)
             submodels = self._create_submodels_to_export(obj)
 
+            print(obj)
             if output:
                 for submodel in submodels:
                     output.dump_element(submodel)
