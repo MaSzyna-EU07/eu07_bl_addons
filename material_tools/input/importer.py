@@ -40,8 +40,8 @@ class MaterialImporter:
             eu07_material.mat_source_path = shortpath
 
             with open(abspath, encoding="latin-1") as matfile:
-                mapping = eu07_tools.mat.load(matfile)
-                matblock = self._import_matblock(mapping, eu07_material)
+                inmat = eu07_tools.mat.load(matfile)
+                matblock = self._import_matblock(inmat, eu07_material)
 
             self.asset_searcher.textures.add_extension(".mat")
 
@@ -58,16 +58,16 @@ class MaterialImporter:
 
         return bl_material
 
-    def _import_matblock(self, mapping, eu07_material):
+    def _import_matblock(self, inmat, eu07_material):
         matblock = eu07_material.create_matblock()
 
         shader_data = None
         tex_counter = 0
 
-        num_textures = len([k for k in mapping.keys() if k.startswith("texture")])
-        use_default_shader = ("shader" not in mapping.keys())
+        num_textures = len(list(inmat.iter_texture_lists()))
+        use_default_shader = (inmat.shader == "")
 
-        shader_name = f"default_{num_textures}" if use_default_shader else mapping["shader"]
+        shader_name = f"default_{num_textures}" if use_default_shader else inmat.shader
 
         shaderparser = ShaderParser(self.asset_searcher)
         self.asset_searcher.shaders.remove_extension(".vert")
@@ -79,58 +79,47 @@ class MaterialImporter:
         if abspath:
             shader_data = shaderparser.parse_from_abspath(abspath)
 
-        for key, value in mapping.items():
-            if key == "shader":
-                matblock.shader_name = value
+        matblock.shader_name = inmat.shader
+        matblock.opacity = inmat.opacity
+        matblock.selfillum = inmat.selfillum
+        matblock.size_x, matblock.size_y = inmat.size
+        matblock.shadow_rank = inmat.shadow_rank
 
-            elif key == "opacity":
-                matblock.opacity = value
+        for param_key, param_val in inmat.shader_params.items():
+            param = matblock.add_shader_param()
+            param.name = param_key
+            param.set_values_list(param_val)
 
-            elif key == "selfillum":
-                matblock.selfillum = value
+        for variant_name, variant_mat in inmat.iter_variants():
+            subblock = self._import_matblock(variant_mat, eu07_material)
+            matblock.set_subblock(subblock, variant_name)
 
-            elif key == "size":
-                matblock.size_x, matblock.size_y = value
+        for texture_key, texture_list in inmat.iter_texture_lists():
+            if len(texture_list) == 1:
+                entity = eu07_material.create_texture()
+                print(texture_list)
+                self._init_texture_from_shortpath(entity, texture_list[0].path)
+            else:
+                entity = eu07_material.create_randomtextureset()
 
-            elif key == "shadow_rank":
-                matblock.shadow_rank = value
+                for texpathobject in texture_list:
+                    texture = eu07_material.create_texture()
+                    self._init_texture_from_shortpath(texture, texpathobject.path)
+                    entity.append_texture(texture)
 
-            elif key.startswith("param"):
-                param = matblock.add_shader_param()
-                param.name = key
-                param.set_values_list(mapping[key])
 
-            elif key in eu07_tools.mat.NESTED_MAPPING_KEYS:
-                subblock = self._import_matblock(value, eu07_material)
-                matblock.set_subblock(subblock, key)
+            slot_name = texture_key
+            alias = ""
+            if "_" in texture_key:
+                _, alias = texture_key.split("_")
+                entity.mat_alias = alias
 
-            elif key.startswith("texture"):
-                tex_counter += 1
+            if alias and shader_data:
+                slot_name = self._get_slot_name_for_alias(alias, shader_data)
+                if not slot_name:
+                    slot_name = f"texture{tex_counter}"
 
-                if value.use_set:
-                    entity = eu07_material.create_randomtextureset()
-                    texset = value.set
-
-                    for tex_path in texset:
-                        texture = eu07_material.create_texture()
-                        self._init_texture_from_shortpath(texture, tex_path)
-                        entity.append_texture(texture)
-                else:
-                    entity = eu07_material.create_texture()
-                    self._init_texture_from_shortpath(entity, value.path)
-
-                slot_name = key
-                alias = ""
-                if "_" in key:
-                    _, alias = key.split("_")
-                    entity.mat_alias = alias
-
-                if alias and shader_data:
-                    slot_name = self._get_slot_name_for_alias(alias, shader_data)
-                    if not slot_name:
-                        slot_name = f"texture{tex_counter}"
-
-                matblock.set_to_texture_slot(entity, slot_name)
+            matblock.set_to_texture_slot(entity, slot_name)
 
         return matblock
 

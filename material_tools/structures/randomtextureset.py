@@ -7,7 +7,7 @@ class EU07_RandomTextureSet(bpy.types.PropertyGroup):
     # HACK: self.id_data returns main node tree so i took this workaround from
     # https://blender.stackexchange.com/questions/214446/adding-properties-to-a-shader-node
     @property
-    def entity_type(self):
+    def texture_type(self):
         return "RANDOM_TEXTURESET"
 
     @property

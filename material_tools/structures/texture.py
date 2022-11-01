@@ -18,7 +18,7 @@ class EU07_Texture(bpy.types.PropertyGroup):
     )
 
     @property
-    def entity_type(self):
+    def texture_type(self):
         return "TEXTURE"
 
     # HACK: self.id_data returns main node tree so i took this workaround from
