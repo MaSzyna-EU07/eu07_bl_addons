@@ -62,7 +62,6 @@ class MaterialImporter:
         matblock = eu07_material.create_matblock()
 
         shader_data = None
-        tex_counter = 0
 
         num_textures = len(list(inmat.iter_texture_lists()))
         use_default_shader = (inmat.shader == "")
@@ -94,20 +93,22 @@ class MaterialImporter:
             subblock = self._import_matblock(variant_mat, eu07_material)
             matblock.set_subblock(subblock, variant_name)
 
+        tex_counter = 1
         for texture_key, texture_list in inmat.iter_texture_lists():
+
             if len(texture_list) == 1:
                 entity = eu07_material.create_texture()
-                print(texture_list)
-                self._init_texture_from_shortpath(entity, texture_list[0].path)
+                self._init_texture(entity, texture_list[0])
             else:
                 entity = eu07_material.create_randomtextureset()
 
                 for texpathobject in texture_list:
                     texture = eu07_material.create_texture()
-                    self._init_texture_from_shortpath(texture, texpathobject.path)
+                    self._init_texture(texture, texpathobject)
                     entity.append_texture(texture)
 
 
+            # WHAT IF SHADER NOT EXISTS :(
             slot_name = texture_key
             alias = ""
             if "_" in texture_key:
@@ -121,11 +122,17 @@ class MaterialImporter:
 
             matblock.set_to_texture_slot(entity, slot_name)
 
+            tex_counter += 1
+
         return matblock
 
-    def _init_texture_from_shortpath(self, texture, shortpath):
-        abspath = self.asset_searcher.textures.find(shortpath)
+    def _init_texture(self, texture, tpo):
+        abspath = self.asset_searcher.textures.find(tpo.path)
         texture.set_image_from_abspath(abspath)
+
+        texture.disable_wrap_s = tpo.disable_wrap_s
+        texture.disable_wrap_t = tpo.disable_wrap_t
+        texture.use_sharpen = tpo.use_sharpen
 
     def _get_slot_name_for_alias(self, alias, shader_data):
         id_ = shader_data.alias_map.get(alias)

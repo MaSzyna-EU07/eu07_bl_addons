@@ -68,7 +68,13 @@ class EU07_PT_MATEntityProperties(bpy.types.Panel):
             return
 
         if active_node.bl_idname == "ShaderNodeTexImage":
-            self.layout.prop(active_node.eu07_texture, "mat_alias")
+            eu07_tex = active_node.eu07_texture
+            self.layout.prop(eu07_tex, "mat_alias")
+            b = self.layout.box()
+            b.label(text="Traits")
+            b.prop(active_node.eu07_texture, "disable_wrap_s")
+            b.prop(active_node.eu07_texture, "disable_wrap_t")
+            b.prop(active_node.eu07_texture, "use_sharpen")
         elif matblock_mod.poll_helper(context):
             matblock_data = active_node.eu07_matblock
             self.layout.prop(matblock_data, "shader_name")

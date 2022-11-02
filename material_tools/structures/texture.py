@@ -17,6 +17,21 @@ class EU07_Texture(bpy.types.PropertyGroup):
         set=_set_alias
     )
 
+    disable_wrap_s: bpy.props.BoolProperty(
+        name="Disable Horizontal Wrap",
+        default=False,
+    )
+
+    disable_wrap_t: bpy.props.BoolProperty(
+        name="Disable Horizontal Wrap",
+        default=False,
+    )
+
+    use_sharpen: bpy.props.BoolProperty(
+        name="Sharpen",
+        default=False,
+    )
+
     @property
     def texture_type(self):
         return "TEXTURE"
@@ -51,6 +66,20 @@ class EU07_Texture(bpy.types.PropertyGroup):
             )
 
         return "none"
+
+    @property
+    def shortpath_with_traits(self):
+        sp = self.shortpath
+
+        traits = ":"
+        traits += "s" if self.disable_wrap_s else ""
+        traits += "t" if self.disable_wrap_t else ""
+        traits += "#" if self.use_sharpen else ""
+
+        if sp != "none" and traits != ":":
+            return f"{sp}{traits}"
+
+        return sp
 
 
 def register():
