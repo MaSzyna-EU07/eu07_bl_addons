@@ -16,15 +16,13 @@ SUBDIR_NAME = "_blender_preview"
 NODE_MODEL_NAME = "model_preview"
 
 
-def make_preview_path(path):
-    filename = pathlib.Path(path).name
-    return str(pathlib.Path(SUBDIR_NAME, filename))
+def make_preview_path(tpo):
+    filename = pathlib.Path(tpo.path).name
+    return str(pathlib.Path(SUBDIR_NAME, filename)) + tpo.traits_suffix
 
 def transfer_material_assets(tex_subdir):
     shutil.rmtree(tex_subdir, ignore_errors=True)
     os.makedirs(tex_subdir, exist_ok=True)
-
-    print(bpy.context.visible_objects)
 
     for obj in bpy.context.visible_objects:
         if not obj.active_material:
@@ -37,29 +35,29 @@ def transfer_material_assets(tex_subdir):
 
         if eu07_material.is_mat:
             exporter = MaterialExporter()
-            mapping = exporter.matblock_to_mapping(eu07_material.mat_root)
+            outmat = exporter.matblock_to_outmat(eu07_material.mat_root)
 
-            mapping = _rewrite_texture_paths(mapping, SUBDIR_NAME)
+            outmat = _rewrite_texture_paths(outmat, SUBDIR_NAME)
             outpath = pathlib.Path(tex_subdir) / pathlib.Path(eu07_material.mat_source_path).with_suffix(".mat").name
 
             with open(outpath, "w+", encoding="windows-1250", newline="\r\n") as of:
-                eu07_tools.mat.dump(mapping, of)
+                eu07_tools.mat.dump(outmat, of)
 
 
-def _rewrite_texture_paths(mapping, tex_subdir):
-    for key, value in mapping.items():
-        if key.startswith("texture"):
-            texobj = value
-            if texobj.use_set:
-                mapping[key] = [make_preview_path(path) for path in texobj.set]
-            else:
-                mapping[key] = make_preview_path(texobj.path)
+def _rewrite_texture_paths(mat, tex_subdir):
+    for tex_key, tex_list in mat.iter_texture_lists():
+        if len(tex_list) == 1:
+            mat.set_texture_path(tex_key, make_preview_path(tex_list[0]))
+        else:
+            mat.set_textureset(tex_key, [make_preview_path(tpo) for tpo in tex_list])
 
-        if key in eu07_tools.mat.NESTED_MAPPING_KEYS:
-            mapping[key] = _rewrite_texture_paths(value, tex_subdir)
+    for variant_key, variant_mat in mat.iter_variants():
+        mat.set_variant(
+            variant_key,
+            _rewrite_texture_paths(variant_mat, tex_subdir)
+        )
 
-    return mapping
-
+    return mat
 
 
 def _transfer_texture(image, tex_subdir):
