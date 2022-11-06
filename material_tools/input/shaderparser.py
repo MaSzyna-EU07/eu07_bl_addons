@@ -3,7 +3,7 @@ class ShaderParser:
         self.asset_searcher = asset_searcher
 
     def parse_from_abspath(self, abspath, shader_data=None):
-        data = ShaderData() if shader_data is None else shader_data
+        data = ShaderInputs() if shader_data is None else shader_data
 
         with open(abspath, "r") as shaderfile:
             for line in shaderfile:
@@ -16,13 +16,40 @@ class ShaderParser:
 
                 if line.startswith("#texture"):
                     _, defstring = line.split("(")
-                    alias, index, colorspace = [p.strip() for p in defstring.split(",")]
+                    name, location, components = [p.strip() for p in defstring.split(",")]
 
-                    data.alias_map[alias] = int(index) + 1
+                    data.textures.append(ShaderTextureInput(name, int(location), components))
+
+                if line.startswith("#param"):
+                    _, defstring = line.split("(")
+                    name, location, offset, size, default = [p.strip() for p in defstring.split(",")]
+
+                    data.params.append(ShaderParamInput(name, int(location), int(offset), int(size), default))
 
         return data
 
 
-class ShaderData:
+class ShaderInputs:
     def __init__(self):
-        self.alias_map = {}
+        self.textures = []
+        self.params = []
+
+
+class ShaderTextureInput:
+    def __init__(self, name, location, components):
+        self.name = name
+        self.location = location
+        self.components = components
+
+    @property
+    def unit_index(self):
+        return self.location + 1
+
+
+class ShaderParamInput:
+    def __init__(self, name, location, offset, size, default):
+        self.name = name
+        self.location = location
+        self.offset = offset
+        self.size = size
+        self.default = default

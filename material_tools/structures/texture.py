@@ -23,7 +23,7 @@ class EU07_Texture(bpy.types.PropertyGroup):
     )
 
     disable_wrap_t: bpy.props.BoolProperty(
-        name="Disable Horizontal Wrap",
+        name="Disable Vertical Wrap",
         default=False,
     )
 

@@ -135,10 +135,12 @@ class MaterialImporter:
         texture.use_sharpen = tpo.use_sharpen
 
     def _get_slot_name_for_alias(self, alias, shader_data):
-        id_ = shader_data.alias_map.get(alias)
+        for tex_input in shader_data.textures:
+            if tex_input.name == alias:
+                return f"texture{tex_input.unit_index}"
 
-        if id_:
-            return f"texture{id_}"
+
+
 
 
 
