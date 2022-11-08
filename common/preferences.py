@@ -15,7 +15,7 @@ class EU07AddonPreferences(bpy.types.AddonPreferences):
     )
 
     trees_material_regex: StringProperty(
-        name="Trees material name filter",
+        name="Trees material filename filter",
         default="tree|drzewo|plant"
     )
 

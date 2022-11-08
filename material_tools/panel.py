@@ -75,27 +75,6 @@ class EU07_PT_MATEntityProperties(bpy.types.Panel):
             b.prop(active_node.eu07_texture, "disable_wrap_s")
             b.prop(active_node.eu07_texture, "disable_wrap_t")
             b.prop(active_node.eu07_texture, "use_sharpen")
-        elif matblock_mod.poll_helper(context):
-            matblock_data = active_node.eu07_matblock
-            self.layout.prop(matblock_data, "shader_name")
-            sbox = self.layout.box()
-            sbox.label(text="Shader Parameters:")
-            sbox.template_list(
-                "EU07_UL_MATShaderParams", "",
-                matblock_data, "shader_params_internal",
-                matblock_data, "active_shader_param_index"
-            )
-            row = sbox.row()
-            row.operator("eu07.mat_add_shader_param", text="Add")
-            row.operator("eu07.mat_remove_shader_param", text="Remove")
-            active_param = matblock_data.get_active_shader_param()
-            if active_param:
-                sbox.prop(active_param, "name", text="Name")
-                sbox.prop(active_param, "value_string", text="Values")
-            self.layout.prop(matblock_data, "shadow_rank")
-            self.layout.prop(matblock_data, "size")
-            self.layout.prop(matblock_data, "opacity")
-            self.layout.prop(matblock_data, "selfillum")
 
 
 classes = (

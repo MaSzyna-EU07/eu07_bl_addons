@@ -52,7 +52,7 @@ class T3DImportOperator(bpy.types.Operator, ImportHelper):
     )
     name_prefix: StringProperty(
         name="Name Prefix",
-        description="Additional name prefix for imported submodels to prevent parenting issues"
+        description="Additional filename prefix for imported submodels to prevent parenting issues"
     )
 
     def execute(self, context):

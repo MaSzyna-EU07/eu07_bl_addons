@@ -45,7 +45,7 @@ class EU07_OT_ExportT3D(bpy.types.Operator, ExportHelper):
         options={'HIDDEN'}
     )
     remove_name_suffixes: bpy.props.BoolProperty(
-        name="Remove name suffices",
+        name="Remove filename suffices",
         default=False,
         description="Remove .00x suffices from object names",
     )

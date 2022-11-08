@@ -3,8 +3,8 @@ import pathlib
 import bpy
 
 import eu07_tools
+import material_tools.nodegroups.randomtextureset
 from . import matblock as matblock_mod
-from . import randomtextureset as randomtextureset_mod
 
 BSDF_COLOR_INPUT = 0
 BSDF_SPECULAR_INPUT = 7
@@ -71,7 +71,7 @@ class EU07_Material(bpy.types.PropertyGroup):
 
     def create_randomtextureset(self):
         node = self.bl_material.node_tree.nodes.new('ShaderNodeGroup')
-        node.node_tree = randomtextureset_mod.get_template()
+        node.node_tree = material_tools.nodegroups.randomtextureset.get_template()
         return node.eu07_randomtextureset
 
     def set_active_color_texture(self, texture):

@@ -1,5 +1,5 @@
 bl_info = {
-    "name": "'MaSzyna' Train Simulator developer tools",
+    "filename": "'MaSzyna' Train Simulator developer tools",
     "description": "Tools for 'MaSzyna' Train Simulator assets - models, scenes, materials",
     "author": "Balaclava vel krzysiuup - based on firleju's work",
     "version": (2022, 2, 1),

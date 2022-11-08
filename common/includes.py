@@ -132,7 +132,7 @@ class EU07_PT_Includes(bpy.types.Panel):
 
         if item:
             name_row = self.layout.row()
-            name_row.prop(item, "name")
+            name_row.prop(item, "filename")
 
             path_row = self.layout.row()
             path_row.prop(item, "file_path")

@@ -25,17 +25,17 @@ class EU07_OT_ExportAnimation(bpy.types.Operator, ExportHelper):
     )
 
     model_name: bpy.props.StringProperty(
-        name="Node Model name",
+        name="Node Model filename",
         default="",
     )
 
     main_event_name: bpy.props.StringProperty(
-        name="Main event name",
+        name="Main event filename",
         default="",
     )
 
     anim_event_name_prefix: bpy.props.StringProperty(
-        name="Anim events name prefix",
+        name="Anim events filename prefix",
         default=""
     )
 

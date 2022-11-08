@@ -155,7 +155,7 @@ class T3DSubmodelPropertiesPanel(bpy.types.Panel):
 
     def draw_panel(self):
         name_r = self.layout.row()
-        name_r.prop(self.obj, "name")
+        name_r.prop(self.obj, "filename")
 
         parent_r = self.layout.row()
         parent_r.prop(self.obj, "parent")

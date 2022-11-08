@@ -1,7 +1,5 @@
 import bpy
 
-RANDOM_TEXTURESET_NAME = "[EU07] Random Texture Set"
-MAX_TEXTURESET_SIZE = 4
 
 class EU07_RandomTextureSet(bpy.types.PropertyGroup):
     # HACK: self.id_data returns main node tree so i took this workaround from
@@ -39,22 +37,6 @@ class EU07_RandomTextureSet(bpy.types.PropertyGroup):
     @mat_alias.setter
     def mat_alias(self, alias):
         self.bl_node.label = alias
-
-
-def get_template():
-    ng = bpy.data.node_groups.get(RANDOM_TEXTURESET_NAME)
-
-    if ng is None:
-        ng = bpy.data.node_groups.new(RANDOM_TEXTURESET_NAME, 'ShaderNodeTree')
-
-        ng_output = ng.nodes.new("NodeGroupOutput")
-        ng_input = ng.nodes.new("NodeGroupInput")
-
-        ng.outputs.new("NodeSocketColor", "Output Texture")
-        for i in range(MAX_TEXTURESET_SIZE):
-            ng.inputs.new("NodeSocketColor", f"Texture{i+1}")
-
-    return ng
 
 
 def register():

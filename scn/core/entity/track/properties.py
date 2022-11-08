@@ -90,7 +90,7 @@ class TrackProperties(NodeProperties):
     material1: bpy.props.PointerProperty(
         type=bpy.types.Material,
         name="Material #1",
-        description="Material name #1",
+        description="Material filename #1",
         update=callbacks.update_material1,
     )
 
