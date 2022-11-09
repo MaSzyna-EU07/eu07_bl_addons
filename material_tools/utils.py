@@ -46,6 +46,4 @@ def get_filename_from_material(material):
     return "none"
 
 
-
-
-
+SHADER_NAME_PREFIX = "[EU07] Shader: "

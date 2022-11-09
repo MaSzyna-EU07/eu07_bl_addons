@@ -8,9 +8,9 @@ class ShaderParser:
         with open(abspath, "r") as shaderfile:
             for line in shaderfile:
                 if line.startswith("#include"):
-                    _, shader_name = line.strip().split("<")
-                    shader_name = shader_name[:-1]
-                    abspath = self.asset_searcher.shaders.find(f"mat_{shader_name}")
+                    _, shader_name = line.strip(" >").split("<")
+                    shader_name = shader_name
+                    abspath = self.asset_searcher.shaders.find(shader_name)
                     if abspath:
                         self.parse_from_abspath(abspath, data)
 

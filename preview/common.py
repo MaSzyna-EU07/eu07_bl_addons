@@ -52,10 +52,7 @@ def _rewrite_texture_paths(mat, tex_subdir):
             mat.set_textureset(tex_key, [make_preview_path(tpo) for tpo in tex_list])
 
     for variant_key, variant_mat in mat.iter_variants():
-        mat.set_variant(
-            variant_key,
-            _rewrite_texture_paths(variant_mat, tex_subdir)
-        )
+        mat.set_variant(_rewrite_texture_paths(variant_mat, tex_subdir), variant_key)
 
     return mat
 

@@ -1,20 +1,11 @@
 import bpy
-import eu07_tools
-from common import uilist_safe_index_after_delete
 
 from ..nodegroups.randomtextureset import RANDOM_TEXTURESET_NAME
-from ..utils import get_active_material, get_active_material_node
+from ..utils import get_active_material, get_active_material_node, SHADER_NAME_PREFIX
 
 
 class EU07_MATBlock(bpy.types.PropertyGroup):
-
-    size: bpy.props.FloatVectorProperty(
-        name="Size",
-        size=2,
-        default=(-1, -1),
-        min=-1,
-    )
-
+    """ PropertyGroup interface object for Shader Nodegroups """
 
     # HACK: self.id_data returns main node tree so i took this workaround from
     # https://blender.stackexchange.com/questions/214446/adding-properties-to-a-shader-node
@@ -32,53 +23,150 @@ class EU07_MATBlock(bpy.types.PropertyGroup):
 
     @property
     def is_valid(self):
-        return self.bl_node.node_tree.name.startswith("[EU07] Shader:")
+        """ Check if node group can be wrapped """
+        return self.bl_node.node_tree.name.startswith(SHADER_NAME_PREFIX)
 
-    def set_to_texture_slot(self, entity, slot_name):
-        self.bl_node_tree.links.new(
-            entity.bl_node.outputs[0],
-            self._get_texture_slot_input(slot_name)
-        )
+    @property
+    def shader(self):
+        return self.bl_node.node_tree.name.replace(SHADER_NAME_PREFIX, "")
 
-    def get_from_texture_slot(self, slot_name):
-        input_ = self._get_texture_slot_input(slot_name)
-        if input_.links:
+    @shader.setter
+    def shader(self, name):
+        self.bl_node.node_tree = bpy.data.node_groups.get(f"{SHADER_NAME_PREFIX}{name}")
+
+    @property
+    def opacity(self):
+        return self._get_value("Opacity")
+
+    @opacity.setter
+    def opacity(self, opacity):
+        self._set_value("Opacity", opacity)
+
+    @property
+    def selfillum(self):
+        return self._get_value("SelfIllum")
+
+    @selfillum.setter
+    def selfillum(self, selfillum):
+        self._set_value("SelfIllum", selfillum)
+
+    @property
+    def size(self):
+        return [self._get_value("Size X"), self._get_value("Size Y")]
+
+    @size.setter
+    def size(self, size):
+        self._set_value("Size X", size[0])
+        self._set_value("Size Y", size[1])
+
+    @property
+    def shadow_rank(self):
+        return self._get_value("Shadow Rank")
+
+    @shadow_rank.setter
+    def shadow_rank(self, shadow_rank):
+        self._set_value("Shadow Rank", shadow_rank)
+
+    def set_texture(self, key, entity):
+        """ Set texture interface object for given key """
+        input_ = self._get_aliasable_input(key)
+
+        if input_ is not None:
+            self.bl_node_tree.links.new(
+                entity.bl_node.outputs[0],
+                input_
+            )
+
+            # NOTE: Temporary workaround
+            # TODO: Make it more distinct?
+            if "albedo" in key or "diffuse" in key or key == "texture1":
+                self.bl_node_tree.links.new(
+                    entity.bl_node.outputs[1],
+                    self._get_input_by_name_part("Alpha")
+                )
+
+    def get_texture(self, key):
+        """ Get texture interface object for given key """
+        input_ = self._get_aliasable_input(key)
+
+        if input_ is not None and input_.links:
             node = input_.links[0].from_node
             if node.bl_idname == "ShaderNodeGroup" and node.node_tree.name == RANDOM_TEXTURESET_NAME:
                 return node.eu07_randomtextureset
             else:
                 return node.eu07_texture
 
-    def set_subblock(self, subblock, variant_name):
+    def set_param(self, key, value):
+        input_ = self._get_aliasable_input(key)
+
+        input_.default_value = " ".join(str(x) for x in value)
+
+    def get_param(self, key):
+        input_ = self._get_aliasable_input(key)
+
+        return input_.default_value.strip()
+
+    def set_variant(self, key, subblock):
+        """ Set material variant to input with given name """
+        input_ = self._get_input(key)
+
         self.bl_node_tree.links.new(
             subblock.bl_node.outputs[0],
-            self._get_variant_input(variant_name)
+            input_
         )
 
-    def get_subblock(self, variant_name):
-        input_ = self._get_variant_input(variant_name)
+    def get_variant(self, key):
+        input_ = self._get_input(key)
         if input_.links:
             return input_.links[0].from_node.eu07_matblock
 
-    def _get_texture_slot_input(self, slot_name):
-        for input in self.bl_node.inputs:
-            if input.name.lower() == slot_name.lower():
-                return input
+    def _set_value(self, key, value):
+        """ Set value at given key """
+        input_ = self._get_input(key)
 
-    def _get_variant_input(self, variant_name):
+        input_.default_value = value
+
+    def _get_value(self, key):
+        """ Get value for given key """
+        input_ = self._get_input(key)
+        return input_.default_value
+
+    def _get_aliasable_input(self, key):
+        if key.startswith("texture"):
+            filter_ = "Texture"
+            searchable = key[7:].lstrip("_")
+        elif key.startswith("param"):
+            filter_ = "Param"
+            searchable = key[5:].lstrip("_").replace("_", " ") # TODO: Name formatting - separate to function
+        else:
+            return
+
         for input_ in self.bl_node.inputs:
-            if input_.name.lower() == variant_name.lower():
+            if filter_ in input_.name:
+                if searchable in input_.name.lower():
+                    return input_
+
+    def _get_input(self, key):
+        for input_ in self.bl_node.inputs:
+            if input_.name.lower() == key.lower():
+                return input_
+
+    def _get_input_by_name_part(self, part):
+        for input_ in self.bl_node.inputs:
+            if part.lower() in input_.name.lower():
                 return input_
 
 
 def poll_helper(context):
     active_mat = get_active_material(context)
     active_node = get_active_material_node(active_mat)
-    return active_node.bl_idname == "ShaderNodeGroup" and active_node.node_tree.name.startswith("[EU07] Shader:")
+    return active_node.bl_idname == "ShaderNodeGroup" and active_node.node_tree.name.startswith(SHADER_NAME_PREFIX)
+
 
 classes = (
     EU07_MATBlock,
 )
+
 
 def register():
     for cls in classes:

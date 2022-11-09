@@ -15,7 +15,7 @@ class NodeLayouter:
         self._arrange_children(first)
         if self.material.eu07_material.is_mat:
             mat_root_node = self.material.eu07_material.mat_root.bl_node
-            mat_root_node.location = first.location - mathutils.Vector((500, 660))
+            mat_root_node.location = first.location - mathutils.Vector((500, 0))
             self._arrange_children(mat_root_node)
 
     def _find_first_node(self):

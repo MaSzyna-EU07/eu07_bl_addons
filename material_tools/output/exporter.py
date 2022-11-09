@@ -27,7 +27,7 @@ class MaterialExporter:
 
         for i in range(matblock_mod.MAX_TEXTURES_NUM):
             slotname = f"texture{i + 1}"
-            entity = matblock.get_from_texture_slot(slotname)
+            entity = matblock.get_texture(slotname)
 
             if entity:
                 key = f"texture_{entity.mat_alias}" if entity.mat_alias else slotname
@@ -41,10 +41,10 @@ class MaterialExporter:
             outmat.shader_params[param.name] = param.get_values_list()
 
         for key in eu07_tools.mat.NESTED_MAPPING_KEYS:
-            subblock = matblock.get_subblock(key)
+            subblock = matblock.get_variant(key)
             if subblock:
                 submat = self.matblock_to_outmat(subblock)
-                outmat.set_variant(key, submat)
+                outmat.set_variant(submat, key)
 
         return outmat
 

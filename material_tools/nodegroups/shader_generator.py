@@ -4,11 +4,16 @@ import bpy
 
 import eu07_tools
 from material_tools.input.shaderparser import ShaderParser
-from material_tools.nodegroups.utils import BSDF_COLOR_INPUT, BSDF_NORMAL_INPUT, BSDF_ALPHA_INPUT, BSDF_METALLIC_INPUT, \
-    BSDF_ROUGHNESS_INPUT
+
+# TODO - redundant, move to common file
+BSDF_COLOR_INPUT = 0
+BSDF_METALLIC_INPUT = 6
+BSDF_ROUGHNESS_INPUT = 9
+BSDF_ALPHA_INPUT = 21
+BSDF_NORMAL_INPUT = 22
+BSDF_SPECULAR_INPUT = 7
 
 # NOTE: This is ugly and could be done better, but it works, so low priority for that
-
 
 class ShaderNodeGroupGenerator:
     def __init__(self, asset_searcher):
@@ -21,7 +26,7 @@ class ShaderNodeGroupGenerator:
         self._bsdf = None
         self._input_index = 0
 
-        # map name: setup callback, default value, has alpha
+        # map key: setup callback, default value, has alpha
         self._map_setups = {
             "diffuse": [
                 self._diffuse_setup,
@@ -46,7 +51,7 @@ class ShaderNodeGroupGenerator:
         }
 
     def generate_from_filename(self, filename):
-        """ Builds node group based on data read from given file name """
+        """ Builds node group based on data read from given file key """
         self.asset_searcher.shaders.remove_extension(".vert")
         abspath = self.asset_searcher.shaders.find(filename)
         self.asset_searcher.shaders.add_extension(".vert")
@@ -60,8 +65,8 @@ class ShaderNodeGroupGenerator:
 
     def generate_from_data(self, shader_data, name):
         """
-        Builds node group with inputs based on passed shader data and given name.
-        If group with given name already exists, it's content is rebuilded.
+        Builds node group with inputs based on passed shader data and given key.
+        If group with given key already exists, it's content is rebuilded.
         """
         self._ng = bpy.data.node_groups.get(name)
         if self._ng:
@@ -74,6 +79,9 @@ class ShaderNodeGroupGenerator:
         self._ng_output = self._ng.nodes.new("NodeGroupOutput")
         self._bsdf = self._ng.nodes.new("ShaderNodeBsdfPrincipled")
 
+        self._bsdf.inputs[BSDF_SPECULAR_INPUT].default_value = 0
+        self._bsdf.inputs[BSDF_ROUGHNESS_INPUT].default_value = 1
+
         self._ng.outputs.new("NodeSocketShader", "Output")
 
         self._ng.links.new(
@@ -83,7 +91,13 @@ class ShaderNodeGroupGenerator:
 
         self._input_index = 0
         for ti in shader_data.textures:
-            inp = self._ng.inputs.new("NodeSocketColor", ti.name.capitalize())
+
+            # "reflmap" is some kind of legacy "normalmap" - there's some quirks with that, so simple fix:
+            if ti.name == "reflmap":
+                ti.name = "normalmap"
+
+            slotname = f"{ti.name.capitalize()} (Texture{ti.unit_index})"
+            inp = self._ng.inputs.new("NodeSocketColor", slotname)
 
             setup_data = self._map_setups.get(ti.name)
             if setup_data:
@@ -103,7 +117,8 @@ class ShaderNodeGroupGenerator:
             self._input_index += 1
 
         for pi in shader_data.params:
-            self._ng.inputs.new("NodeSocketString", pi.name.capitalize())
+            slotname = pi.name.replace("_", " ").capitalize()
+            self._ng.inputs.new("NodeSocketString", f"{slotname} (Param{pi.location + 1})")
 
             self._input_index += 1
 
@@ -245,6 +260,5 @@ class ShaderNodeGroupGenerator:
         )
 
         return mix_rgb
-
 
 

@@ -2,10 +2,10 @@ import pathlib
 
 import bpy
 
-import eu07_tools
-import material_tools.nodegroups.randomtextureset
-from . import matblock as matblock_mod
+# TODO: Move it away, too tight cohesion between modules
+from material_tools.nodegroups.randomtextureset import RANDOM_TEXTURESET_NAME
 
+# TODO - redundant, move to common file
 BSDF_COLOR_INPUT = 0
 BSDF_SPECULAR_INPUT = 7
 BSDF_ROUGHNESS_INPUT = 9
@@ -51,12 +51,32 @@ class EU07_Material(bpy.types.PropertyGroup):
                 if not is_nested:
                     return node.eu07_matblock
 
-    def configure(self):
+    @mat_root.setter
+    def mat_root(self, new_root):
+        if not self.is_mat:
+            return
+
+        output = self._get_output_node()
+
+        self.bl_material.node_tree.links.new(
+            new_root.bl_node.outputs[0],
+            output.inputs[0],
+        )
+
+    def init_texture(self):
         self.bl_material.use_nodes = True
         bsdf = self._get_bsdf_node()
+        output = self._get_output_node()
 
         bsdf.inputs[BSDF_SPECULAR_INPUT].default_value = 0
         bsdf.inputs[BSDF_ROUGHNESS_INPUT].default_value = 1
+        self.bl_material.use_backface_culling = True
+        self.bl_material.show_transparent_back = False
+
+    def init_mat(self):
+        output = self._get_output_node()
+
+        self.bl_material.use_nodes = True
         self.bl_material.use_backface_culling = True
         self.bl_material.show_transparent_back = False
 
@@ -66,33 +86,27 @@ class EU07_Material(bpy.types.PropertyGroup):
 
     def create_matblock(self):
         node = self.bl_material.node_tree.nodes.new('ShaderNodeGroup')
-        node.node_tree = matblock_mod.get_template()
+        node.inputs.new("NodeSocketShader", "Output")
+
         return node.eu07_matblock
 
     def create_randomtextureset(self):
         node = self.bl_material.node_tree.nodes.new('ShaderNodeGroup')
-        node.node_tree = material_tools.nodegroups.randomtextureset.get_template()
+        node.node_tree = bpy.data.node_groups.get(RANDOM_TEXTURESET_NAME)
         return node.eu07_randomtextureset
 
-    def set_active_color_texture(self, texture):
+    def set_single_texture(self, texture):
         bsdf = self._get_bsdf_node()
+
         self.bl_material.node_tree.links.new(
             texture.bl_node.outputs[0],
             bsdf.inputs[BSDF_COLOR_INPUT]
         )
+
         self.bl_material.node_tree.links.new(
             texture.bl_node.outputs[1],
             bsdf.inputs[BSDF_ALPHA_INPUT]
         )
-
-    def get_active_color_texture(self):
-        bsdf = self._get_bsdf_node()
-
-        links = bsdf.inputs[BSDF_COLOR_INPUT].links
-        if links:
-            node = links[0].from_node
-            if node.bl_idname == "ShaderNodeTexImage":
-                return node.image
 
     def get_opacity_for_submodel(self):
         if self.bl_material.blend_method == 'BLEND':
@@ -119,15 +133,12 @@ class EU07_Material(bpy.types.PropertyGroup):
                 if node.image:
                     yield node.image
 
-    def reset(self):
+    def clear(self):
         self.bl_material.node_tree.nodes.clear()
 
-        self.bl_material.node_tree.links.new(
-            self._get_bsdf_node().outputs[0],
-            self._get_output_node().inputs[0]
-        )
+    def _get_diffuse_texture_node(self):
+        bsdf = self._get_bsdf_node()
 
-    def _get_diffuse_texture_node(self, bsdf):
         if not bsdf:
             return None
 
