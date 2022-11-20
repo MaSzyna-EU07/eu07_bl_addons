@@ -89,7 +89,7 @@ class EU07_PT_MATEntityProperties(bpy.types.Panel):
 
             for inp in active_node.inputs:
                 row = self.layout.row()
-                row.prop(inp, "hide", text=inp.name, invert_checkbox=True)
+                row.prop(inp, "hide", text=inp.name, toggle=1, invert_checkbox=True)
 
 
 classes = (
