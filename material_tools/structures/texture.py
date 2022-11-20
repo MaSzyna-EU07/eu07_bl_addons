@@ -4,19 +4,8 @@ import bpy
 
 import eu07_tools
 
-def _get_alias(self):
-    return self.bl_node.label
-
-def _set_alias(self, alias):
-    self.bl_node.label = alias
 
 class EU07_Texture(bpy.types.PropertyGroup):
-    mat_alias: bpy.props.StringProperty(
-        name="Alias",
-        get=_get_alias,
-        set=_set_alias
-    )
-
     disable_wrap_s: bpy.props.BoolProperty(
         name="Disable Horizontal Wrap",
         default=False,

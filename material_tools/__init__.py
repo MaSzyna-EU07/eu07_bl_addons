@@ -4,7 +4,7 @@ from . import panel
 from . import skins
 from . import structures
 from . import output
-from . import provide_ng
+from . import ng_ops
 
 modules = (
     input_,
@@ -12,7 +12,7 @@ modules = (
     structures,
     panel,
     output,
-    provide_ng,
+    ng_ops,
 )
 
 

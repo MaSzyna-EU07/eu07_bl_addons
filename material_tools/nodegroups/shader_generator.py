@@ -3,7 +3,7 @@ import pathlib
 import bpy
 
 import eu07_tools
-from material_tools.input.shaderparser import ShaderParser
+from eu07_tools.mat.shaderparser import ShaderParser
 
 # TODO - redundant, move to common file
 BSDF_COLOR_INPUT = 0
@@ -96,8 +96,10 @@ class ShaderNodeGroupGenerator:
             if ti.name == "reflmap":
                 ti.name = "normalmap"
 
-            slotname = f"{ti.name.capitalize()} (Texture{ti.unit_index})"
+            slotname = ti.name.replace("_", " ").title()
             inp = self._ng.inputs.new("NodeSocketColor", slotname)
+
+            self._ng.eu07_shader_inputs_map.add_texture_data(ti.unit_index, slotname)
 
             setup_data = self._map_setups.get(ti.name)
             if setup_data:
@@ -117,8 +119,10 @@ class ShaderNodeGroupGenerator:
             self._input_index += 1
 
         for pi in shader_data.params:
-            slotname = pi.name.replace("_", " ").capitalize()
-            self._ng.inputs.new("NodeSocketString", f"{slotname} (Param{pi.location + 1})")
+            slotname = pi.name.replace("_", " ").title()
+            self._ng.inputs.new("NodeSocketString", slotname)
+
+            self._ng.eu07_shader_inputs_map.add_param_data(pi.unit_index, slotname)
 
             self._input_index += 1
 

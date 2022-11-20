@@ -7,9 +7,10 @@ import material_tools.nodegroups.randomtextureset
 from common import get_environment_path
 from eu07_tools.utils import AssetSearcher
 from .nodegroups.shader_generator import ShaderNodeGroupGenerator
+from .utils import SHADER_NAME_PREFIX, get_active_material, get_active_material_node
 
 
-def provide_mat_nodes():
+def provide_mat_nodegroups():
     material_tools.nodegroups.randomtextureset.generate()
 
     env_path = get_environment_path()
@@ -23,18 +24,59 @@ def provide_mat_nodes():
             ng = ng_builder.generate_from_filename(entry.with_suffix("").name)
 
 
+def remove_mat_nodegroups():
+    for ng in bpy.data.node_groups:
+        if ng.name.startswith("[EU07]"):
+            bpy.data.node_groups.remove(ng)
+
+
 class EU07_OT_ProvideMATNodeGroups(bpy.types.Operator):
     bl_label = "Provide MAT Nodes"
-    bl_idname = "eu07.provide_mat_nodes"
+    bl_idname = "eu07.provide_mat_nodegroups"
 
     def execute(self, context):
-        provide_mat_nodes()
+        provide_mat_nodegroups()
+
+        return {'FINISHED'}
+
+
+class EU07_OT_RemoveMATNodeGroups(bpy.types.Operator):
+    bl_label = "Remove MAT Nodes"
+    bl_idname = "eu07.remove_mat_nodegroups"
+
+    def execute(self, context):
+        remove_mat_nodegroups()
+
+        return {'FINISHED'}
+
+
+class EU07_OT_ToggleMATShaderInputs(bpy.types.Operator):
+    bl_label = "Disable all inputs"
+    bl_idname = "eu07.toggle_shader_inputs"
+
+    hidden_state: bpy.props.BoolProperty(
+        default=True
+    )
+
+    @classmethod
+    def poll(cls, context):
+        active_material = get_active_material(context)
+        active_node = get_active_material_node(active_material)
+
+        return active_node is not None
+
+    def execute(self, context):
+        node = get_active_material_node(get_active_material(context))
+        for inp in node.inputs:
+            inp.hide = self.hidden_state
 
         return {'FINISHED'}
 
 
 classes = (
     EU07_OT_ProvideMATNodeGroups,
+    EU07_OT_RemoveMATNodeGroups,
+    EU07_OT_ToggleMATShaderInputs
 )
 
 

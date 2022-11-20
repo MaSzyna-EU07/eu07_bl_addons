@@ -26,13 +26,20 @@ class EU07_MATBlock(bpy.types.PropertyGroup):
         """ Check if node group can be wrapped """
         return self.bl_node.node_tree.name.startswith(SHADER_NAME_PREFIX)
 
+    def hide_slots(self):
+        for inp in self.bl_node.inputs:
+            inp.hide = True
+
     @property
     def shader(self):
         return self.bl_node.node_tree.name.replace(SHADER_NAME_PREFIX, "")
 
     @shader.setter
     def shader(self, name):
-        self.bl_node.node_tree = bpy.data.node_groups.get(f"{SHADER_NAME_PREFIX}{name}")
+        try:
+            self.bl_node.node_tree = bpy.data.node_groups[f"{SHADER_NAME_PREFIX}{name}"]
+        except KeyError:
+            raise KeyError(f"[EU07] Trying to set non-existing shader node group {name}")
 
     @property
     def opacity(self):
@@ -69,7 +76,8 @@ class EU07_MATBlock(bpy.types.PropertyGroup):
 
     def set_texture(self, key, entity):
         """ Set texture interface object for given key """
-        input_ = self._get_aliasable_input(key)
+        input_ = self._get_input(key)
+        input_.hide = False
 
         if input_ is not None:
             self.bl_node_tree.links.new(
@@ -78,8 +86,7 @@ class EU07_MATBlock(bpy.types.PropertyGroup):
             )
 
             # NOTE: Temporary workaround
-            # TODO: Make it more distinct?
-            if "albedo" in key or "diffuse" in key or key == "texture1":
+            if "albedo" in key.lower() or "diffuse" in key.lower():
                 self.bl_node_tree.links.new(
                     entity.bl_node.outputs[1],
                     self._get_input_by_name_part("Alpha")
@@ -87,7 +94,7 @@ class EU07_MATBlock(bpy.types.PropertyGroup):
 
     def get_texture(self, key):
         """ Get texture interface object for given key """
-        input_ = self._get_aliasable_input(key)
+        input_ = self._get_input(key)
 
         if input_ is not None and input_.links:
             node = input_.links[0].from_node
@@ -97,18 +104,25 @@ class EU07_MATBlock(bpy.types.PropertyGroup):
                 return node.eu07_texture
 
     def set_param(self, key, value):
-        input_ = self._get_aliasable_input(key)
+        """ Set shader param value to input with given name """
+        input_ = self._get_input(key)
+        input_.hide = False
 
-        input_.default_value = " ".join(str(x) for x in value)
+        if input_ is not None:
+            input_.default_value = " ".join(str(x) for x in value)
+        else:
+            raise KeyError(f"No key '{key}' in shader f'{self.shader}'")
 
     def get_param(self, key):
-        input_ = self._get_aliasable_input(key)
+        """ Get shader param value from input with given name """
+        input_ = self._get_input(key)
 
         return input_.default_value.strip()
 
     def set_variant(self, key, subblock):
         """ Set material variant to input with given name """
         input_ = self._get_input(key)
+        input_.hide = False
 
         self.bl_node_tree.links.new(
             subblock.bl_node.outputs[0],
@@ -123,6 +137,7 @@ class EU07_MATBlock(bpy.types.PropertyGroup):
     def _set_value(self, key, value):
         """ Set value at given key """
         input_ = self._get_input(key)
+        input_.hide = False
 
         input_.default_value = value
 
@@ -130,21 +145,6 @@ class EU07_MATBlock(bpy.types.PropertyGroup):
         """ Get value for given key """
         input_ = self._get_input(key)
         return input_.default_value
-
-    def _get_aliasable_input(self, key):
-        if key.startswith("texture"):
-            filter_ = "Texture"
-            searchable = key[7:].lstrip("_")
-        elif key.startswith("param"):
-            filter_ = "Param"
-            searchable = key[5:].lstrip("_").replace("_", " ") # TODO: Name formatting - separate to function
-        else:
-            return
-
-        for input_ in self.bl_node.inputs:
-            if filter_ in input_.name:
-                if searchable in input_.name.lower():
-                    return input_
 
     def _get_input(self, key):
         for input_ in self.bl_node.inputs:

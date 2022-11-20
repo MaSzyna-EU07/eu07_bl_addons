@@ -42,8 +42,10 @@ class EU07_PT_MaterialToolsPanel(bpy.types.Panel):
         self.layout.operator("eu07.broadcast_skin", text="Broadcast Skin", icon="PARTICLES")
 
         if eu07_material.is_mat:
-            row = self.layout.row()
-            row.operator("eu07.provide_mat_nodes", icon="NODETREE")
+            box = self.layout.box()
+            box.label(text="MAT Nodes Manager", icon="NODETREE")
+            box.operator("eu07.provide_mat_nodegroups", icon="IMPORT")
+            box.operator("eu07.remove_mat_nodegroups", icon="TRASH")
 
 
 class EU07_PT_MATEntityProperties(bpy.types.Panel):
@@ -75,6 +77,19 @@ class EU07_PT_MATEntityProperties(bpy.types.Panel):
             b.prop(active_node.eu07_texture, "disable_wrap_s")
             b.prop(active_node.eu07_texture, "disable_wrap_t")
             b.prop(active_node.eu07_texture, "use_sharpen")
+        elif active_node.bl_idname == "ShaderNodeGroup":
+            self.layout.label(text="Shader Node Group Inputs:")
+            row = self.layout.row()
+
+            disable_op = row.operator("eu07.toggle_shader_inputs", text="Disable All")
+            disable_op.hidden_state = True
+
+            enable_op = row.operator("eu07.toggle_shader_inputs", text="Enable All")
+            enable_op.hidden_state = False
+
+            for inp in active_node.inputs:
+                row = self.layout.row()
+                row.prop(inp, "hide", text=inp.name, invert_checkbox=True)
 
 
 classes = (

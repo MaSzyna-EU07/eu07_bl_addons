@@ -7,7 +7,7 @@ modules = (
 )
 
 def menu_func_export(self, context):
-    self.layout.operator(operator.EU07_OT_ExportMAT.bl_idname, text="[EU07] Material (.mat)")
+    self.layout.operator(operator.EU07_OT_ExportMAT.bl_idname, text="[EU07] MATMaterial (.mat)")
 
 
 def register():
