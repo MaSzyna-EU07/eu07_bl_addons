@@ -5,13 +5,15 @@ import bpy
 import eu07_tools
 from eu07_tools.mat.shaderparser import ShaderParser
 
-# TODO - redundant, move to common file
-BSDF_COLOR_INPUT = 0
-BSDF_METALLIC_INPUT = 6
-BSDF_ROUGHNESS_INPUT = 9
-BSDF_ALPHA_INPUT = 21
-BSDF_NORMAL_INPUT = 22
-BSDF_SPECULAR_INPUT = 7
+from ..utils import (
+    BSDF_COLOR_INPUT,
+    BSDF_ROUGHNESS_INPUT,
+    BSDF_ALPHA_INPUT,
+    BSDF_SPECULAR_INPUT,
+    BSDF_METALLIC_INPUT,
+    BSDF_NORMAL_INPUT,
+)
+
 
 # NOTE: This is ugly and could be done better, but it works, so low priority for that
 
@@ -91,11 +93,6 @@ class ShaderNodeGroupGenerator:
 
         self._input_index = 0
         for ti in shader_data.textures:
-
-            # "reflmap" is some kind of legacy "normalmap" - there's some quirks with that, so simple fix:
-            if ti.name == "reflmap":
-                ti.name = "normalmap"
-
             slotname = ti.name.replace("_", " ").title()
             inp = self._ng.inputs.new("NodeSocketColor", slotname)
 

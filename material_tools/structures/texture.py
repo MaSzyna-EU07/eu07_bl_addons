@@ -6,6 +6,10 @@ import eu07_tools
 
 
 class EU07_Texture(bpy.types.PropertyGroup):
+    placeholder_path: bpy.props.StringProperty(
+        name="Placeholder Path"
+    )
+
     disable_wrap_s: bpy.props.BoolProperty(
         name="Disable Horizontal Wrap",
         default=False,
@@ -53,6 +57,9 @@ class EU07_Texture(bpy.types.PropertyGroup):
             return eu07_tools.utils.shorten_asset_path(
                 str(pathlib.Path(self.abspath).with_suffix(""))
             )
+
+        if self.placeholder_path:
+            return self.placeholder_path
 
         return "none"
 

@@ -1,5 +1,6 @@
 import bpy
 
+from common.exceptions import EU07AddonException
 from ..nodegroups.randomtextureset import RANDOM_TEXTURESET_NAME
 from ..utils import get_active_material, get_active_material_node, SHADER_NAME_PREFIX
 
@@ -133,6 +134,18 @@ class EU07_MATBlock(bpy.types.PropertyGroup):
         input_ = self._get_input(key)
         if input_.links:
             return input_.links[0].from_node.eu07_matblock
+
+    def key_to_input_name(self, key):
+        if "_" in key:
+            alias_parts = key.split("_")[1:]
+            input_name = " ".join(alias_parts).capitalize()
+        else:
+            unit_index = int(key[-1])
+            if key.startswith("texture"):
+                input_name = self.bl_node.node_tree.eu07_shader_inputs_map.get_texture_input_name(unit_index)
+            # TODO: Same for params
+
+        return input_name
 
     def _set_value(self, key, value):
         """ Set value at given key """

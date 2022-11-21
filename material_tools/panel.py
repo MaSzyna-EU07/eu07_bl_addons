@@ -71,12 +71,12 @@ class EU07_PT_MATEntityProperties(bpy.types.Panel):
 
         if active_node.bl_idname == "ShaderNodeTexImage":
             eu07_tex = active_node.eu07_texture
-            self.layout.prop(eu07_tex, "mat_alias")
+            self.layout.prop(eu07_tex, "placeholder_path")
             b = self.layout.box()
             b.label(text="Traits")
-            b.prop(active_node.eu07_texture, "disable_wrap_s")
-            b.prop(active_node.eu07_texture, "disable_wrap_t")
-            b.prop(active_node.eu07_texture, "use_sharpen")
+            b.prop(eu07_tex, "disable_wrap_s")
+            b.prop(eu07_tex, "disable_wrap_t")
+            b.prop(eu07_tex, "use_sharpen")
         elif active_node.bl_idname == "ShaderNodeGroup":
             self.layout.label(text="Shader Node Group Inputs:")
             row = self.layout.row()

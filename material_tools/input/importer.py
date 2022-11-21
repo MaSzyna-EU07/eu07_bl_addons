@@ -1,6 +1,5 @@
 import eu07_tools
 from eu07_tools.mat import NESTED_MAPPING_KEYS
-from eu07_tools.mat.shaderparser import ShaderParser
 
 from material_tools import utils
 from ..layouter import NodeLayouter
@@ -85,7 +84,7 @@ class MaterialImporter:
 
             elif key.startswith("param"):
                 # TODO: Params can be indexed, but this rarely happens
-                input_name = key_to_input_name(key, matblock)
+                input_name = matblock.key_to_input_name(key)
                 try:
                     matblock.set_param(input_name, value)
                 except KeyError as e:
@@ -104,7 +103,7 @@ class MaterialImporter:
                         self._init_from_tpo(texture, texpathobject)
                         entity.append_texture(texture)
 
-                input_name = key_to_input_name(key, matblock)
+                input_name = matblock.key_to_input_name(key)
                 matblock.set_texture(input_name, entity)
 
 
@@ -125,24 +124,14 @@ class MaterialImporter:
 
     def _init_from_tpo(self, texture, tpo):
         abspath = self.asset_searcher.textures.find(tpo.path)
-        texture.set_image_from_abspath(abspath)
+        if abspath:
+            texture.set_image_from_abspath(abspath)
+        else:
+            texture.placeholder_path = tpo.path
 
         texture.disable_wrap_s = tpo.disable_wrap_s
         texture.disable_wrap_t = tpo.disable_wrap_t
         texture.use_sharpen = tpo.use_sharpen
-
-
-def key_to_input_name(key, matblock):
-    if "_" in key:
-        alias_parts = key.split("_")[1:]
-        input_name = " ".join(alias_parts).capitalize()
-    else:
-        unit_index = int(key[-1])
-        if key.startswith("texture"):
-            input_name = matblock.node_tree.eu07_shader_inputs_map.get_texture_input_name(unit_index)
-        # TODO: Same for params
-
-    return input_name
 
 
 

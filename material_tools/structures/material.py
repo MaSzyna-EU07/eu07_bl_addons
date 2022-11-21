@@ -5,11 +5,8 @@ import bpy
 # TODO: Move it away, too tight cohesion between modules
 from material_tools.nodegroups.randomtextureset import RANDOM_TEXTURESET_NAME
 
-# TODO - redundant, move to common file
-BSDF_COLOR_INPUT = 0
-BSDF_SPECULAR_INPUT = 7
-BSDF_ROUGHNESS_INPUT = 9
-BSDF_ALPHA_INPUT = 21
+from material_tools.utils import BSDF_COLOR_INPUT, BSDF_SPECULAR_INPUT, BSDF_ROUGHNESS_INPUT, BSDF_ALPHA_INPUT
+
 
 class EU07_Material(bpy.types.PropertyGroup):
     is_mat: bpy.props.BoolProperty(
