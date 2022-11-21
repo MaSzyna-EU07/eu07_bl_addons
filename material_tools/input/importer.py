@@ -34,11 +34,10 @@ class MaterialImporter:
 
         eu07_material = bl_material.eu07_material
         eu07_material.clear()
+        eu07_material.init()
 
         if abspath.endswith(".mat"):
-            eu07_material.init_mat()
             self.asset_searcher.textures.remove_extension(".mat")
-            eu07_material.is_mat = True
             eu07_material.mat_source_path = shortpath
 
             with open(abspath, encoding="latin-1") as matfile:
@@ -50,7 +49,6 @@ class MaterialImporter:
             self.asset_searcher.textures.add_extension(".mat")
 
         else:
-            eu07_material.init_texture()
             texture = eu07_material.create_texture()
             eu07_material.set_single_texture(texture)
 

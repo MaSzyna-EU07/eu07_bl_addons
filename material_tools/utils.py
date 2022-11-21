@@ -6,7 +6,6 @@ import eu07_tools
 
 def create_material(name):
     bl_material = bpy.data.materials.new(name)
-    bl_material.eu07_material.configure()
     return bl_material
 
 
@@ -54,3 +53,11 @@ BSDF_ROUGHNESS_INPUT = 9
 BSDF_ALPHA_INPUT = 21
 BSDF_METALLIC_INPUT = 6
 BSDF_NORMAL_INPUT = 22
+
+
+def is_eu07_shader_node(node):
+    if node.bl_idname == "ShaderNodeGroup":
+        if node.node_tree.name.startswith(SHADER_NAME_PREFIX):
+            return True
+
+    return False

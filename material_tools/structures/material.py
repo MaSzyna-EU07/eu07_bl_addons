@@ -5,19 +5,27 @@ import bpy
 # TODO: Move it away, too tight cohesion between modules
 from material_tools.nodegroups.randomtextureset import RANDOM_TEXTURESET_NAME
 
-from material_tools.utils import BSDF_COLOR_INPUT, BSDF_SPECULAR_INPUT, BSDF_ROUGHNESS_INPUT, BSDF_ALPHA_INPUT
+from material_tools.utils import BSDF_COLOR_INPUT, BSDF_SPECULAR_INPUT, BSDF_ROUGHNESS_INPUT, BSDF_ALPHA_INPUT, \
+    is_eu07_shader_node
 
 
 class EU07_Material(bpy.types.PropertyGroup):
-    is_mat: bpy.props.BoolProperty(
-        name="Is MAT",
-        default=False
-    )
-
     mat_source_path: bpy.props.StringProperty(
         name="MAT Source Path",
         subtype='FILE_PATH'
     )
+
+    @property
+    def is_mat(self):
+        output = self._get_output_node()
+        links = output.inputs[0].links
+        if links:
+            node = links[0].from_node
+            return is_eu07_shader_node(node)
+
+        return False
+
+
 
     @property
     def bl_material(self):
@@ -38,11 +46,11 @@ class EU07_Material(bpy.types.PropertyGroup):
             return None
 
         for node in self.bl_material.node_tree.nodes:
-            if node.type == 'GROUP' and node.eu07_matblock.is_valid:
+            if is_eu07_shader_node(node):
                 output = node.outputs[0]
 
                 is_nested = any([
-                    link.to_node.type == 'GROUP' and node.eu07_matblock.is_valid
+                    is_eu07_shader_node(link.to_node)
                     for link in output.links
                 ])
                 if not is_nested:
@@ -50,9 +58,6 @@ class EU07_Material(bpy.types.PropertyGroup):
 
     @mat_root.setter
     def mat_root(self, new_root):
-        if not self.is_mat:
-            return
-
         output = self._get_output_node()
 
         self.bl_material.node_tree.links.new(
@@ -60,19 +65,8 @@ class EU07_Material(bpy.types.PropertyGroup):
             output.inputs[0],
         )
 
-    def init_texture(self):
-        self.bl_material.use_nodes = True
-        bsdf = self._get_bsdf_node()
-        output = self._get_output_node()
-
-        bsdf.inputs[BSDF_SPECULAR_INPUT].default_value = 0
-        bsdf.inputs[BSDF_ROUGHNESS_INPUT].default_value = 1
-        self.bl_material.use_backface_culling = True
-        self.bl_material.show_transparent_back = False
-
-    def init_mat(self):
-        output = self._get_output_node()
-
+    def init(self):
+        """ Initialize material """
         self.bl_material.use_nodes = True
         self.bl_material.use_backface_culling = True
         self.bl_material.show_transparent_back = False
@@ -150,7 +144,11 @@ class EU07_Material(bpy.types.PropertyGroup):
             if "Bsdf" in node.bl_idname:
                 return node
 
-        return self.bl_material.node_tree.nodes.new("ShaderNodeBsdfPrincipled")
+        bsdf = self.bl_material.node_tree.nodes.new("ShaderNodeBsdfPrincipled")
+        bsdf.inputs[BSDF_SPECULAR_INPUT].default_value = 0
+        bsdf.inputs[BSDF_ROUGHNESS_INPUT].default_value = 1
+
+        return bsdf
 
     def _get_output_node(self):
         for node in self.bl_material.node_tree.nodes:

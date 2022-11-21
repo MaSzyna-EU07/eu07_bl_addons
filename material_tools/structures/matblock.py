@@ -22,11 +22,6 @@ class EU07_MATBlock(bpy.types.PropertyGroup):
     def bl_node_tree(self):
         return self.id_data
 
-    @property
-    def is_valid(self):
-        """ Check if node group can be wrapped """
-        return self.bl_node.node_tree.name.startswith(SHADER_NAME_PREFIX)
-
     def hide_slots(self):
         for inp in self.bl_node.inputs:
             inp.hide = True

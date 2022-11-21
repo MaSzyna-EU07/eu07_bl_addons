@@ -14,11 +14,7 @@ class EU07_PT_MaterialToolsPanel(bpy.types.Panel):
         active_bl_material = context.view_layer.objects.active.active_material
         eu07_material = active_bl_material.eu07_material if active_bl_material else None
 
-
         if eu07_material:
-            is_imported_row = self.layout.row()
-            is_imported_row.prop(eu07_material, "is_mat")
-
             if eu07_material.is_mat:
                 row = self.layout.row()
                 row.prop(eu07_material, "mat_source_path")
@@ -28,24 +24,20 @@ class EU07_PT_MaterialToolsPanel(bpy.types.Panel):
         import_op.set_new_as_active = True
 
         row = self.layout.row()
+        row.enabled = (eu07_material is not None)
         import_op_repl = row.operator("eu07.import_material", text="Import Material to Active", icon="IMPORT")
         import_op_repl.import_into_active = True
-        row.enabled = (eu07_material is not None)
 
-        if eu07_material.is_mat:
-            row = self.layout.row()
-            export_op_as = row.operator("eu07.export_material", text="Export Material As...", icon="EXPORT")
-            row.enabled = (eu07_material is not None)
-
-        row.enabled = (eu07_material is not None)
+        row = self.layout.row()
+        export_op_as = row.operator("eu07.export_material", text="Export Material As...", icon="EXPORT")
+        row.enabled = eu07_material is not None and eu07_material.is_mat
 
         self.layout.operator("eu07.broadcast_skin", text="Broadcast Skin", icon="PARTICLES")
 
-        if eu07_material.is_mat:
-            box = self.layout.box()
-            box.label(text="MAT Nodes Manager", icon="NODETREE")
-            box.operator("eu07.provide_mat_nodegroups", icon="IMPORT")
-            box.operator("eu07.remove_mat_nodegroups", icon="TRASH")
+        box = self.layout.box()
+        box.label(text="MAT Nodes Manager", icon="NODETREE")
+        box.operator("eu07.provide_mat_nodegroups", icon="IMPORT")
+        box.operator("eu07.remove_mat_nodegroups", icon="TRASH")
 
 
 class EU07_PT_MATEntityProperties(bpy.types.Panel):
