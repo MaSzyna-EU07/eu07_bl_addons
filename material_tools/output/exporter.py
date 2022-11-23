@@ -16,35 +16,27 @@ class MaterialExporter:
         eu07_tools.mat.dump(outmat, file)
 
     def matblock_to_outmat(self, matblock):
-        outmat = eu07_tools.mat.create_material()
+        outmat = eu07_tools.mat.MATMaterial()
 
-        if matblock.shader_name != "":
-            outmat.shader = matblock.shader_name
-        outmat.opacity = matblock.opacity
-        outmat.selfillum = matblock.selfillum
-        outmat.size = list(matblock.size)
-        outmat.shadow_rank = matblock.shadow_rank
+        for key in matblock.iter_used_keys():
+            value = matblock.get_by_key(key)
 
-        for i in range(matblock_mod.MAX_TEXTURES_NUM):
-            slotname = f"texture{i + 1}"
-            entity = matblock.get_texture(slotname)
-
-            if entity:
-                key = f"texture_{entity.mat_alias}" if entity.mat_alias else slotname
-
-                if entity.texture_type == "TEXTURE":
-                    outmat.set_texture_path(key, entity.shortpath_with_traits)
+            if key.startswith("texture"):
+                tex_entity = value
+                if tex_entity.texture_type == "TEXTURE":
+                    value = eu07_tools.utils.TexturePath(tex_entity.shortpath_with_traits)
                 else:
-                    outmat.set_textureset(key, list(tex.shortpath_with_traits for tex in entity.iter_textures()))
+                    value = list(
+                        eu07_tools.utils.TexturePath(tex_entity.shortpath_with_traits)
+                        for tex in tex_entity.iter_textures()
+                    )
 
-        for param in matblock.iter_shader_params():
-            outmat.shader_params[param.name] = param.get_values_list()
+            elif key in eu07_tools.mat.VARIANT_KEYS:
+                subblock = value
+                if subblock:
+                    value = self.matblock_to_outmat(subblock)
 
-        for key in eu07_tools.mat.NESTED_MAPPING_KEYS:
-            subblock = matblock.get_variant(key)
-            if subblock:
-                submat = self.matblock_to_outmat(subblock)
-                outmat.set_variant(submat, key)
+            outmat[key] = value
 
         return outmat
 

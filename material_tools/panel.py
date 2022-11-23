@@ -51,7 +51,7 @@ class EU07_PT_MATEntityProperties(bpy.types.Panel):
         active_object = context.view_layer.objects.active
         if active_object:
             active_material = active_object.active_material
-            return active_material and active_material.eu07_material.is_mat
+            return active_material
 
         return False
 

@@ -33,22 +33,18 @@ class ShaderNodeGroupGenerator:
             "diffuse": [
                 self._diffuse_setup,
                 (1, 1, 1, 1),
-                True,
             ],
             "normalmap": [
                 self._normalmap_setup,
                 (0.5, 0.5, 1, 1),
-                False,
             ],
             "albedo": [
                 self._albedo_setup,
                 (1, 1, 1, 1),
-                True,
             ],
             "params": [
                 self._params_setup,
                 (0, 0, 1, 1),
-                False
             ]
         }
 
@@ -92,21 +88,24 @@ class ShaderNodeGroupGenerator:
         )
 
         self._input_index = 0
-        for ti in shader_data.textures:
-            slotname = ti.name.replace("_", " ").title()
+        for texture_data_object in shader_data.textures:
+            slotname = texture_data_object.name.replace("_", " ").title()
             inp = self._ng.inputs.new("NodeSocketColor", slotname)
 
-            self._ng.eu07_shader_inputs_map.add_texture_data(ti.unit_index, slotname)
-
-            setup_data = self._map_setups.get(ti.name)
+            setup_data = self._map_setups.get(texture_data_object.name)
             if setup_data:
-                setup_func, default_value, has_alpha = setup_data
+                setup_func, default_value = setup_data
 
+            has_alpha = texture_data_object.components in ("RGBA", "sRGB_A")
+
+            self._register_input_data(texture_data_object, "texture", has_alpha=has_alpha)
+
+            if setup_func:
                 setup_func()
                 inp.default_value = default_value
 
                 if has_alpha:
-                    inp = self._ng.inputs.new("NodeSocketFloat", f"{ti.name.capitalize()} Alpha")
+                    inp = self._ng.inputs.new("NodeSocketFloat", f"{texture_data_object.name.capitalize()} Alpha")
                     inp.default_value = 1
                     inp.max_value = 1
                     inp.min_value = 1
@@ -115,11 +114,11 @@ class ShaderNodeGroupGenerator:
 
             self._input_index += 1
 
-        for pi in shader_data.params:
-            slotname = pi.name.replace("_", " ").title()
+        for param_data_object in shader_data.params:
+            slotname = param_data_object.name.replace("_", " ").title()
             self._ng.inputs.new("NodeSocketString", slotname)
 
-            self._ng.eu07_shader_inputs_map.add_param_data(pi.unit_index, slotname)
+            self._register_input_data(param_data_object, "param")
 
             self._input_index += 1
 
@@ -148,11 +147,20 @@ class ShaderNodeGroupGenerator:
 
         self._input_index += 5
 
-        for variant_name in eu07_tools.mat.NESTED_MAPPING_KEYS:
+        for variant_name in eu07_tools.mat.VARIANT_KEYS:
             self._ng.inputs.new("NodeSocketShader", variant_name.capitalize())
+
+            self._ng.eu07_shader_inputs_data.register_input(self._input_index, variant_name)
+
             self._input_index += 1
 
         return self._ng
+
+    def _register_input_data(self, data_object, keyword, has_alpha=False):
+        key_default = f"{keyword}{data_object.unit_index}"
+        key_alias = f"{keyword}_{data_object.name}"
+        self._ng.eu07_shader_inputs_data.register_input(self._input_index, key_default, key_alias, has_alpha)
+
 
     def _diffuse_setup(self):
         self._ng.links.new(

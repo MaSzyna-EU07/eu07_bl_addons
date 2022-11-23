@@ -46,6 +46,7 @@ def get_filename_from_material(material):
 
 
 SHADER_NAME_PREFIX = "[EU07] Shader: "
+RANDOM_TEXTURESET_NAME = "[EU07] Random Texture Set"
 
 BSDF_COLOR_INPUT = 0
 BSDF_SPECULAR_INPUT = 7
@@ -56,8 +57,18 @@ BSDF_NORMAL_INPUT = 22
 
 
 def is_eu07_shader_node(node):
-    if node.bl_idname == "ShaderNodeGroup":
-        if node.node_tree.name.startswith(SHADER_NAME_PREFIX):
-            return True
+    return (
+        node.bl_idname == "ShaderNodeGroup" and
+        node.node_tree is not None
+        and node.node_tree.name.startswith(SHADER_NAME_PREFIX)
+    )
 
-    return False
+
+def is_random_textureset_node(node):
+    return (
+        node.bl_idname == "ShaderNodeGroup" and
+        node.node_tree is not None and
+        node.node_tree.name == RANDOM_TEXTURESET_NAME
+    )
+
+

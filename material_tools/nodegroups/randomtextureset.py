@@ -1,6 +1,7 @@
 import bpy
 
-RANDOM_TEXTURESET_NAME = "[EU07] Random Texture Set"
+from material_tools.utils import RANDOM_TEXTURESET_NAME
+
 MAX_TEXTURESET_SIZE = 4
 
 

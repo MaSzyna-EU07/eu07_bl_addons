@@ -1,11 +1,11 @@
-from . import matblock, material, randomtextureset, texture, shader_inputs_map
+from . import matblock, material, randomtextureset, texture, shader_inputs_data
 
 modules = (
     matblock,
     material,
     randomtextureset,
     texture,
-    shader_inputs_map
+    shader_inputs_data
 )
 
 

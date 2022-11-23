@@ -1,5 +1,5 @@
 import eu07_tools
-from eu07_tools.mat import NESTED_MAPPING_KEYS
+from eu07_tools.mat import VARIANT_KEYS
 
 from material_tools import utils
 from ..layouter import NodeLayouter
@@ -63,52 +63,35 @@ class MaterialImporter:
             num_textures = len([k for k in inmat.keys() if k.startswith("texture")])
             inmat["shader"] = f"default_{num_textures}"
 
-        matblock.shader = inmat["shader"]
+        # Shader first! It implicitly sets proper node group.
+        matblock.set_by_key("shader", inmat["shader"])
         matblock.hide_slots()
 
         for key, value in inmat.items():
+            if key in VARIANT_KEYS:
+                continue
 
-            if key == "opacity":
-                matblock.opacity = inmat["opacity"]
-
-            elif key == "selfillum":
-                matblock.selfillum = inmat["selfillum"]
-
-            elif key == "size":
-                matblock.size_x, matblock.size_y = inmat["size"]
-
-            elif key == "shadow_rank":
-                matblock.shadow_rank = inmat["shadow_rank"]
-
-            elif key.startswith("param"):
-                # TODO: Params can be indexed, but this rarely happens
-                input_name = matblock.key_to_input_name(key)
-                try:
-                    matblock.set_param(input_name, value)
-                except KeyError as e:
-                    # TODO: Make logging?
-                    print(e)
-
-            elif key.startswith("texture"):
+            if key.startswith("texture"):
                 if len(value) == 1:
-                    entity = eu07_material.create_texture()
-                    self._init_from_tpo(entity, value[0])
+                    tex_entity = eu07_material.create_texture()
+                    self._init_from_tpo(tex_entity, value[0])
                 else:
-                    entity = eu07_material.create_randomtextureset()
+                    tex_entity = eu07_material.create_randomtextureset()
 
                     for texpathobject in value:
                         texture = eu07_material.create_texture()
                         self._init_from_tpo(texture, texpathobject)
-                        entity.append_texture(texture)
+                        tex_entity.append_texture(texture)
 
-                input_name = matblock.key_to_input_name(key)
-                matblock.set_texture(input_name, entity)
+                matblock.set_by_key(key, tex_entity)
+            else:
+                matblock.set_by_key(key, value)
 
 
-        # Variants import are delayed to ensure proper node connection
+        # Variants imports are postponed, to ensure all nodes has been connected
         for key, value in inmat.items():
 
-            if key not in NESTED_MAPPING_KEYS:
+            if key not in VARIANT_KEYS:
                 continue
 
             # Get parent shader if not specified locally
@@ -116,7 +99,7 @@ class MaterialImporter:
                 value["shader"] = inmat["shader"]
 
             subblock = self._import_matblock(value, eu07_material)
-            matblock.set_variant(key, subblock)
+            matblock.set_by_key(key, subblock)
 
         return matblock
 

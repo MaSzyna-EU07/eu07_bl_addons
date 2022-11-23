@@ -3,10 +3,9 @@ import pathlib
 import bpy
 
 # TODO: Move it away, too tight cohesion between modules
-from material_tools.nodegroups.randomtextureset import RANDOM_TEXTURESET_NAME
 
 from material_tools.utils import BSDF_COLOR_INPUT, BSDF_SPECULAR_INPUT, BSDF_ROUGHNESS_INPUT, BSDF_ALPHA_INPUT, \
-    is_eu07_shader_node
+    is_eu07_shader_node, RANDOM_TEXTURESET_NAME
 
 
 class EU07_Material(bpy.types.PropertyGroup):
