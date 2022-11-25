@@ -1,7 +1,5 @@
 import eu07_tools
 
-from material_tools.structures import matblock as matblock_mod
-
 class MaterialExporter:
     def __init__(self):
         pass
@@ -24,12 +22,14 @@ class MaterialExporter:
             if key.startswith("texture"):
                 tex_entity = value
                 if tex_entity.texture_type == "TEXTURE":
-                    value = eu07_tools.utils.TexturePath(tex_entity.shortpath_with_traits)
+                    tpo = eu07_tools.utils.TexturePath(tex_entity.shortpath_with_traits)
+                    value = eu07_tools.mat.MATTextureValue.from_path(tpo)
                 else:
-                    value = list(
-                        eu07_tools.utils.TexturePath(tex_entity.shortpath_with_traits)
+                    tpos = [
+                        eu07_tools.utils.TexturePath(tex.shortpath_with_traits)
                         for tex in tex_entity.iter_textures()
-                    )
+                    ]
+                    value = eu07_tools.mat.MATTextureValue.from_list(tpos)
 
             elif key in eu07_tools.mat.VARIANT_KEYS:
                 subblock = value

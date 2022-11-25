@@ -11,6 +11,7 @@ class MaterialImporter:
         self.asset_searcher = asset_searcher
         self.do_mat_lookup = False
         self.do_name_overwrite = True
+        self._eu07_material = None
 
     def import_from_shortpath(self, shortpath, bl_material=None):
         abspath = self.asset_searcher.textures.find(shortpath)
@@ -32,36 +33,35 @@ class MaterialImporter:
             if self.do_name_overwrite:
                 bl_material.name = shortpath
 
-        eu07_material = bl_material.eu07_material
-        eu07_material.clear()
-        eu07_material.init()
+        self._eu07_material = bl_material.eu07_material
+        self._eu07_material.clear()
+        self._eu07_material.init()
 
         if abspath.endswith(".mat"):
             self.asset_searcher.textures.remove_extension(".mat")
-            eu07_material.mat_source_path = shortpath
+            self._eu07_material.mat_source_path = shortpath
 
             with open(abspath, encoding="latin-1") as matfile:
                 inmat = eu07_tools.mat.load(matfile)
 
-            matblock = self._import_matblock(inmat, eu07_material)
-            eu07_material.mat_root = matblock
+            matblock = self._import_matblock(inmat)
+            self._eu07_material.mat_root = matblock
 
             self.asset_searcher.textures.add_extension(".mat")
 
         else:
-            texture = eu07_material.create_texture()
-            eu07_material.set_single_texture(texture)
+            texture = self._eu07_material.create_texture()
+            self._eu07_material.set_single_texture(texture)
 
         NodeLayouter(bl_material).layout_nodes()
 
         return bl_material
 
-    def _import_matblock(self, inmat, eu07_material):
-        matblock = eu07_material.create_matblock()
+    def _import_matblock(self, inmat):
+        matblock = self._eu07_material.create_matblock()
 
         if "shader" not in inmat.keys():
-            num_textures = len([k for k in inmat.keys() if k.startswith("texture")])
-            inmat["shader"] = f"default_{num_textures}"
+            inmat["shader"] = inmat.get_default_shader_name()
 
         # Shader first! It implicitly sets proper node group.
         matblock.set_by_key("shader", inmat["shader"])
@@ -72,20 +72,9 @@ class MaterialImporter:
                 continue
 
             if key.startswith("texture"):
-                if len(value) == 1:
-                    tex_entity = eu07_material.create_texture()
-                    self._init_from_tpo(tex_entity, value[0])
-                else:
-                    tex_entity = eu07_material.create_randomtextureset()
+                value = self._import_texture(value)
 
-                    for texpathobject in value:
-                        texture = eu07_material.create_texture()
-                        self._init_from_tpo(texture, texpathobject)
-                        tex_entity.append_texture(texture)
-
-                matblock.set_by_key(key, tex_entity)
-            else:
-                matblock.set_by_key(key, value)
+            matblock.set_by_key(key, value)
 
 
         # Variants imports are postponed, to ensure all nodes has been connected
@@ -98,10 +87,25 @@ class MaterialImporter:
             if value.get("shader") is None:
                 value["shader"] = inmat["shader"]
 
-            subblock = self._import_matblock(value, eu07_material)
+            subblock = self._import_matblock(value)
             matblock.set_by_key(key, subblock)
 
         return matblock
+
+    def _import_texture(self, value):
+        if value.is_path:
+            tex_entity = self._eu07_material.create_texture()
+            self._init_from_tpo(tex_entity, value.paths[0])
+
+        elif value.is_randomset:
+            tex_entity = self._eu07_material.create_randomtextureset()
+
+            for tpo in value.paths:
+                texture = self._eu07_material.create_texture()
+                self._init_from_tpo(texture, tpo)
+                tex_entity.append_texture(texture)
+
+        return tex_entity
 
     def _init_from_tpo(self, texture, tpo):
         abspath = self.asset_searcher.textures.find(tpo.path)

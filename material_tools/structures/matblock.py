@@ -93,7 +93,10 @@ class EU07_MATBlock(bpy.types.PropertyGroup):
             )
 
     def _get_param(self, input_):
-        return input_.default_value.strip().split(" ")
+        if input_.default_value != "":
+            return [float(x) for x in input_.default_value.strip().split(" ")]
+
+        return []
 
     def _set_param(self, input_, value):
         input_.default_value = " ".join(str(x) for x in value)

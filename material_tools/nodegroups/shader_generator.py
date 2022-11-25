@@ -15,8 +15,10 @@ from ..utils import (
 )
 
 
-# NOTE: This is ugly and could be done better, but it works, so low priority for that
 
+COLOR_TEXTURE_ALIASES = ("albedo", "diffuse", "color", "base_color", "basecolor")
+
+# NOTE: This is ugly and could be done better, but it works, so low priority for that
 class ShaderNodeGroupGenerator:
     def __init__(self, asset_searcher):
         self.asset_searcher = asset_searcher
@@ -92,13 +94,12 @@ class ShaderNodeGroupGenerator:
             slotname = texture_data_object.name.replace("_", " ").title()
             inp = self._ng.inputs.new("NodeSocketColor", slotname)
 
+            has_alpha = texture_data_object.components in ("RGBA", "sRGB_A")
+            self._register_input_data(texture_data_object, "texture", has_alpha=has_alpha)
+
             setup_data = self._map_setups.get(texture_data_object.name)
             if setup_data:
                 setup_func, default_value = setup_data
-
-            has_alpha = texture_data_object.components in ("RGBA", "sRGB_A")
-
-            self._register_input_data(texture_data_object, "texture", has_alpha=has_alpha)
 
             if setup_func:
                 setup_func()
@@ -110,7 +111,10 @@ class ShaderNodeGroupGenerator:
                     inp.max_value = 1
                     inp.min_value = 1
                     self._input_index += 1
-                    self._alpha_setup()
+
+                    # Only color texture's alpha should be connected to alpha slot in BSDF
+                    if texture_data_object.name in COLOR_TEXTURE_ALIASES:
+                        self._alpha_setup()
 
             self._input_index += 1
 
