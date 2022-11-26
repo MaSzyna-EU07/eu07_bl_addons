@@ -18,7 +18,9 @@ NODE_MODEL_NAME = "model_preview"
 
 def make_preview_path(tpo):
     filename = pathlib.Path(tpo.path).name
-    return str(pathlib.Path(SUBDIR_NAME, filename)) + tpo.traits_suffix
+    tpo.path = str(pathlib.Path(SUBDIR_NAME, filename))
+    return tpo
+
 
 def transfer_material_assets(tex_subdir):
     shutil.rmtree(tex_subdir, ignore_errors=True)
@@ -45,14 +47,15 @@ def transfer_material_assets(tex_subdir):
 
 
 def _rewrite_texture_paths(mat, tex_subdir):
-    for tex_key, tex_list in mat.iter_texture_lists():
-        if len(tex_list) == 1:
-            mat.set_texture_path(tex_key, make_preview_path(tex_list[0]))
-        else:
-            mat.set_textureset(tex_key, [make_preview_path(tpo) for tpo in tex_list])
+    for key in mat.keys():
+        value = mat[key]
 
-    for variant_key, variant_mat in mat.iter_variants():
-        mat.set_variant(_rewrite_texture_paths(variant_mat, tex_subdir), variant_key)
+        if key.startswith("texture"):
+            value.paths = [make_preview_path(tpo) for tpo in value.paths]
+            mat[key] = value
+
+        elif key in eu07_tools.mat.VARIANT_KEYS:
+            mat[key] = _rewrite_texture_paths(value, tex_subdir)
 
     return mat
 

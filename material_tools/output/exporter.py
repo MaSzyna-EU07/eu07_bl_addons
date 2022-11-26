@@ -22,11 +22,11 @@ class MaterialExporter:
             if key.startswith("texture"):
                 tex_entity = value
                 if tex_entity.texture_type == "TEXTURE":
-                    tpo = eu07_tools.utils.TexturePath(tex_entity.shortpath_with_traits)
+                    tpo = eu07_tools.utils.TexturePath.from_string(tex_entity.shortpath_with_traits)
                     value = eu07_tools.mat.MATTextureValue.from_path(tpo)
                 else:
                     tpos = [
-                        eu07_tools.utils.TexturePath(tex.shortpath_with_traits)
+                        eu07_tools.utils.TexturePath.from_string(tex.shortpath_with_traits)
                         for tex in tex_entity.iter_textures()
                     ]
                     value = eu07_tools.mat.MATTextureValue.from_list(tpos)

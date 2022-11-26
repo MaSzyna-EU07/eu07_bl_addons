@@ -87,6 +87,8 @@ class EU07_ShaderInputsData(bpy.types.PropertyGroup):
 
     def iter_used_keys(self, inputs):
         # TODO: Check if this don't kill performance
+        yield "shader"
+
         for input_ in inputs:
             key = self.get_key_by_input(input_, inputs)
             if key is not None and self.is_key_used(key, inputs):
