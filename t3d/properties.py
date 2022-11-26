@@ -194,7 +194,7 @@ class T3DSubmodelPropertiesPanel(bpy.types.Panel):
                 if self.obj.active_material:
                     opacity_box.row().label(text=f"Opacity: {self.obj.active_material.eu07_material.get_opacity_for_submodel()} (taken from material)")
                 else:
-                    opacity_box.row().label(text="No active material! Fallback value will be used:", icon="ERROR")
+                    opacity_box.row().label(text="No active material! Fallback param_list will be used:", icon="ERROR")
                     opacity_box.row().prop(self.obj.t3d_properties, "opacity", text="Opacity (fallback)")
             else:
                 opacity_box.prop(self.obj.t3d_properties, "opacity", text="Opacity")

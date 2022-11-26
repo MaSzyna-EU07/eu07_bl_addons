@@ -42,9 +42,11 @@ class EU07_MATBlock(bpy.types.PropertyGroup):
         if key.startswith("texture"):
             return self._get_texture(input_)
         elif key.startswith("param"):
-            return self._get_param(input_)
+            return self._get_param(key)
         elif key in eu07_tools.mat.VARIANT_KEYS:
             return self._get_variant(input_)
+        elif key == "size":
+            return input_.default_value[:2]
         else:
             return input_.default_value
 
@@ -64,6 +66,8 @@ class EU07_MATBlock(bpy.types.PropertyGroup):
             self._set_param(input_, value)
         elif key in eu07_tools.mat.VARIANT_KEYS:
             self._set_variant(input_, value)
+        elif key == "size":
+            input_.default_value = [*value, 0]
         else:
             input_.default_value = value
 
@@ -92,14 +96,14 @@ class EU07_MATBlock(bpy.types.PropertyGroup):
                 alpha_input
             )
 
-    def _get_param(self, input_):
-        if input_.default_value != "":
-            return [float(x) for x in input_.default_value.strip().split(" ")]
+    def _get_param(self, key):
+        return self._shader_inputs_data.get_param_value_by_key(key, self.bl_node.inputs)
 
-        return []
-
-    def _set_param(self, input_, value):
-        input_.default_value = " ".join(str(x) for x in value)
+    def _set_param(self, input_, param_list):
+        input_.default_value = (
+            param_list[0] if len(param_list) == 1
+            else param_list
+        )
 
     def _get_variant(self, input_):
         if input_.links:

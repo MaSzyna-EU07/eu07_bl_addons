@@ -25,7 +25,7 @@ def update_geometry(self, context):
             if material_slot.slot_index in skin_mat_indices:
                 material_slot.link = 'OBJECT'
 
-        #TODO: Update replacableskin_1 etc with materials from slots in order to refresh field value when changing model
+        #TODO: Update replacableskin_1 etc with materials from slots in order to refresh field param_list when changing model
     else:
         obj.data = bpy.data.meshes.get("EmptyMesh", bpy.data.meshes.new("EmptyMesh"))
 

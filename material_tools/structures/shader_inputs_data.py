@@ -26,21 +26,40 @@ class EU07_ShaderInputsDataItem(bpy.types.PropertyGroup):
         description="True if this input has additional alpha input, false otherwise",
         default=False
     )
+    param_size: bpy.props.IntProperty(
+        name="Param Size",
+        description="Size of the shader param vector. Used for providing correct export. 0 if input is not a param.",
+        default=0
+    )
 
 
 class EU07_ShaderInputsData(bpy.types.PropertyGroup):
     items: bpy.props.CollectionProperty(type=EU07_ShaderInputsDataItem)
 
-    def register_input(self, input_index, key_default, key_alias="", has_alpha=False):
+    def register_input(self, input_index, key_default, key_alias="", has_alpha=False, param_size=0):
         item = self.items.add()
         item.input_index = input_index
         item.key_default = key_default
         item.key_alias = key_alias
         item.has_alpha = has_alpha
+        item.param_size = param_size
 
     def get_input_by_key(self, key, inputs):
         index = self._get_index_by_key(key)
         return inputs[index]
+
+    def get_param_value_by_key(self, key, inputs):
+        item = self._get_item_by_key(key)
+        input_ = self.get_input_by_key(key, inputs)
+
+        if item.param_size == 0:
+            return []
+        elif item.param_size == 2:
+            return input_.default_value[:2]
+        elif item.param_size == 1:
+            return [input_.default_value]
+        else:
+            return input_.default_value
 
     def get_key_by_input(self, input, inputs):
         index = inputs.find(input.name)
@@ -63,10 +82,8 @@ class EU07_ShaderInputsData(bpy.types.PropertyGroup):
         if key.startswith("texture") or key in eu07_tools.mat.VARIANT_KEYS:
             if input_.links:
                 return True
-        elif key.startswith("param"):
-            return input_.default_value.strip() != ""
 
-        return False
+        return True
 
     def iter_used_keys(self, inputs):
         # TODO: Check if this don't kill performance

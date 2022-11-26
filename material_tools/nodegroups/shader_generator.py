@@ -17,6 +17,12 @@ from ..utils import (
 
 
 COLOR_TEXTURE_ALIASES = ("albedo", "diffuse", "color", "base_color", "basecolor")
+PARAMS_SOCKET_TYPES = {
+    1: "NodeSocketFloat",
+    2: "NodeSocketVector",
+    3: "NodeSocketVector",
+    4: "NodeSocketColor",
+}
 
 # NOTE: This is ugly and could be done better, but it works, so low priority for that
 class ShaderNodeGroupGenerator:
@@ -30,7 +36,7 @@ class ShaderNodeGroupGenerator:
         self._bsdf = None
         self._input_index = 0
 
-        # map key: setup callback, default value, has alpha
+        # map key: setup callback, default param_list, has alpha
         self._map_setups = {
             "diffuse": [
                 self._diffuse_setup,
@@ -95,7 +101,13 @@ class ShaderNodeGroupGenerator:
             inp = self._ng.inputs.new("NodeSocketColor", slotname)
 
             has_alpha = texture_data_object.components in ("RGBA", "sRGB_A")
-            self._register_input_data(texture_data_object, "texture", has_alpha=has_alpha)
+
+            key_default, key_alias = self._get_default_and_alias_keys(texture_data_object, "texture")
+            self._ng.eu07_shader_inputs_data.register_input(
+                self._input_index,
+                key_default, key_alias,
+                has_alpha=has_alpha
+            )
 
             setup_data = self._map_setups.get(texture_data_object.name)
             if setup_data:
@@ -120,9 +132,17 @@ class ShaderNodeGroupGenerator:
 
         for param_data_object in shader_data.params:
             slotname = param_data_object.name.replace("_", " ").title()
-            self._ng.inputs.new("NodeSocketString", slotname)
 
-            self._register_input_data(param_data_object, "param")
+            socket_type = PARAMS_SOCKET_TYPES.get(param_data_object.size)
+
+            self._ng.inputs.new(socket_type, slotname)
+
+            key_default, key_alias = self._get_default_and_alias_keys(param_data_object, "param")
+            self._ng.eu07_shader_inputs_data.register_input(
+                self._input_index,
+                key_default, key_alias,
+                param_size=param_data_object.size
+            )
 
             self._input_index += 1
 
@@ -130,26 +150,27 @@ class ShaderNodeGroupGenerator:
         opacity_inp.default_value = 1
         opacity_inp.min_value = 0
         opacity_inp.max_value = 1
+        self._ng.eu07_shader_inputs_data.register_input(self._input_index, "opacity")
+        self._input_index += 1
 
         selfillum_inp = self._ng.inputs.new("NodeSocketFloat", "SelfIllum")
         selfillum_inp.default_value = -1
         selfillum_inp.min_value = -1
         selfillum_inp.max_value = 2
+        self._ng.eu07_shader_inputs_data.register_input(self._input_index, "selfillum")
+        self._input_index += 1
 
         shadowrank_inp = self._ng.inputs.new("NodeSocketInt", "Shadow Rank")
         shadowrank_inp.default_value = 3
         shadowrank_inp.min_value = 1
         shadowrank_inp.max_value = 3
+        self._ng.eu07_shader_inputs_data.register_input(self._input_index, "shadow_rank")
+        self._input_index += 1
 
-        sizex_inp = self._ng.inputs.new("NodeSocketFloat", "Size X")
-        sizex_inp.default_value = -1
-        sizex_inp.min_value = -1
-
-        sizey_inp = self._ng.inputs.new("NodeSocketFloat", "Size Y")
-        sizey_inp.default_value = -1
-        sizey_inp.min_value = -1
-
-        self._input_index += 5
+        size_inp = self._ng.inputs.new("NodeSocketVectorTranslation", "Size")
+        size_inp.default_value = [-1, -1, 0]
+        self._ng.eu07_shader_inputs_data.register_input(self._input_index, "size")
+        self._input_index += 1
 
         for variant_name in eu07_tools.mat.VARIANT_KEYS:
             self._ng.inputs.new("NodeSocketShader", variant_name.capitalize())
@@ -160,10 +181,10 @@ class ShaderNodeGroupGenerator:
 
         return self._ng
 
-    def _register_input_data(self, data_object, keyword, has_alpha=False):
+    def _get_default_and_alias_keys(self, data_object, keyword):
         key_default = f"{keyword}{data_object.unit_index}"
         key_alias = f"{keyword}_{data_object.name}"
-        self._ng.eu07_shader_inputs_data.register_input(self._input_index, key_default, key_alias, has_alpha)
+        return key_default, key_alias
 
 
     def _diffuse_setup(self):
