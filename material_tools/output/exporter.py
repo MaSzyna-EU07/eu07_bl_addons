@@ -36,8 +36,6 @@ class MaterialExporter:
                 if subblock:
                     value = self.matblock_to_outmat(subblock)
 
-            print(key, value)
-
             outmat[key] = value
 
         return outmat

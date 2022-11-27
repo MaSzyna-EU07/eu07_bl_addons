@@ -24,8 +24,6 @@ class EU07_Material(bpy.types.PropertyGroup):
 
         return False
 
-
-
     @property
     def bl_material(self):
         # To ensure if node tree exists, a little hack here

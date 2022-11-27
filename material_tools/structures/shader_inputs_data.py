@@ -80,8 +80,8 @@ class EU07_ShaderInputsData(bpy.types.PropertyGroup):
             return False
 
         if key.startswith("texture") or key in eu07_tools.mat.VARIANT_KEYS:
-            if input_.links:
-                return True
+            if not input_.links:
+                return False
 
         return True
 

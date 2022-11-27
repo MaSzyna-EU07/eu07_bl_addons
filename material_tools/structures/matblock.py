@@ -78,11 +78,12 @@ class EU07_MATBlock(bpy.types.PropertyGroup):
         yield from self._shader_inputs_data.iter_used_keys(self.bl_node.inputs)
 
     def _get_texture(self, input_):
-        node = input_.links[0].from_node
-        if is_random_textureset_node(node):
-            return node.eu07_randomtextureset
-        else:
-            return node.eu07_texture
+        if input_.links:
+            node = input_.links[0].from_node
+            if is_random_textureset_node(node):
+                return node.eu07_randomtextureset
+            else:
+                return node.eu07_texture
 
     def _set_texture(self, input_, alpha_input, entity):
         self.bl_node_tree.links.new(

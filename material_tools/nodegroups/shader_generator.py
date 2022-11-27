@@ -113,7 +113,7 @@ class ShaderNodeGroupGenerator:
             if setup_data:
                 setup_func, default_value = setup_data
 
-            if setup_func:
+            if setup_data:
                 setup_func()
                 inp.default_value = default_value
 

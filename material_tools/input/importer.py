@@ -34,8 +34,8 @@ class MaterialImporter:
                 bl_material.name = shortpath
 
         self._eu07_material = bl_material.eu07_material
-        self._eu07_material.clear()
         self._eu07_material.init()
+        self._eu07_material.clear()
 
         if abspath.endswith(".mat"):
             self.asset_searcher.textures.remove_extension(".mat")
