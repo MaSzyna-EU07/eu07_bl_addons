@@ -84,7 +84,13 @@ class EU07_Material(bpy.types.PropertyGroup):
         return node.eu07_randomtextureset
 
     def set_single_texture(self, texture):
+        output = self._get_output_node()
         bsdf = self._get_bsdf_node()
+
+        self.bl_material.node_tree.links.new(
+            bsdf.outputs[0],
+            output.inputs[0]
+        )
 
         self.bl_material.node_tree.links.new(
             texture.bl_node.outputs[0],
@@ -107,8 +113,7 @@ class EU07_Material(bpy.types.PropertyGroup):
         if self.is_mat:
             return str(pathlib.Path(self.mat_source_path).with_suffix(""))
         else:
-            bsdf = self._get_bsdf_node()
-            image_node = self._get_diffuse_texture_node(bsdf)
+            image_node = self._get_diffuse_texture_node()
 
             if image_node:
                 return image_node.eu07_texture.shortpath

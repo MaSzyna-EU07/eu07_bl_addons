@@ -37,8 +37,9 @@ class MaterialImporter:
         self._eu07_material.init()
         self._eu07_material.clear()
 
+        self.asset_searcher.textures.remove_extension(".mat")
+
         if abspath.endswith(".mat"):
-            self.asset_searcher.textures.remove_extension(".mat")
             self._eu07_material.mat_source_path = shortpath
 
             with open(abspath, encoding="latin-1") as matfile:
@@ -47,11 +48,12 @@ class MaterialImporter:
             matblock = self._import_matblock(inmat)
             self._eu07_material.mat_root = matblock
 
-            self.asset_searcher.textures.add_extension(".mat")
-
         else:
             texture = self._eu07_material.create_texture()
+            texture.set_image_from_abspath(abspath)
             self._eu07_material.set_single_texture(texture)
+
+        self.asset_searcher.textures.add_extension(".mat")
 
         NodeLayouter(bl_material).layout_nodes()
 

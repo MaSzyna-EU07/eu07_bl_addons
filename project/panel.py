@@ -2,9 +2,10 @@ import bpy
 
 class EU07_PT_ProjectProperties(bpy.types.Panel):
     bl_idname = "EU07_PT_ProjectProperties"
-    bl_label = "Project Properties"
-    bl_space_type = "VIEW_3D"
-    bl_region_type = "UI"
+    bl_label = "[EU07] Project Properties"
+    bl_space_type = "PROPERTIES"
+    bl_region_type = "WINDOW"
+    bl_context = "scene"
     bl_category = "[EU07] Developer Tools"
 
     def draw(self, context):
