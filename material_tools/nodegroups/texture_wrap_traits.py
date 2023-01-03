@@ -11,8 +11,16 @@ def generate():
         ng_output = ng.nodes.new("NodeGroupOutput")
         ng_input = ng.nodes.new("NodeGroupInput")
 
-        ng.inputs.new("NodeSocketInt", "Disable Horizontal (S)")
-        ng.inputs.new("NodeSocketInt", "Disable Vertical (T)")
+        input_vec = ng.inputs.new("NodeSocketVector", "Vector")
+        input_vec.hide_value = True
+
+        input_s = ng.inputs.new("NodeSocketInt", "Disable Horizontal (S)")
+        input_s.min_value = 0
+        input_s.max_value = 1
+
+        input_t = ng.inputs.new("NodeSocketInt", "Disable Vertical (T)")
+        input_t.min_value = 0
+        input_t.max_value = 1
 
         ng.outputs.new("NodeSocketVector", "Vector")
 
@@ -20,13 +28,13 @@ def generate():
         comb_xyz = ng.nodes.new("ShaderNodeCombineXYZ")
 
         ng.links.new(
-            comb_xyz.outputs[0],
-            ng_output.inputs[0]
+            ng_input.outputs[0],
+            sep_xyz.inputs[0]
         )
 
         ng.links.new(
-            ng_input.outputs[0],
-            sep_xyz.inputs[0]
+            comb_xyz.outputs[0],
+            ng_output.inputs[0]
         )
 
         x_last_socket = _generate_wrap_chain(ng, sep_xyz.outputs[0], ng_input.outputs[1])
@@ -43,7 +51,7 @@ def generate():
 
     return ng
 
-def _generate_wrap_chain(ng, coord_output, param_output):
+def _generate_wrap_chain(ng, coord_socket, param_socket):
     add = ng.nodes.new("ShaderNodeMath")
     add.operation = 'ADD'
 
@@ -58,26 +66,23 @@ def _generate_wrap_chain(ng, coord_output, param_output):
     clamp.inputs[2].default_value = 0.99999
 
     sub = ng.nodes.new("ShaderNodeMath")
-    sub.operation = 'MULTIPLY'
+    sub.operation = 'SUBTRACT'
+    sub.inputs[0].default_value = 1
 
     ng.links.new(
-        mul1.outputs[0],
-        add.inputs[0],
-    )
-    ng.links.new(
-        mul2.outputs[0],
-        add.inputs[1],
+        param_socket,
+        sub.inputs[1]
     )
     ng.links.new(
         sub.outputs[0],
         mul1.inputs[0]
     )
     ng.links.new(
-        coord_output,
-        mul1.inputs[0]
+        coord_socket,
+        mul1.inputs[1]
     )
     ng.links.new(
-        coord_output,
+        coord_socket,
         clamp.inputs[0]
     )
     ng.links.new(
@@ -85,12 +90,16 @@ def _generate_wrap_chain(ng, coord_output, param_output):
         mul2.inputs[0]
     )
     ng.links.new(
-        param_output,
-        mul2.inputs[0]
+        param_socket,
+        mul2.inputs[1]
     )
     ng.links.new(
-        param_output,
-        sub.inputs[1]
+        mul1.outputs[0],
+        add.inputs[0]
+    )
+    ng.links.new(
+        mul2.outputs[0],
+        add.inputs[1]
     )
 
     last_socket = add.outputs[0]
