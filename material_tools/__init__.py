@@ -5,6 +5,7 @@ from . import skins
 from . import structures
 from . import output
 from . import ng_ops
+from . import opacity_flag
 
 modules = (
     input_,
@@ -13,6 +14,7 @@ modules = (
     panel,
     output,
     ng_ops,
+    opacity_flag
 )
 
 

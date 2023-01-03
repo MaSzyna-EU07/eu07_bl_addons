@@ -286,10 +286,7 @@ class MultiMaterialMeshOutputBuilder(MeshOutputBuilder):
 
     def set_opacity(self):
         for mtl, submodel in self.mtl_to_submodels.items():
-            submodel.opacity = self.obj.t3d_properties.opacity
-
-            if mtl and self.obj.t3d_properties.opacity_source == "MATERIAL":
-                submodel.opacity = mtl.eu07_material.get_opacity_for_submodel()
+            submodel.opacity = mtl.eu07_material.get_opacity_flag()
 
     def set_map(self, embed_skins=False, use_generated_img_name=False):
         for mtl, submodel in self.mtl_to_submodels.items():
@@ -368,10 +365,8 @@ class SingleMaterialMeshOutputBuilder(MeshOutputBuilder):
         self.submodel = eu07_tools.t3d.create_submodel("Mesh", remove_name_suffix(obj.name))
 
     def set_opacity(self):
-        self.submodel.opacity = self.obj.t3d_properties.opacity
-
-        if self.material and self.obj.t3d_properties.opacity_source == "MATERIAL":
-                self.submodel.opacity = self.material.eu07_material.get_opacity_for_submodel()
+        if self.material:
+            self.submodel.opacity = self.material.eu07_material.get_opacity_flag()
 
     def set_map(self, embed_skins=False, use_generated_img_name=False):
         is_replacable = self.obj.t3d_properties.replacableskin_id != "None"
@@ -380,7 +375,8 @@ class SingleMaterialMeshOutputBuilder(MeshOutputBuilder):
             self.submodel.map = self.obj.t3d_properties.replacableskin_id
             return
 
-        self.submodel.map = self.material.eu07_material.shortpath
+        if self.material is not None:
+            self.submodel.map = self.material.eu07_material.shortpath
 
     def set_geometry(self, apply_modifiers):
         

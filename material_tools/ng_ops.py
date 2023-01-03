@@ -4,6 +4,7 @@ import pathlib
 import bpy
 
 import material_tools.nodegroups.randomtextureset
+import material_tools.nodegroups.texture_wrap_traits
 from common import get_environment_path
 from eu07_tools.utils import AssetSearcher
 from .nodegroups.shader_generator import ShaderNodeGroupGenerator
@@ -12,6 +13,7 @@ from .utils import SHADER_NAME_PREFIX, get_active_material, get_active_material_
 
 def provide_mat_nodegroups():
     material_tools.nodegroups.randomtextureset.generate()
+    material_tools.nodegroups.texture_wrap_traits.generate()
 
     env_path = get_environment_path()
     shaders_dir = pathlib.Path(env_path, "shaders")

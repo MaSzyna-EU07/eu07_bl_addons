@@ -36,17 +36,15 @@ def get_qualified_material_name(abspath, opacity=1):
 
 
 def get_shortpath_from_material(material):
-    raise DeprecationWarning("get_shortpath_from_material is legacy and should be removed. Returning none...")
-    return "none"
+    if material:
+        return material.eu07_material.shortpath
 
-
-def get_filename_from_material(material):
-    raise DeprecationWarning("get_filename_from_material is legacy and should be removed. Returning none...")
     return "none"
 
 
 SHADER_NAME_PREFIX = "[EU07] Shader: "
 RANDOM_TEXTURESET_NAME = "[EU07] Random Texture Set"
+WRAP_TRAITS_NAME = "[EU07] Texture Wrap Traits"
 
 BSDF_COLOR_INPUT = 0
 BSDF_SPECULAR_INPUT = 7

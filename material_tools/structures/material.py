@@ -102,7 +102,7 @@ class EU07_Material(bpy.types.PropertyGroup):
             bsdf.inputs[BSDF_ALPHA_INPUT]
         )
 
-    def get_opacity_for_submodel(self):
+    def get_opacity_flag(self):
         if self.bl_material.blend_method == 'BLEND':
             return 0
 

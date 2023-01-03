@@ -25,7 +25,11 @@ class EU07_OT_GameEnginePreviewScenery(bpy.types.Operator):
 
         with open(scenery_outpath, encoding="windows-1250", mode="a") as outfile:
             camera = create_camera_from_viewport()
-            eu07_tools.scn.dump([camera], outfile)
+
+            sky = eu07_tools.scn.create_element("sky")
+            sky.model_path = "skydome_clouds.t3d"
+
+            eu07_tools.scn.dump([camera, sky], outfile)
 
         run_preview_command(root, settings.executable_command)
 
