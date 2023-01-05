@@ -3,7 +3,7 @@ from eu07_tools.mat import VARIANT_KEYS
 
 from material_tools import utils
 from ..layouter import NodeLayouter
-from ..ng_ops import provide_mat_nodegroups
+from material_tools.nodegroups.ops import provide_mat_nodegroups
 
 
 class MaterialImporter:

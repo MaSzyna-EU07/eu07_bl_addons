@@ -74,7 +74,7 @@ class EU07_Material(bpy.types.PropertyGroup):
 
     def create_matblock(self):
         node = self.bl_material.node_tree.nodes.new('ShaderNodeGroup')
-        node.inputs.new("NodeSocketShader", "Output")
+        #node.inputs.new("NodeSocketShader", "Output")
 
         return node.eu07_matblock
 

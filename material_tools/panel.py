@@ -66,8 +66,6 @@ class EU07_PT_MATEntityProperties(bpy.types.Panel):
             self.layout.prop(eu07_tex, "placeholder_path")
             b = self.layout.box()
             b.label(text="Traits")
-            b.prop(eu07_tex, "disable_wrap_s")
-            b.prop(eu07_tex, "disable_wrap_t")
             b.prop(eu07_tex, "use_sharpen")
         elif active_node.bl_idname == "ShaderNodeGroup":
             self.layout.label(text="Shader Node Group Inputs:")

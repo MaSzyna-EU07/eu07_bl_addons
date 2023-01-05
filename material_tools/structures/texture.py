@@ -3,21 +3,13 @@ import pathlib
 import bpy
 
 import eu07_tools
+from material_tools.nodegroups import texture_wrap_traits
+from material_tools.utils import WRAP_TRAITS_NAME
 
 
 class EU07_Texture(bpy.types.PropertyGroup):
     placeholder_path: bpy.props.StringProperty(
         name="Placeholder Path"
-    )
-
-    disable_wrap_s: bpy.props.BoolProperty(
-        name="Disable Horizontal Wrap",
-        default=False,
-    )
-
-    disable_wrap_t: bpy.props.BoolProperty(
-        name="Disable Vertical Wrap",
-        default=False,
     )
 
     use_sharpen: bpy.props.BoolProperty(
@@ -38,6 +30,10 @@ class EU07_Texture(bpy.types.PropertyGroup):
             n.eu07_texture.name = n.name
 
         return self.id_data.nodes.get(self.name)
+
+    @property
+    def bl_node_tree(self):
+        return self.id_data
 
     def set_image_from_abspath(self, abspath):
         image = bpy.data.images.load(abspath, check_existing=True)
@@ -67,9 +63,12 @@ class EU07_Texture(bpy.types.PropertyGroup):
     def shortpath_with_traits(self):
         sp = self.shortpath
 
+        traits_node = self._get_traits_node()
+
         traits = ":"
         traits += "s" if self.disable_wrap_s else ""
         traits += "t" if self.disable_wrap_t else ""
+
         traits += "#" if self.use_sharpen else ""
 
         if sp != "none" and traits != ":":
@@ -77,6 +76,55 @@ class EU07_Texture(bpy.types.PropertyGroup):
 
         return sp
 
+    @property
+    def disable_wrap_s(self):
+        traits_node = self._get_traits_node()
+        if not traits_node:
+            return False
+        return traits_node.inputs[1].default_value == 1
+
+    @disable_wrap_s.setter
+    def disable_wrap_s(self, disable_wrap_s):
+        traits_node = self._get_traits_node(create_missing=True)
+        traits_node.inputs[1].default_value = int(disable_wrap_s)
+
+    @property
+    def disable_wrap_t(self):
+        traits_node = self._get_traits_node()
+        if not traits_node:
+            return False
+        return traits_node.inputs[2].default_value == 1
+
+    @disable_wrap_t.setter
+    def disable_wrap_t(self, disable_wrap_t):
+        traits_node = self._get_traits_node(create_missing=True)
+        traits_node.inputs[2].default_value = int(disable_wrap_t)
+
+
+    def _get_traits_node(self, create_missing=False):
+        links = self.bl_node.inputs[0].links
+        if links:
+            node = links[0].from_node
+            if node.bl_idname == "ShaderNodeGroup" and node.node_tree.name == WRAP_TRAITS_NAME:
+                return node
+        else:
+            if create_missing:
+                traits_node = self.bl_node_tree.nodes.new('ShaderNodeGroup')
+                traits_node.node_tree = texture_wrap_traits.generate()
+
+                uvnode = self.bl_node_tree.nodes.new("ShaderNodeUVMap")
+
+                self.bl_node_tree.links.new(
+                    traits_node.outputs[0],
+                    self.bl_node.inputs[0]
+                )
+
+                self.bl_node_tree.links.new(
+                    uvnode.outputs[0],
+                    traits_node.inputs[0]
+                )
+
+                return traits_node
 
 def register():
     bpy.utils.register_class(EU07_Texture)

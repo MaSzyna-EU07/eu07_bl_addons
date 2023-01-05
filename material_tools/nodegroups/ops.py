@@ -3,17 +3,19 @@ import pathlib
 
 import bpy
 
-import material_tools.nodegroups.randomtextureset
+from . import randomtextureset, texture_wrap_traits, alpha_threshold
 import material_tools.nodegroups.texture_wrap_traits
+import material_tools.nodegroups.alpha_threshold
 from common import get_environment_path
 from eu07_tools.utils import AssetSearcher
-from .nodegroups.shader_generator import ShaderNodeGroupGenerator
-from .utils import SHADER_NAME_PREFIX, get_active_material, get_active_material_node
+from material_tools.nodegroups.shader_generator import ShaderNodeGroupGenerator
+from material_tools.utils import SHADER_NAME_PREFIX, get_active_material, get_active_material_node
 
 
 def provide_mat_nodegroups():
-    material_tools.nodegroups.randomtextureset.generate()
-    material_tools.nodegroups.texture_wrap_traits.generate()
+    randomtextureset.generate()
+    texture_wrap_traits.generate()
+    alpha_threshold.generate()
 
     env_path = get_environment_path()
     shaders_dir = pathlib.Path(env_path, "shaders")

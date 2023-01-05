@@ -45,6 +45,7 @@ def get_shortpath_from_material(material):
 SHADER_NAME_PREFIX = "[EU07] Shader: "
 RANDOM_TEXTURESET_NAME = "[EU07] Random Texture Set"
 WRAP_TRAITS_NAME = "[EU07] Texture Wrap Traits"
+ALPHA_THRESHOLD_NAME = "[EU07] Alpha Threshold"
 
 BSDF_COLOR_INPUT = 0
 BSDF_SPECULAR_INPUT = 7

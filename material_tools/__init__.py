@@ -4,7 +4,7 @@ from . import panel
 from . import skins
 from . import structures
 from . import output
-from . import ng_ops
+from .nodegroups import ops
 from . import opacity_flag
 
 modules = (
@@ -13,7 +13,7 @@ modules = (
     structures,
     panel,
     output,
-    ng_ops,
+    ops,
     opacity_flag
 )
 
