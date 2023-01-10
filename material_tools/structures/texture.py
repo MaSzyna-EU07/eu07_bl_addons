@@ -65,9 +65,18 @@ class EU07_Texture(bpy.types.PropertyGroup):
 
         traits_node = self._get_traits_node()
 
+
+
         traits = ":"
-        traits += "s" if self.disable_wrap_s else ""
-        traits += "t" if self.disable_wrap_t else ""
+
+        # NOTE: vanilla blender clipping allows to clip in both axes, so we can use it as a convienient option
+        if self.bl_node.extension == 'EXTEND':
+            traits += "st"
+
+        # but if there's no vanilla clipping, we can use our custom solution
+        else:
+            traits += "s" if self.disable_wrap_s else ""
+            traits += "t" if self.disable_wrap_t else ""
 
         traits += "#" if self.use_sharpen else ""
 
