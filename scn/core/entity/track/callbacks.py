@@ -195,7 +195,9 @@ def get_cvX(obj, x):
         except IndexError:
             return mathutils.Vector((0, 0, 0))
 
-        if x % 2 == 0:
+        if (x + spline_idx) % 2 == 0:
+            # adding spline_idx seems to fix the handle flipping issue
+            # probably no need for more sophisticated fix as we only handle at most two pieces of spline
             return obj.matrix_world @ point.handle_left
         else:
             return obj.matrix_world @ point.handle_right
@@ -207,7 +209,7 @@ def set_cvX(obj, x, value):
     if validate.is_curve(obj):
         point = obj.data.splines[spline_idx].bezier_points[point_idx]
         # TODO: Relative to pX
-        if x % 2 == 0:
+        if (x + spline_idx) % 2 == 0: 
             point.handle_left = value
             point.handle_right = 0, 0, 0
             point.handle_left_type = 'FREE'
