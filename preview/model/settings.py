@@ -48,4 +48,5 @@ def register():
 
 
 def unregister():
+    bpy.utils.unregister_class(ModelPreviewSettings)
     del bpy.types.Scene.eu07_model_preview

@@ -60,4 +60,4 @@ def register():
 
 def unregister():
     bpy.utils.unregister_class(StaticInclude_TreeProperties)
-    del bpy.types.Object.eu07_staticinc_tree
+    del bpy.types.Object.eu07_scn_staticinc_tree
