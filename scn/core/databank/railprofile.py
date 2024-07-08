@@ -104,4 +104,6 @@ def register():
 def unregister():
     for cls in classes:
         bpy.utils.unregister_class(cls)
+
+    del bpy.types.Scene.eu07_rail_profile_bank
     

@@ -10,9 +10,9 @@ if _swig_python_version_info < (2, 7, 0):
 
 # Import the low-level C/C++ module
 if __package__ or "." in __name__:
-    from . import _mikktspace
+    from . import _eu07_tools_native_Windows
 else:
-    import _mikktspace
+    import _eu07_tools_native_Windows
 
 try:
     import builtins as __builtin__
@@ -64,59 +64,59 @@ class _SwigNonDynamicMeta(type):
 class Vertex(object):
     thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc="The membership flag")
     __repr__ = _swig_repr
-    Position = property(_mikktspace.Vertex_Position_get, _mikktspace.Vertex_Position_set)
-    Normal = property(_mikktspace.Vertex_Normal_get, _mikktspace.Vertex_Normal_set)
-    Tangent = property(_mikktspace.Vertex_Tangent_get, _mikktspace.Vertex_Tangent_set)
-    Uv = property(_mikktspace.Vertex_Uv_get, _mikktspace.Vertex_Uv_set)
-    Sign = property(_mikktspace.Vertex_Sign_get, _mikktspace.Vertex_Sign_set)
+    Position = property(_eu07_tools_native_Windows.Vertex_Position_get, _eu07_tools_native_Windows.Vertex_Position_set)
+    Normal = property(_eu07_tools_native_Windows.Vertex_Normal_get, _eu07_tools_native_Windows.Vertex_Normal_set)
+    Tangent = property(_eu07_tools_native_Windows.Vertex_Tangent_get, _eu07_tools_native_Windows.Vertex_Tangent_set)
+    Uv = property(_eu07_tools_native_Windows.Vertex_Uv_get, _eu07_tools_native_Windows.Vertex_Uv_set)
+    Sign = property(_eu07_tools_native_Windows.Vertex_Sign_get, _eu07_tools_native_Windows.Vertex_Sign_set)
 
     def __init__(self):
-        _mikktspace.Vertex_swiginit(self, _mikktspace.new_Vertex())
-    __swig_destroy__ = _mikktspace.delete_Vertex
+        _eu07_tools_native_Windows.Vertex_swiginit(self, _eu07_tools_native_Windows.new_Vertex())
+    __swig_destroy__ = _eu07_tools_native_Windows.delete_Vertex
 
-# Register Vertex in _mikktspace:
-_mikktspace.Vertex_swigregister(Vertex)
+# Register Vertex in _eu07_tools_native_Windows:
+_eu07_tools_native_Windows.Vertex_swigregister(Vertex)
 
 class MikkContext(object):
     thisown = property(lambda x: x.this.own(), lambda x, v: x.this.own(v), doc="The membership flag")
     __repr__ = _swig_repr
 
     def addVertex(self, co, normal, uv):
-        return _mikktspace.MikkContext_addVertex(self, co, normal, uv)
+        return _eu07_tools_native_Windows.MikkContext_addVertex(self, co, normal, uv)
 
     def calculate(self):
-        return _mikktspace.MikkContext_calculate(self)
+        return _eu07_tools_native_Windows.MikkContext_calculate(self)
 
     def setTangent(self, index, tangent, sign):
-        return _mikktspace.MikkContext_setTangent(self, index, tangent, sign)
+        return _eu07_tools_native_Windows.MikkContext_setTangent(self, index, tangent, sign)
 
     def getPosition(self, index):
-        return _mikktspace.MikkContext_getPosition(self, index)
+        return _eu07_tools_native_Windows.MikkContext_getPosition(self, index)
 
     def getNormal(self, index):
-        return _mikktspace.MikkContext_getNormal(self, index)
+        return _eu07_tools_native_Windows.MikkContext_getNormal(self, index)
 
     def getTangent(self, index):
-        return _mikktspace.MikkContext_getTangent(self, index)
+        return _eu07_tools_native_Windows.MikkContext_getTangent(self, index)
 
     def getSign(self, index):
-        return _mikktspace.MikkContext_getSign(self, index)
+        return _eu07_tools_native_Windows.MikkContext_getSign(self, index)
 
     def getUv(self, index):
-        return _mikktspace.MikkContext_getUv(self, index)
+        return _eu07_tools_native_Windows.MikkContext_getUv(self, index)
 
     def getSize(self):
-        return _mikktspace.MikkContext_getSize(self)
+        return _eu07_tools_native_Windows.MikkContext_getSize(self)
 
     def computeVertexTable(self):
-        return _mikktspace.MikkContext_computeVertexTable(self)
+        return _eu07_tools_native_Windows.MikkContext_computeVertexTable(self)
 
     def __init__(self):
-        _mikktspace.MikkContext_swiginit(self, _mikktspace.new_MikkContext())
-    __swig_destroy__ = _mikktspace.delete_MikkContext
+        _eu07_tools_native_Windows.MikkContext_swiginit(self, _eu07_tools_native_Windows.new_MikkContext())
+    __swig_destroy__ = _eu07_tools_native_Windows.delete_MikkContext
 
-# Register MikkContext in _mikktspace:
-_mikktspace.MikkContext_swigregister(MikkContext)
+# Register MikkContext in _eu07_tools_native_Windows:
+_eu07_tools_native_Windows.MikkContext_swigregister(MikkContext)
 
 
 
