@@ -133,6 +133,11 @@ class T3DSubmodelProperties(bpy.types.PropertyGroup):
         min=0,
         max=2
     )
+    far_decay_radius: FloatProperty(
+        name='FarDecayRadius',
+        default=100,
+        min=0,
+    )
 
 
 class T3DSubmodelPropertiesPanel(bpy.types.Panel):
@@ -224,7 +229,7 @@ class T3DSubmodelPropertiesPanel(bpy.types.Panel):
             far_atten_decay_type_r.prop(self.obj.t3d_properties, "far_atten_decay_type")
 
             far_decay_radius_r = self.layout.row()
-            far_decay_radius_r.prop(self.obj.data, "distance", text="FarDecayRadius")
+            far_decay_radius_r.prop(self.obj.t3d_properties, "far_decay_radius")
 
         maxdistance_r = self.layout.row()
         maxdistance_r.prop(self.obj.t3d_properties, "max_distance")

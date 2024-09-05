@@ -168,7 +168,7 @@ class FreeSpotLightInputBuilder(SubmodelInputBuilder):
         self.obj.t3d_properties.far_atten_decay_type = far_atten_decay_type
 
     def set_far_decay_radius(self, far_decay_radius):
-        self.obj.data.distance = far_decay_radius
+        self.obj.t3d_properties.far_decay_radius = far_decay_radius
 
     def set_falloff_angle(self, falloff_angle):
         if self._is_cosinus(falloff_angle):

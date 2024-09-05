@@ -71,7 +71,6 @@ class GeometryBuilder:
         bm.to_mesh(mesh_data)
         bm.free()
 
-        mesh_data.use_auto_smooth = True
         mesh_data.normals_split_custom_set(custom_normals)
 
         return mesh_data
