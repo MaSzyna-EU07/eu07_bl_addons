@@ -149,9 +149,6 @@ class MeshOutputBuilder(SubmodelOutputBuilder):
         except RuntimeError:
             return
 
-        if not mesh.has_custom_normals:
-            mesh.calc_normals_split()
-
 
         verts_collector = {}
         vertex_count = 0
@@ -163,7 +160,7 @@ class MeshOutputBuilder(SubmodelOutputBuilder):
 
                 vert_data = []
                 vert_data.extend(mesh.vertices[loop.vertex_index].co)
-                vert_data.extend(loop.normal)
+                vert_data.extend(mesh.corner_normals[loop.index].vector)
                 vert_data.extend(uv_data[loop_index].uv if uv_layer else [0, 0])
                 vert_data.extend([*loop.tangent, 1])
 
