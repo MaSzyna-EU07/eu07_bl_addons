@@ -93,13 +93,6 @@ class MeshOutputBuilder(SubmodelOutputBuilder):
     def set_opacity(self):
         self.submodel.opacity = self.obj.t3d_properties.opacity
 
-        if self.obj.t3d_properties.opacity_source == "MATERIAL":
-            if self.obj.active_material:
-                wrapper = MaterialWrapper(self.obj.active_material)
-
-                if wrapper.get_diffusemap() is not None:
-                    self.submodel.opacity = wrapper.get_opacity()
-
     def set_map(self, embed_skins=False, use_generated_img_name=False):
         mtl = self.obj.active_material
 

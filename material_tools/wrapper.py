@@ -86,14 +86,10 @@ class MaterialWrapper:
         )
 
     def set_opacity(self, opacity: float):
-        if opacity == 1:
-            self.material.blend_method = 'CLIP'
-            self.material.alpha_threshold = 0.5
-        else:
-            self.material.blend_method = 'BLEND'
+        self.material.surface_render_method = 'BLENDED'
 
     def get_opacity(self) -> float:
-        if self.material.blend_method == 'BLEND':
+        if self.material.surface_render_method == 'BLENDED':
             return 0
 
         return 1
