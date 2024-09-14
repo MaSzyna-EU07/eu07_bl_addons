@@ -14,18 +14,8 @@ def set_thickness(self, thickness):
 
 
 def get_color(self):
-    obj = self.id_data
-    if not obj.active_material:
-        obj.active_material = obj.data.materials.new()
-
-    wrapper = MaterialWrapper(obj.active_material)
-    return wrapper.get_diffuse_color()
+    return [1, 0, 0]
 
 
 def set_color(self, color):
-    obj = self.id_data
-    if not obj.active_material:
-        obj.active_material = obj.data.materials.new()
-
-    wrapper = MaterialWrapper(obj.active_material)
-    return wrapper.set_diffuse_color(color[:3])
+    return

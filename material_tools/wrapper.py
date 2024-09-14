@@ -26,12 +26,6 @@ class MaterialWrapper:
         self.nodes = material.node_tree.nodes
         self.links = material.node_tree.links
 
-    # TODO: Deprecate
-    def clean(self):
-        for node in self.material.node_tree.nodes:
-            if "Output" not in node.bl_idname:
-                self.material.node_tree.nodes.remove(node)
-
     def initialize(self):
         self.nodes.clear()
 
@@ -80,16 +74,6 @@ class MaterialWrapper:
 
         self.material.use_backface_culling = True
         self.material.use_transparency_overlap = False
-
-    # TODO: Deprecate
-    def set_diffuse_color(self, diffuse_color):
-        bsdf = self._get_bsdf_node()
-        bsdf.inputs[BSDF_TEXTURE_INPUT].default_value = [*diffuse_color, 1]
-
-    # TODO: Deprecate
-    def get_diffuse_color(self):
-        bsdf = self._get_bsdf_node()
-        return bsdf.inputs[BSDF_TEXTURE_INPUT].default_value
 
     def set_diffusemap(self, image):
         img_node = self._get_image_node()
