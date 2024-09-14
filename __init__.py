@@ -10,7 +10,7 @@ bl_info = {
 import sys, os
 sys.path.append(os.path.dirname(__file__))
 
-from . import common, t3d, e3d, scn, material_tools, project, preview, animation_tools, inc
+from . import common, t3d, e3d, scn, material_tools, project, preview, animation_tools, inc, presets
 
 
 modules = (
@@ -22,7 +22,8 @@ modules = (
     material_tools,
     animation_tools,
     preview,
-    inc
+    inc,
+    presets
 )
 
 def register():

@@ -1,4 +1,5 @@
 import bpy
+import presets
 
 BSDF_COLOR_INPUT = 0
 BSDF_SPECULAR_INPUT = 7
@@ -24,7 +25,7 @@ class MaterialWrapper:
 
     def initialize(self):
         self.material.use_nodes = True
-        bsdf = self._get_bsdf_node()
+        bsdf = self._get_principled_node()
 
         bsdf.inputs[BSDF_SPECULAR_INPUT].default_value = 0
         bsdf.inputs[BSDF_ROUGHNESS_INPUT].default_value = 1
@@ -32,15 +33,15 @@ class MaterialWrapper:
         self.material.show_transparent_back = False
 
     def set_diffuse_color(self, diffuse_color):
-        bsdf = self._get_bsdf_node()
+        bsdf = self._get_principled_node()
         bsdf.inputs[BSDF_COLOR_INPUT].default_value = [*diffuse_color, 1]
 
     def get_diffuse_color(self):
-        bsdf = self._get_bsdf_node()
+        bsdf = self._get_principled_node()
         return bsdf.inputs[BSDF_COLOR_INPUT].default_value
 
     def set_diffusemap(self, image: bpy.types.Image):
-        bsdf = self._get_bsdf_node()
+        bsdf = self._get_principled_node()
 
         img_node = self._create_image_node(image)
         img_node.location = (-500, 300)
@@ -55,7 +56,7 @@ class MaterialWrapper:
         )
 
     def get_diffusemap(self):
-        bsdf = self._get_bsdf_node()
+        bsdf = self._get_principled_node()
 
         links = bsdf.inputs[BSDF_COLOR_INPUT].links
         if links:
@@ -67,7 +68,7 @@ class MaterialWrapper:
         return # display issues...
         image.colorspace_settings.name = 'Non-Color'
 
-        bsdf = self._get_bsdf_node()
+        bsdf = self._get_principled_node()
 
         img_node = self._create_image_node(image)
         img_node.location = (-500, -300)
@@ -105,7 +106,7 @@ class MaterialWrapper:
 
         return img_node
 
-    def _get_bsdf_node(self) -> bpy.types.ShaderNode:
+    def _get_principled_node(self) -> bpy.types.ShaderNode:
         for node in self.material.node_tree.nodes:
             if "Bsdf" in node.bl_idname:
                 return node
