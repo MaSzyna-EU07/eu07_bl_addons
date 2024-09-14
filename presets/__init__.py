@@ -3,9 +3,12 @@ import os
 
 LIB_NAME = "eu07_preset_lib.blend"
 
+BSDF_NODE_NAME = "[EU07] Common BSDF"
+TEXTURETRAITS_NODE_NAME = "[EU07] Texture Traits"
+
 NODE_GROUPS = (
-    "[EU07] Default BSDF",
-    "[EU07] Texture Traits",
+    BSDF_NODE_NAME,
+    TEXTURETRAITS_NODE_NAME
 )
 
 @bpy.app.handlers.persistent

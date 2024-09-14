@@ -34,7 +34,6 @@ class MaterialImporter:
 
         wrapper = MaterialWrapper(material)
         wrapper.initialize()
-        wrapper.clean()
 
         material.eu07_properties.source_path = source_path
         material.eu07_properties.is_imported = True
@@ -73,9 +72,6 @@ class MaterialImporter:
 
                     if key in {"texture_diffuse", "texture1"}:
                         wrapper.set_diffusemap(image)
-
-                    elif key in {"texture_normalmap", "texture2"}:
-                        wrapper.set_normalmap(image)
 
         self.asset_searcher.textures.add_extension(".mat")
 

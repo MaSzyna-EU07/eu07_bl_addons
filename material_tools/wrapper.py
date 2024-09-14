@@ -1,112 +1,119 @@
 import bpy
 import presets
 
-BSDF_COLOR_INPUT = 0
-BSDF_SPECULAR_INPUT = 7
-BSDF_ROUGHNESS_INPUT = 2
-BSDF_ALPHA_INPUT = 4
-BSDF_NORMAL_INPUT = 5
+MATERIALOUT_INPUT = 0
 
+BSDF_TEXTURE_INPUT = 0
+BSDF_ALPHA_INPUT = 1
+BSDF_OUTPUT = 0
+
+IMAGE_VECTOR_INPUT = 0
 IMAGE_COLOR_OUTPUT = 0
 IMAGE_ALPHA_OUTPUT = 1
 
-NORMALMAP_COLOR_INPUT = 1
-NORMALMAP_NORMAL_OUTPUT = 0
+TRAITS_VECTOR_INPUT = 0
+TRAITS_VECTOR_OUTPUT = 0
+
+UVMAP_VECTOR_OUTPUT = 0
+
+TEXTURETRAITS_NODE_NAME = "[EU07] Texture Traits"
 
 
 class MaterialWrapper:
     def __init__(self, material):
         self.material = material
+        self.material.use_nodes = True
+        self.nodes = material.node_tree.nodes
+        self.links = material.node_tree.links
 
+    # TODO: Deprecate
     def clean(self):
         for node in self.material.node_tree.nodes:
-            if "Bsdf" not in node.bl_idname and "Output" not in node.bl_idname:
+            if "Output" not in node.bl_idname:
                 self.material.node_tree.nodes.remove(node)
 
     def initialize(self):
-        self.material.use_nodes = True
-        bsdf = self._get_principled_node()
+        self.nodes.clear()
 
-        bsdf.inputs[BSDF_SPECULAR_INPUT].default_value = 0
-        bsdf.inputs[BSDF_ROUGHNESS_INPUT].default_value = 1
-        self.material.use_backface_culling = True
-        self.material.show_transparent_back = False
+        output = self.nodes.new("ShaderNodeOutputMaterial")
+        output.location = (0, 0)
 
-    def set_diffuse_color(self, diffuse_color):
-        bsdf = self._get_principled_node()
-        bsdf.inputs[BSDF_COLOR_INPUT].default_value = [*diffuse_color, 1]
+        bsdf = self.nodes.new("ShaderNodeGroup")
+        bsdf.node_tree = bpy.data.node_groups.get(presets.BSDF_NODE_NAME)
+        bsdf.location = (output.location.x - 300, 0)
 
-    def get_diffuse_color(self):
-        bsdf = self._get_principled_node()
-        return bsdf.inputs[BSDF_COLOR_INPUT].default_value
+        img_node = self.nodes.new("ShaderNodeTexImage")
+        img_node.location = (bsdf.location.x - 300, 0)
+        img_node.interpolation = 'Linear'
 
-    def set_diffusemap(self, image: bpy.types.Image):
-        bsdf = self._get_principled_node()
+        traits_node = self.nodes.new("ShaderNodeGroup")
+        traits_node.node_tree = bpy.data.node_groups.get(TEXTURETRAITS_NODE_NAME)
+        traits_node.location = (img_node.location.x - 200, 0)
 
-        img_node = self._create_image_node(image)
-        img_node.location = (-500, 300)
+        uvmap_node = self.nodes.new("ShaderNodeUVMap")
+        uvmap_node.location = (traits_node.location.x - 200, 0)
 
-        link_color = self.material.node_tree.links.new(
-            img_node.outputs[IMAGE_COLOR_OUTPUT],
-            bsdf.inputs[BSDF_COLOR_INPUT]
+        self.links.new(
+            uvmap_node.outputs[UVMAP_VECTOR_OUTPUT],
+            traits_node.inputs[TRAITS_VECTOR_INPUT]
         )
-        link_alpha = self.material.node_tree.links.new(
+
+        self.links.new(
+            traits_node.outputs[TRAITS_VECTOR_OUTPUT],
+            img_node.inputs[IMAGE_VECTOR_INPUT]
+        )
+
+        self.links.new(
+            img_node.outputs[IMAGE_COLOR_OUTPUT],
+            bsdf.inputs[BSDF_TEXTURE_INPUT]
+        )
+
+        self.links.new(
             img_node.outputs[IMAGE_ALPHA_OUTPUT],
             bsdf.inputs[BSDF_ALPHA_INPUT]
         )
 
-    def get_diffusemap(self):
-        bsdf = self._get_principled_node()
-
-        links = bsdf.inputs[BSDF_COLOR_INPUT].links
-        if links:
-            node = links[0].from_node
-            if node.bl_idname == "ShaderNodeTexImage":
-                return node.image
-
-    def set_normalmap(self, image: bpy.types.Image):
-        return # display issues...
-        image.colorspace_settings.name = 'Non-Color'
-
-        bsdf = self._get_principled_node()
-
-        img_node = self._create_image_node(image)
-        img_node.location = (-500, -300)
-
-        normalmap_node = self.material.node_tree.nodes.new('ShaderNodeNormalMap')
-        normalmap_node.location = (-250, -300)
-
-        link1 = self.material.node_tree.links.new(
-            img_node.outputs[IMAGE_COLOR_OUTPUT],
-            normalmap_node.inputs[NORMALMAP_COLOR_INPUT]
+        self.links.new(
+            bsdf.outputs[BSDF_OUTPUT],
+            output.inputs[MATERIALOUT_INPUT]
         )
 
-        link2 = self.material.node_tree.links.new(
-            normalmap_node.outputs[NORMALMAP_NORMAL_OUTPUT],
-            bsdf.inputs[BSDF_NORMAL_INPUT]
-        )
+        self.material.use_backface_culling = True
+        self.material.use_transparency_overlap = False
 
-    def set_opacity(self, opacity: float):
-        self.material.surface_render_method = 'BLENDED'
+    # TODO: Deprecate
+    def set_diffuse_color(self, diffuse_color):
+        bsdf = self._get_bsdf_node()
+        bsdf.inputs[BSDF_TEXTURE_INPUT].default_value = [*diffuse_color, 1]
 
-    def get_opacity(self) -> float:
-        if self.material.surface_render_method == 'BLENDED':
-            return 0
+    # TODO: Deprecate
+    def get_diffuse_color(self):
+        bsdf = self._get_bsdf_node()
+        return bsdf.inputs[BSDF_TEXTURE_INPUT].default_value
 
-        return 1
-
-    def _create_image_node(self, image: bpy.types.Image) -> bpy.types.ShaderNodeTexImage:
-        img_node = self.material.node_tree.nodes.new('ShaderNodeTexImage')
-
+    def set_diffusemap(self, image):
+        img_node = self._get_image_node()
         img_node.image = image
-        img_node.interpolation = 'Linear'
 
         if img_node.image.filepath.endswith(".dds"):
             img_node.texture_mapping.scale[1] = -1
 
-        return img_node
+    def get_diffusemap(self):
+        img_node = self._get_image_node()
 
-    def _get_principled_node(self) -> bpy.types.ShaderNode:
-        for node in self.material.node_tree.nodes:
-            if "Bsdf" in node.bl_idname:
+        if img_node:
+            return img_node.image
+
+    # TODO: Deprecate
+    def set_opacity(self, opacity: float):
+        return
+
+    def _get_bsdf_node(self) -> bpy.types.ShaderNode:
+        for node in self.nodes:
+            if node.label == presets.BSDF_NODE_NAME:
+                return node
+
+    def _get_image_node(self):
+        for node in self.nodes:
+            if node.bl_idname == 'ShaderNodeTexImage':
                 return node
