@@ -94,10 +94,15 @@ class MaterialWrapper:
 
     def _get_bsdf_node(self) -> bpy.types.ShaderNode:
         for node in self.nodes:
-            if node.label == presets.BSDF_NODE_NAME:
+            if (
+                node.bl_idname == 'ShaderNodeGroup' and
+                node.node_tree and node.node_tree.name == presets.BSDF_NODE_NAME
+            ):
                 return node
 
     def _get_image_node(self):
-        for node in self.nodes:
-            if node.bl_idname == 'ShaderNodeTexImage':
-                return node
+        bsdf = self._get_bsdf_node()
+
+        links = bsdf.inputs[BSDF_TEXTURE_INPUT].links
+        if links:
+            return links[0].from_node
