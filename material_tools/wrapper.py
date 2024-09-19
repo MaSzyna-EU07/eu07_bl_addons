@@ -92,12 +92,16 @@ class MaterialWrapper:
     def set_opacity(self, opacity: float):
         return
 
-    def _get_bsdf_node(self) -> bpy.types.ShaderNode:
+    def _get_bsdf_node(self):
         for node in self.nodes:
-            if (
+            is_eu07_bsdf = (
                 node.bl_idname == 'ShaderNodeGroup' and
                 node.node_tree and node.node_tree.name == presets.BSDF_NODE_NAME
-            ):
+            )
+
+            is_blender_bsdf = (not is_eu07_bsdf and "Bsdf" in node.bl_idname)
+
+            if is_eu07_bsdf or is_blender_bsdf:
                 return node
 
     def _get_image_node(self):

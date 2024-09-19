@@ -1,5 +1,6 @@
 import bpy
 
+from .wrapper import MaterialWrapper
 
 class EU07MaterialProperties(bpy.types.PropertyGroup):
     source_path: bpy.props.StringProperty(
@@ -13,7 +14,6 @@ class EU07MaterialProperties(bpy.types.PropertyGroup):
         default=False,
         description="This material was imported by addon?"
     )
-
 
 classes = (
     EU07MaterialProperties,
