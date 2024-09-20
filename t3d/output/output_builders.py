@@ -13,7 +13,7 @@ from common.utils import remove_name_suffix
 def get_builder(obj):
     cls = None
 
-    if obj.type == 'MESH':
+    if obj.type in ('MESH', 'CURVE', 'SURFACE', 'META', 'FONT'):
         cls = MeshOutputBuilder
     elif obj.type == 'LIGHT' and obj.data.type == 'SPOT':
         cls = FreeSpotLightOutputBuilder
@@ -114,16 +114,15 @@ class MeshOutputBuilder(SubmodelOutputBuilder):
 
     def set_geometry(self, apply_modifiers):
         mesh = None
+        temp_obj = self.obj
 
         self.submodel.geometry.to_indexed()
 
         if apply_modifiers:
             depsgraph = bpy.context.evaluated_depsgraph_get()
-            obj_eval = self.obj.evaluated_get(depsgraph)
+            temp_obj = self.obj.evaluated_get(depsgraph)
 
-            mesh = bpy.data.meshes.new_from_object(obj_eval)
-        else:
-            mesh = self.obj.data.copy()
+        mesh = temp_obj.to_mesh()
 
         bm = bmesh.new()
         bm.from_mesh(mesh)
@@ -170,7 +169,7 @@ class MeshOutputBuilder(SubmodelOutputBuilder):
         for vert_data, index in verts_collector.items():
             self.submodel.geometry.vertices.new(vert_data)
 
-        bpy.data.meshes.remove(mesh)
+        temp_obj.to_mesh_clear()
 
 
 class BananMeshOutputBuilder(MeshOutputBuilder):

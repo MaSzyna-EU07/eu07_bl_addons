@@ -6,7 +6,6 @@ import eu07_tools
 from common.utils import get_environment_path
 from common import includes
 from common.export_manager import ExportManager
-from .hierarchy_maker import HierarchyMaker
 from . import output_builders
 
 
@@ -24,19 +23,15 @@ class T3DExporter:
         export_manager.create_buffers()
         export_manager.create_outputs(eu07_tools.t3d.T3DOutput)
 
-        objects_to_export = bpy.context.scene.objects
-        if self.objects_range == "SELECTION":
-            objects_to_export = bpy.context.selected_objects
-        elif self.objects_range == "VISIBLE":
-            objects_to_export = bpy.context.visible_objects
-        elif self.objects_range == "ACTIVE_COLLECTION":
-            objects_to_export = bpy.context.collection.objects
-
-        objects_to_export = HierarchyMaker().make_hierarchy(objects_to_export)
+        objects_to_export = self._get_objects()
 
         identifiers_written_includes = set()
 
         for obj in objects_to_export:
+            submodel = self._create_submodel_to_export(obj)
+            if not submodel:
+                continue
+
             if not self.aggregate_includes and (obj.eu07_include_identifier != includes.MASTER_IDENTIFIER):
                 if obj.eu07_include_identifier not in identifiers_written_includes:
                     include = includes.get_include_by_identifier(obj.eu07_include_identifier)
@@ -49,7 +44,6 @@ class T3DExporter:
             identifier = includes.MASTER_IDENTIFIER if self.aggregate_includes else obj.eu07_include_identifier
 
             output = export_manager.get_output(identifier)
-            submodel = self._create_submodel_to_export(obj)
 
             if output:
                 output.dump_element(submodel)
@@ -61,6 +55,21 @@ class T3DExporter:
             environment_path = pathlib.Path(filepath).parent
 
         export_manager.flush_buffers_to_files(environment_path, filepath)
+
+    def _get_objects(self):
+        objects = bpy.context.scene.objects
+        if self.objects_range == "SELECTION":
+            objects = bpy.context.selected_objects
+        elif self.objects_range == "VISIBLE":
+            objects = bpy.context.visible_objects
+        elif self.objects_range == "ACTIVE_COLLECTION":
+            objects = bpy.context.collection.objects
+
+        for obj in objects:
+            if not obj.parent or obj.parent.name not in objects:
+                yield obj
+                for child in obj.children_recursive:
+                    yield child
 
     def _create_submodel_to_export(self, obj):
         builder = output_builders.get_builder(obj)
