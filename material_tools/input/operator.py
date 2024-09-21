@@ -66,3 +66,17 @@ class EU07_OT_MaterialImport(bpy.types.Operator, ImportHelper):
                     context.active_object.active_material = material
 
         return {'FINISHED'}
+
+    def invoke(self, context, event):
+        return self.invoke_popup(context)
+
+
+class EU07_FH_material_import(bpy.types.FileHandler):
+    bl_idname = "EU07_FH_material_import"
+    bl_label = "File handler for EU07 material import"
+    bl_import_operator = EU07_OT_MaterialImport.bl_idname
+    bl_file_extensions = ".mat;.tga;.dds;.png;.bmp;"
+
+    @classmethod
+    def poll_drop(cls, context):
+        return (context.region and context.region.type == 'WINDOW')

@@ -1,12 +1,13 @@
 import bpy
 from bpy.props import PointerProperty
 
-from .input import T3DImportOperator
+from .input import EU07_OT_ImportT3D, EU07_FH_t3d_import
 from .output import EU07_OT_ExportT3D
 from .properties import T3DSubmodelProperties, T3DSubmodelPropertiesPanel
 
 classes = (
-    T3DImportOperator,
+    EU07_OT_ImportT3D,
+    EU07_FH_t3d_import,
     EU07_OT_ExportT3D,
     T3DSubmodelProperties,
     T3DSubmodelPropertiesPanel
@@ -14,7 +15,7 @@ classes = (
 
 
 def menu_func_import(self, context):
-    self.layout.operator(T3DImportOperator.bl_idname, text="[EU07] Text Model (.t3d)")
+    self.layout.operator(EU07_OT_ImportT3D.bl_idname, text="[EU07] Text Model (.t3d)")
 
 
 def menu_func_export(self, context):

@@ -1,11 +1,12 @@
 import bpy
 
-from .operator import EU07_OT_MaterialImport
+from .operator import EU07_OT_MaterialImport, EU07_FH_material_import
 from .importer import MaterialImporter
 
 
 classes = (
     EU07_OT_MaterialImport,
+    EU07_FH_material_import
 )
 
 
