@@ -75,17 +75,17 @@ class T3DImporter:
         builder = input_builders.get_builder(element, banan_as_mesh=self.join_into_one)
 
         builder.create_submodel(f"{self.name_prefix}{element.name}")
-        builder.set_parent(f"{self.name_prefix}{element.parent_name}")
+        builder.set_parent_name(f"{self.name_prefix}{element.parent_name}")
         builder.set_anim(element.anim)
-        builder.set_diffuse(element.diffuse_color)
+        builder.set_diffuse_color(element.diffuse_color)
         builder.set_selfillum(element.selfillum)
         builder.set_max_distance(element.max_distance)
         builder.set_min_distance(element.min_distance)
         builder.set_transform(element.transform)
 
         if element.type == 'Mesh':
-            builder.set_ambient(element.ambient_color)
-            builder.set_specular(element.specular_color)
+            builder.set_ambient_color(element.ambient_color)
+            builder.set_specular_color(element.specular_color)
             builder.set_wire(element.wire)
             builder.set_wire_size(element.wire_size)
             builder.set_opacity(element.opacity)
@@ -102,7 +102,7 @@ class T3DImporter:
             builder.set_hotspot_angle(element.hotspot_angle)
 
         elif element.type == 'Stars':
-            builder.set_geometry(element.stars)
+            builder.set_points(element.stars)
 
         obj = builder.obj
         obj.eu07_include_identifier = self.include_identifier

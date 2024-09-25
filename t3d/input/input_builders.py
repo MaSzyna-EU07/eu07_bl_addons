@@ -34,13 +34,13 @@ class SubmodelInputBuilder(abc.ABC):
     def create_submodel(self, name):
         self.obj = None
 
-    def set_parent(self, parent_name):
+    def set_parent_name(self, parent_name):
         if parent_name == "none":
             return
 
         self.obj.parent = bpy.data.objects.get(parent_name)
 
-    def set_diffuse(self, diffuse):
+    def set_diffuse_color(self, diffuse):
         self.obj.t3d_properties.diffuse_color = diffuse / 255.0
 
     def set_selfillum(self, selfillum):
@@ -71,10 +71,10 @@ class MeshInputBuilder(SubmodelInputBuilder):
         mesh = bpy.data.meshes.new(name)
         self.obj = bpy.data.objects.new(name, mesh)
 
-    def set_ambient(self, ambient_color):
+    def set_ambient_color(self, ambient_color):
         self.obj.t3d_properties.ambient_color = ambient_color / 255.0
 
-    def set_specular(self, specular_color):
+    def set_specular_color(self, specular_color):
         self.obj.t3d_properties.specular_color = specular_color / 255.0
 
     def set_wire(self, wire):
@@ -88,7 +88,7 @@ class MeshInputBuilder(SubmodelInputBuilder):
 
     def set_map(self, map_, asset_searcher, opacity, diffuse):
         if map_ == "none":
-            # name = f"Color {' '.join((str(int(x)) for x in diffuse))}"
+            # name = f"Color {' '.join((str(int(x)) for x in override))}"
             #
             # try:
             #     self.obj.active_material = bpy.data.materials[name]
@@ -96,7 +96,7 @@ class MeshInputBuilder(SubmodelInputBuilder):
             #     material = self.obj.active_material = bpy.data.materials.new(name)
             #     wrapper = MaterialWrapper(material)
             #     wrapper.initialize()
-            #     wrapper.set_diffuse_color(diffuse / 255)
+            #     wrapper.set_diffuse_color(override / 255)
 
             return
 
@@ -149,7 +149,7 @@ class FreeSpotLightInputBuilder(SubmodelInputBuilder):
         data = bpy.data.lights.new(name, type='SPOT')
         self.obj = bpy.data.objects.new(name, data)
 
-    def set_diffuse(self, diffuse):
+    def set_diffuse_color(self, diffuse):
         self.obj.data.color = [value / 255 for value in diffuse]
 
     def set_selfillum(self, selfillum):
@@ -193,7 +193,7 @@ class StarsInputBuilder(SubmodelInputBuilder):
     def create_submodel(self, name: str):
         self.obj = bpy.data.objects.new(name, None)
 
-    def set_geometry(self, geometry):
+    def set_points(self, geometry):
         for star in geometry:
                 point = bpy.data.lights.new(
                     f"{self.obj.name}.star",

@@ -63,7 +63,9 @@ class EU07_OT_ExportT3D(bpy.types.Operator, ExportHelper):
 
         return {'FINISHED'}
 
-
-
-
+class EU07_FH_t3d_export(bpy.types.FileHandler):
+    bl_idname = "EU07_FH_t3d_import"
+    bl_label = "File handler for T3D model import"
+    bl_import_operator = 'collection'
+    bl_file_extensions = ".t3d"
 

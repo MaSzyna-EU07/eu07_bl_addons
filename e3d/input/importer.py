@@ -71,10 +71,10 @@ class E3DImporter:
         builder = input_builders.get_builder(submodel, self.join_into_one)
 
         builder.create_submodel(f"{self.name_prefix}{submodel.name}")
-        builder.set_parent(f"{self.name_prefix}{submodel.parent_name}")
+        builder.set_parent_name(f"{self.name_prefix}{submodel.parent_name}")
         builder.set_anim(submodel.anim)
         # All colors are multiplied, because in E3D they are in range 0-1, while in T3D in range 0-255
-        builder.set_diffuse(submodel.diffuse_color[:3] * 255)
+        builder.set_diffuse_color(submodel.diffuse_color[:3] * 255)
         builder.set_selfillum(submodel.selfillum)
         builder.set_max_distance(math.sqrt(submodel.max_distance))
         builder.set_min_distance(math.sqrt(submodel.min_distance))
@@ -88,8 +88,8 @@ class E3DImporter:
         builder.set_transform(submodel.transform, initialrotate_matrix)
 
         if submodel.type == 'Mesh':
-            builder.set_ambient(submodel.ambient_color[:3] * 255)
-            builder.set_specular(submodel.specular_color[:3] * 255)
+            builder.set_ambient_color(submodel.ambient_color[:3] * 255)
+            builder.set_specular_color(submodel.specular_color[:3] * 255)
             builder.set_wire_size(submodel.wire_size)
 
             opacity = 1
@@ -109,7 +109,7 @@ class E3DImporter:
             builder.set_hotspot_angle(submodel.cos_hotspot_angle)
 
         elif submodel.type == 'Stars':
-            builder.set_geometry(submodel.stars)
+            builder.set_points(submodel.stars)
 
         return builder.obj
 

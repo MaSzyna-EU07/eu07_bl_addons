@@ -35,66 +35,110 @@ class SubmodelOutputBuilder(abc.ABC):
         self.obj = obj
         self.submodel = None
 
-    def set_name(self, remove_name_suffixes):
-        self.submodel.name = (
-            remove_name_suffix(self.obj.name) if (remove_name_suffixes or self.obj.name.startswith("smokesource"))
-            else self.obj.name
-        )
-
-    def set_parent(self, remove_name_suffixes):
-        if self.obj.parent:
-            self.submodel.parent_name = (
-                remove_name_suffix(self.obj.parent.name) if remove_name_suffixes
-                else self.obj.parent.name
+    def set_name(self, name=None, remove_name_suffixes=False):
+        if name is None:
+            self.submodel.name = (
+                remove_name_suffix(self.obj.name) if self.obj.name.startswith("smokesource")
+                else self.obj.name
             )
         else:
-            return "none"
+            self.submodel.name = name
 
-    def set_diffuse(self):
-        self.submodel.diffuse_color = self.obj.t3d_properties.diffuse_color * 255
+        if remove_name_suffixes:
+            self.submodel.name = remove_name_suffix(self.submodel.name)
 
-    def set_anim(self):
-        self.submodel.anim = self.obj.t3d_properties.anim
+    def set_parent_name(self, override=None, remove_name_suffixes=False):
+        if override is None:
+            if self.obj.parent:
+                self.submodel.parent_name = self.obj.parent.name
+        else:
+            self.submodel.parent_name = override
 
-    def set_selfillum(self):
-        self.submodel.selfillum = self.obj.t3d_properties.selfillum
+        if remove_name_suffixes:
+            self.submodel.parent_name = remove_name_suffix(self.submodel.parent_name)
 
-    def set_max_distance(self):
-        self.submodel.max_distance = self.obj.t3d_properties.max_distance
+    def set_diffuse_color(self, override=None):
+        if override is None:
+            self.submodel.diffuse_color = self.obj.t3d_properties.diffuse_color * 255
+        else:
+            self.submodel.diffuse_color = override
 
-    def set_min_distance(self):
-        self.submodel.min_distance = self.obj.t3d_properties.min_distance
+    def set_anim(self, override=None):
+        if override is None:
+            self.submodel.anim = self.obj.t3d_properties.anim
+        else:
+            self.submodel.anim = override
 
-    def set_transform(self):
-        mat = self.obj.matrix_local.transposed()
+    def set_selfillum(self, override=None):
+        if override is None:
+            self.submodel.selfillum = self.obj.t3d_properties.selfillum
+        else:
+            self.submodel.selfillum = override
 
-        self.submodel.transform = [
-            *mat[0], *mat[1], *mat[2], *mat[3]
-        ]
+    def set_max_distance(self, override=None):
+        if override is None:
+            self.submodel.max_distance = self.obj.t3d_properties.max_distance
+        else:
+            self.submodel.max_distance = override
+
+    def set_min_distance(self, override=None):
+        if override is None:
+            self.submodel.min_distance = self.obj.t3d_properties.min_distance
+        else:
+            self.submodel.min_distance = override
+
+    def set_transform(self, override=None):
+        if override is None:
+            mat = self.obj.matrix_local.transposed()
+
+            self.submodel.transform = [
+                *mat[0], *mat[1], *mat[2], *mat[3]
+            ]
+        else:
+            self.submodel.transform = override
 
 
 class MeshOutputBuilder(SubmodelOutputBuilder):
     def __init__(self, obj):
         super().__init__(obj)
-        self.submodel = eu07_tools.t3d.create_submodel("Mesh", remove_name_suffix(obj.name))
+        self.submodel = eu07_tools.t3d.create_submodel("Mesh", "MeshSubmodel")
 
-    def set_ambient(self):
-        self.submodel.ambient_color = self.obj.t3d_properties.ambient_color * 255
+    def set_ambient_color(self, override=None):
+        if override is None:
+            self.submodel.ambient_color = self.obj.t3d_properties.ambient_color * 255
+        else:
+            self.submodel.ambient_color = override
 
-    def set_specular(self):
-        self.submodel.specular_color = self.obj.t3d_properties.specular_color * 255
+    def set_specular_color(self, override=None):
+        if override is None:
+            self.submodel.specular_color = self.obj.t3d_properties.specular_color * 255
+        else:
+            self.submodel.specular_color = override
 
-    def set_wire(self):
-        self.submodel.wire = self.obj.t3d_properties.wire
+    def set_wire(self, override=None):
+        if override is None:
+            self.submodel.wire = self.obj.t3d_properties.wire
+        else:
+            self.submodel.wire = override
 
-    def set_wire_size(self):
-        self.submodel.wire_size = self.obj.t3d_properties.wire_size
+    def set_wire_size(self, override=None):
+        if override is None:
+            self.submodel.wire_size = self.obj.t3d_properties.wire_size
+        else:
+            self.submodel.wire_size = override
 
-    def set_opacity(self):
-        self.submodel.opacity = self.obj.t3d_properties.opacity
+    def set_opacity(self, override=None):
+        if override is None:
+            self.submodel.opacity = self.obj.t3d_properties.opacity
+        else:
+            self.submodel.opacity = override
 
-    def set_map(self, embed_skins=False, use_generated_img_name=False):
-        mtl = self.obj.active_material
+    def set_map(self, override=None, material_override=None, embed_skins=False, use_generated_img_name=False):
+        if override is not None:
+            self.submodel.map = override
+            return
+
+        mtl = self.obj.active_material if material_override is None else material_override
 
         is_replacable = self.obj.t3d_properties.replacableskin_id != "None"
 
@@ -112,7 +156,7 @@ class MeshOutputBuilder(SubmodelOutputBuilder):
 
         self.submodel.map = get_shortpath_from_material(mtl)
 
-    def set_geometry(self, apply_modifiers):
+    def set_geometry(self, apply_modifiers=True, material_index=None):
         mesh = None
         temp_obj = self.obj
 
@@ -141,11 +185,12 @@ class MeshOutputBuilder(SubmodelOutputBuilder):
         except RuntimeError:
             return
 
-
         verts_collector = {}
         vertex_count = 0
 
         for poly in mesh.polygons:
+            if material_index is not None and poly.material_index != material_index:
+                continue
 
             for loop_index in poly.loop_indices:
                 loop = mesh.loops[loop_index]
@@ -175,12 +220,15 @@ class MeshOutputBuilder(SubmodelOutputBuilder):
 class BananMeshOutputBuilder(MeshOutputBuilder):
     def __init__(self, obj):
         super().__init__(obj)
-        self.submodel = eu07_tools.t3d.create_submodel("Mesh", obj.name)
+        self.submodel = eu07_tools.t3d.create_submodel("Mesh", "Banan")
 
-    def set_map(self, embed_skins=False, use_generated_img_name=False):
-        self.submodel.map = "none"
+    def set_map(self, override=None, embed_skins=False, use_generated_img_name=False):
+        if override is None:
+            self.submodel.map = "none"
+        else:
+            self.submodel.map = override
 
-    def set_geometry(self, apply_modifiers):
+    def set_geometry(self, apply_modifiers=True, material_index=None):
         # "Banan" is a mesh without mesh_data, so no implementation here
         pass
 
@@ -188,42 +236,68 @@ class BananMeshOutputBuilder(MeshOutputBuilder):
 class FreeSpotLightOutputBuilder(SubmodelOutputBuilder):
     def __init__(self, obj):
         super().__init__(obj)
-        self.submodel = eu07_tools.t3d.create_submodel("FreeSpotLight", remove_name_suffix(obj.name))
+        self.submodel = eu07_tools.t3d.create_submodel("FreeSpotLight", "SpotSubmodel")
 
-    def set_diffuse(self):
-        self.submodel.diffuse_color = self.obj.data.color * 255
+    def set_diffuse_color(self, override=None):
+        if override is None:
+            self.submodel.diffuse_color = self.obj.data.color * 255
+        else:
+            self.submodel.diffuse_color = override
 
-    def set_selfillum(self):
-        self.submodel.selfillum = self.obj.t3d_properties.selfillum_spot
+    def set_selfillum(self, override=None):
+        if override is None:
+            self.submodel.selfillum = self.obj.t3d_properties.selfillum_spot
+        else:
+            self.submodel.selfillum = override
 
-    def set_near_atten_start(self):
-        self.submodel.near_atten_start = self.obj.t3d_properties.near_atten_start
+    def set_near_atten_start(self, override=None):
+        if override is None:
+            self.submodel.near_atten_start = self.obj.t3d_properties.near_atten_start
+        else:
+            self.submodel.near_atten_start = override
 
-    def set_near_atten_end(self):
-        self.submodel.near_atten_end = self.obj.t3d_properties.near_atten_end
+    def set_near_atten_end(self, override=None):
+        if override is None:
+            self.submodel.near_atten_end = self.obj.t3d_properties.near_atten_end
+        else:
+            self.submodel.near_atten_end = override
 
-    def set_use_near_atten(self):
-        self.submodel.use_near_atten = self.obj.t3d_properties.use_near_atten
+    def set_use_near_atten(self, override=None):
+        if override is None:
+            self.submodel.use_near_atten = self.obj.t3d_properties.use_near_atten
+        else:
+            self.submodel.use_near_atten = override
 
-    def set_far_atten_decay_type(self):
-        self.submodel.far_atten_decay_type = self.obj.t3d_properties.far_atten_decay_type
+    def set_far_atten_decay_type(self, override=None):
+        if override is None:
+            self.submodel.far_atten_decay_type = self.obj.t3d_properties.far_atten_decay_type
+        else:
+            self.submodel.far_atten_decay_type = override
 
-    def set_far_decay_radius(self):
-        self.submodel.far_decay_radius = self.obj.t3d_properties.far_decay_radius
+    def set_far_decay_radius(self, override=None):
+        if override is None:
+            self.submodel.far_decay_radius = self.obj.t3d_properties.far_decay_radius
+        else:
+            self.submodel.far_decay_radius = override
 
-    def set_falloff_angle(self):
-        self.submodel.falloff_angle = math.degrees(self.obj.data.spot_size)
+    def set_falloff_angle(self, override=None):
+        if override is None:
+            self.submodel.falloff_angle = math.degrees(self.obj.data.spot_size)
+        else:
+            self.submodel.falloff_angle = override
 
-    def set_hotspot_angle(self):
-        self.submodel.hotspot_angle = math.degrees(self.obj.data.spot_size * (1 - self.obj.data.spot_blend))
-
+    def set_hotspot_angle(self, override=None):
+        if override is None:
+            self.submodel.hotspot_angle = math.degrees(self.obj.data.spot_size * (1 - self.obj.data.spot_blend))
+        else:
+            self.submodel.hotspot_angle = override
 
 class StarsOutputBuilder(SubmodelOutputBuilder):
     def __init__(self, obj):
         super().__init__(obj)
-        self.submodel = eu07_tools.t3d.create_submodel("Stars", remove_name_suffix(obj.name))
+        self.submodel = eu07_tools.t3d.create_submodel("Stars", "StarsSubmodel")
 
-    def set_geometry(self):
+    def set_points(self, **kwargs):
         points = [
             c for c in self.obj.children
             if c.type == 'LIGHT' and c.data.type == 'POINT'
