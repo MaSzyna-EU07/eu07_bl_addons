@@ -114,50 +114,47 @@ class T3DExporter:
         return [builder.submodel]
 
     def _create_submodels_from_multimaterial(self, obj):
-        banan_builder = output_builders.BananMeshOutputBuilder(obj)
-        banan_builder.set_name(remove_name_suffixes=self.remove_name_suffixes)
-        banan_builder.set_parent_name(remove_name_suffixes=self.remove_name_suffixes)
-        banan_builder.set_ambient_color()
-        banan_builder.set_diffuse_color()
-        banan_builder.set_specular_color()
-        banan_builder.set_anim()
-        banan_builder.set_selfillum()
-        banan_builder.set_wire()
-        banan_builder.set_wire_size()
-        banan_builder.set_opacity()
-        banan_builder.set_max_distance()
-        banan_builder.set_min_distance()
-        banan_builder.set_transform()
-
-        banan = banan_builder.submodel
-
-        submodels = [banan]
+        submodels = []
 
         for material_slot in obj.material_slots:
-            child_builder = output_builders.MeshOutputBuilder(obj)
-            child_builder.set_name(
-                name=f"{obj.name}_m{material_slot.slot_index}"
-            )
-            child_builder.set_parent_name(override=banan.name)
-            child_builder.set_ambient_color(override=banan.ambient_color)
-            child_builder.set_diffuse_color(override=banan.diffuse_color)
-            child_builder.set_specular_color(override=banan.specular_color)
-            child_builder.set_anim(override=banan.anim)
-            child_builder.set_selfillum(override=banan.selfillum)
-            child_builder.set_wire(override=banan.wire)
-            child_builder.set_wire_size(override=banan.wire_size)
-            child_builder.set_opacity(override=banan.opacity)
-            child_builder.set_max_distance(override=-1) # TODO: Kill magic number?
-            child_builder.set_map(
-                material_override=material_slot.material,
+            is_main = material_slot.slot_index == 0
+
+            builder = output_builders.MeshOutputBuilder(obj)
+
+            if is_main:
+                builder.set_name(remove_name_suffixes=self.remove_name_suffixes)
+                builder.set_parent_name()
+                builder.set_anim()
+                builder.set_max_distance()
+                builder.set_min_distance()
+                builder.set_transform()
+
+            else:
+                builder.set_name(
+                    name=f"{obj.name}_part{material_slot.slot_index}"
+                )
+                builder.set_parent_name(override=obj.name, remove_name_suffixes=self.remove_name_suffixes)
+                builder.set_anim(override='false')
+                builder.set_max_distance(override=-1) # TODO: Kill magic number?
+                builder.set_min_distance(override=0)
+
+            builder.set_ambient_color()
+            builder.set_diffuse_color()
+            builder.set_specular_color()
+            builder.set_selfillum()
+            builder.set_wire()
+            builder.set_wire_size()
+            builder.set_opacity() # TODO: May be problematic, find a good way to handle proper value
+            builder.set_map(
+                slot_index=material_slot.slot_index,
                 embed_skins=self.embed_skins,
                 use_generated_img_name=self.use_generated_img_name
             )
-            child_builder.set_geometry(
+            builder.set_geometry(
                 material_index=material_slot.slot_index,
                 apply_modifiers=self.apply_modifiers
             )
 
-            submodels.append(child_builder.submodel)
+            submodels.append(builder.submodel)
 
         return submodels

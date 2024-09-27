@@ -133,12 +133,15 @@ class MeshOutputBuilder(SubmodelOutputBuilder):
         else:
             self.submodel.opacity = override
 
-    def set_map(self, override=None, material_override=None, embed_skins=False, use_generated_img_name=False):
+    def set_map(self, override=None, slot_index=None, embed_skins=False, use_generated_img_name=False):
         if override is not None:
             self.submodel.map = override
             return
 
-        mtl = self.obj.active_material if material_override is None else material_override
+        if slot_index is not None and len(self.obj.material_slots) > 0:
+            mtl = self.obj.data.materials[slot_index]
+        else:
+            mtl = self.obj.active_material
 
         is_replacable = self.obj.t3d_properties.replacableskin_id != "None"
 
