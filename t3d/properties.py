@@ -1,8 +1,7 @@
 import bpy
 from bpy.props import EnumProperty, FloatProperty, IntProperty, FloatVectorProperty, BoolProperty
 
-from material_tools.wrapper import MaterialWrapper
-
+import icons
 
 class T3DSubmodelProperties(bpy.types.PropertyGroup):
     anim: EnumProperty(
@@ -138,6 +137,11 @@ class T3DSubmodelPropertiesPanel(bpy.types.Panel):
     bl_space_type = 'PROPERTIES'
     bl_region_type = 'WINDOW'
     bl_context = 'object'
+
+    def draw_header(self, context):
+        icons.get_icons()
+
+        self.layout.label(text="", icon_value=icons.get_icon_id("sz_icon"))
 
     def draw(self, context):
         self.obj = context.object

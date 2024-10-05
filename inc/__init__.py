@@ -1,5 +1,6 @@
 import bpy
 
+import icons
 from .input import INCImportOperator
 
 classes = (
@@ -8,7 +9,10 @@ classes = (
 
 
 def menu_func_import(self, context):
-    self.layout.operator(INCImportOperator.bl_idname, text="[EU07] Scenery INC (.inc)")
+    self.layout.operator(
+        INCImportOperator.bl_idname, text="[EU07] Scenery INC (.inc)",
+        icon_value=icons.get_icon_id("sz_icon")
+    )
 
 
 def register():

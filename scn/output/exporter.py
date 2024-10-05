@@ -5,6 +5,7 @@ import bpy
 from bpy.props import StringProperty, BoolProperty
 from bpy_extras.io_utils import ExportHelper
 import eu07_tools
+import icons
 
 from common.export_manager import ExportManager
 from common import utils
@@ -310,7 +311,10 @@ classes = (
 
 
 def menu_func_export(self, context):
-    self.layout.operator(SCNExporter.bl_idname, text="[EU07] Scenery File (.scn, .scm)")
+    self.layout.operator(
+        SCNExporter.bl_idname, text="[EU07] Scenery File (.scn, .scm)",
+        icon_value=icons.get_icon_id("sz_icon")
+    )
 
 
 def register():

@@ -1,11 +1,16 @@
 import bpy
 
+import icons
+
 
 class EU07_PT_MaterialToolsPanel(bpy.types.Panel):
     bl_space_type = 'NODE_EDITOR'
     bl_region_type = 'UI'
     bl_category = "[EU07] Tools"
     bl_label = "[EU07] Material Tools"
+
+    def draw_header(self, context):
+        self.layout.label(text="", icon_value=icons.get_icon_id("sz_icon"))
 
     def draw(self, context):
         active_material = context.view_layer.objects.active.active_material

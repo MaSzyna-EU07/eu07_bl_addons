@@ -1,5 +1,6 @@
 import bpy
 
+import icons
 from .operator import EU07_OT_MaterialImport, EU07_FH_material_import
 from .importer import MaterialImporter
 
@@ -11,7 +12,10 @@ classes = (
 
 
 def menu_func_import(self, context):
-    self.layout.operator(EU07_OT_MaterialImport.bl_idname, text="[EU07] Material (.mat)")
+    self.layout.operator(
+        EU07_OT_MaterialImport.bl_idname, text="[EU07] Material (.mat)",
+        icon_value=icons.get_icon_id("sz_icon")
+    )
 
 
 def register():

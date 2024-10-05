@@ -14,6 +14,7 @@ from . import common, t3d, e3d, scn, material_tools, project, preview, animation
 
 
 modules = (
+    icons,
     common,
     project,
     t3d,
@@ -30,6 +31,8 @@ modules = (
 def register():
     for mod in modules:
         mod.register()
+
+    icons.get_icons()
 
 
 def unregister():
