@@ -3,21 +3,11 @@ from bpy.props import StringProperty
 
 
 def get_preferences():
-    return bpy.context.preferences.addons['eu07_bl_addons'].preferences
+    return bpy.context.preferences.addons[__package__].preferences
 
 
 class EU07AddonPreferences(bpy.types.AddonPreferences):
-    bl_idname = "eu07_bl_addons"
-
-    default_environment_path: StringProperty(
-        name="Default environment path",
-        subtype='FILE_PATH'
-    )
-
-    trees_material_regex: StringProperty(
-        name="Trees material name filter",
-        default="tree|drzewo|plant"
-    )
+    bl_idname = __package__
 
 
 classes = (
