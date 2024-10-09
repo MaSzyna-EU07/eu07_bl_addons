@@ -32,8 +32,6 @@ def register():
     for mod in modules:
         mod.register()
 
-    icons.get_icons()
-
 
 def unregister():
     for mod in modules:

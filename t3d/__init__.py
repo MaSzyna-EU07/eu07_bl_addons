@@ -17,6 +17,7 @@ classes = (
 
 
 def menu_func_import(self, context):
+    icons.get_icons()
     self.layout.operator(
         EU07_OT_ImportT3D.bl_idname, text="[EU07] Text Model (.t3d)",
         icon_value=icons.get_icon_id("sz_icon")
@@ -24,6 +25,7 @@ def menu_func_import(self, context):
 
 
 def menu_func_export(self, context):
+    icons.get_icons()
     self.layout.operator(
         EU07_OT_ExportT3D.bl_idname, text="[EU07] Text Model (.t3d)",
         icon_value=icons.get_icon_id("sz_icon")

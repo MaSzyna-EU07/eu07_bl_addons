@@ -10,6 +10,7 @@ class EU07_PT_MaterialToolsPanel(bpy.types.Panel):
     bl_label = "[EU07] Material Tools"
 
     def draw_header(self, context):
+        icons.get_icons()
         self.layout.label(text="", icon_value=icons.get_icon_id("sz_icon"))
 
     def draw(self, context):

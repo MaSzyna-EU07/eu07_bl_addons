@@ -140,7 +140,6 @@ class T3DSubmodelPropertiesPanel(bpy.types.Panel):
 
     def draw_header(self, context):
         icons.get_icons()
-
         self.layout.label(text="", icon_value=icons.get_icon_id("sz_icon"))
 
     def draw(self, context):
