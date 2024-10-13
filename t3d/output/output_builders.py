@@ -145,8 +145,8 @@ class MeshOutputBuilder(SubmodelOutputBuilder):
 
         is_replacable = self.obj.t3d_properties.replacableskin_id != "None"
 
+        wrapper = MaterialWrapper(mtl)
         if mtl and use_generated_img_name:
-            wrapper = MaterialWrapper(mtl)
             diffusemap = wrapper.get_diffusemap()
 
             if diffusemap and diffusemap.source == 'GENERATED':
@@ -157,7 +157,9 @@ class MeshOutputBuilder(SubmodelOutputBuilder):
             self.submodel.map = self.obj.t3d_properties.replacableskin_id
             return
 
-        self.submodel.map = get_shortpath_from_material(mtl)
+        shortpath = get_shortpath_from_material(mtl)
+        traits = wrapper.get_traits_string()
+        self.submodel.map = f"{shortpath}{traits}"
 
     def set_geometry(self, apply_modifiers=True, material_index=None):
         mesh = None

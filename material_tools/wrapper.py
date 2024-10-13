@@ -88,6 +88,29 @@ class MaterialWrapper:
         if img_node:
             return img_node.image
 
+    def get_traits_string(self):
+        img_node = self._get_image_node()
+        in_links = img_node.inputs[0].links if img_node else None
+        if in_links:
+            link = in_links[0]
+            node = link.from_node
+            if node is not None:
+                is_traits_node = (
+                        node.bl_idname == 'ShaderNodeGroup' and
+                        node.node_tree.name == TEXTURETRAITS_NODE_NAME
+                )
+                if is_traits_node:
+                    traits_str = ""
+                    traits_str += "s" if node.inputs[1].default_value == True else ""
+                    traits_str += "t" if node.inputs[2].default_value == True else ""
+
+                    if traits_str:
+                        return f":{traits_str}"
+
+        return ""
+
+
+
     # TODO: Deprecate
     def set_opacity(self, opacity: float):
         return
