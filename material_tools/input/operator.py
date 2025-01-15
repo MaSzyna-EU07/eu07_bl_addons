@@ -58,7 +58,7 @@ class EU07_OT_MaterialImport(bpy.types.Operator, ImportHelper):
                 get_environment_path(filepath), Path(filepath).parent
             )
             importer = MaterialImporter(asset_searcher)
-            material = importer.import_from_abspath(filepath, active_material, self.opacity)
+            material = importer.import_from_abspath(filepath, active_material)
             importer.use_fake_user = self.use_fake_user
 
             if not self.import_into_active and self.set_new_as_active:

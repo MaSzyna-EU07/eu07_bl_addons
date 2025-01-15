@@ -158,8 +158,10 @@ class MeshOutputBuilder(SubmodelOutputBuilder):
             return
 
         shortpath = get_shortpath_from_material(mtl)
+        self.submodel.map.resource_path = shortpath
+
         traits = wrapper.get_traits_string()
-        self.submodel.map = f"{shortpath}{traits}"
+        self.submodel.map.set_traits_from_str(traits)
 
     def set_geometry(self, apply_modifiers=True, material_index=None):
         mesh = None

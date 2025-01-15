@@ -21,7 +21,7 @@ class INCImportOperator(bpy.types.Operator, ImportHelper):
         options={'HIDDEN'}
     )
     parameters_string: StringProperty(
-        name="Parameters string",
+        name="Parameters data",
         default=""
     )
 

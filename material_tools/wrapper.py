@@ -89,26 +89,23 @@ class MaterialWrapper:
             return img_node.image
 
     def get_traits_string(self):
-        img_node = self._get_image_node()
-        in_links = img_node.inputs[0].links if img_node else None
-        if in_links:
-            link = in_links[0]
-            node = link.from_node
-            if node is not None:
-                is_traits_node = (
-                        node.bl_idname == 'ShaderNodeGroup' and
-                        node.node_tree.name == TEXTURETRAITS_NODE_NAME
-                )
-                if is_traits_node:
-                    traits_str = ""
-                    traits_str += "s" if node.inputs[1].default_value == True else ""
-                    traits_str += "t" if node.inputs[2].default_value == True else ""
+        traits_node = self._get_traits_node()
+        if not traits_node:
+            return ""
 
-                    if traits_str:
-                        return f":{traits_str}"
+        traits_str = ""
+        traits_str += "s" if traits_node.inputs[1].default_value == True else ""
+        traits_str += "t" if traits_node.inputs[2].default_value == True else ""
+
+        if traits_str:
+            return f":{traits_str}"
 
         return ""
 
+    def set_traits_from_string(self, traits_str):
+        traits_node = self._get_traits_node()
+        traits_node.inputs[1].default_value = True if "s" in traits_str else False
+        traits_node.inputs[2].default_value = True if "t" in traits_str else False
 
 
     # TODO: Deprecate
@@ -133,3 +130,17 @@ class MaterialWrapper:
         links = bsdf.inputs[BSDF_TEXTURE_INPUT].links
         if links:
             return links[0].from_node
+
+    def _get_traits_node(self):
+        img_node = self._get_image_node()
+        in_links = img_node.inputs[0].links if img_node else None
+        if in_links:
+            link = in_links[0]
+            node = link.from_node
+            if node is not None:
+                is_traits_node = (
+                        node.bl_idname == 'ShaderNodeGroup' and
+                        node.node_tree.name == TEXTURETRAITS_NODE_NAME
+                )
+                if is_traits_node:
+                    return node

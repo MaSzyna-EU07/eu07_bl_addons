@@ -16,15 +16,15 @@ class MaterialImporter:
         self.material = None
         self.allow_duplicates = False
 
-    def import_from_relpath(self, relpath, material=None, opacity=1):
+    def import_from_relpath(self, relpath, traits="", material=None):
         abspath = self.asset_searcher.textures.find(relpath)
         if abspath:
-            return self.import_from_abspath(abspath, material, opacity)
+            return self.import_from_abspath(abspath, traits, material)
 
         return None
 
-    def import_from_abspath(self, abspath, material=None, opacity=1):
-        name = utils.get_qualified_material_name(abspath, opacity)
+    def import_from_abspath(self, abspath, traits="", material=None):
+        name = utils.get_qualified_material_name(abspath)
         source_path = common.get_source_path(abspath)
 
         if material is None:
@@ -34,22 +34,21 @@ class MaterialImporter:
 
         wrapper = MaterialWrapper(material)
         wrapper.initialize()
+        wrapper.set_traits_from_string(traits)
 
         material.eu07_properties.source_path = source_path
         material.eu07_properties.is_imported = True
 
         if abspath.endswith(".mat"):
             # TODO: Ugly, opacity should be muted without returning
-            opacity = self._build_from_mat_file(abspath, wrapper, opacity)
+            self._build_from_mat_file(abspath, wrapper)
         else:
             image = bpy.data.images.load(abspath, check_existing=True)
             wrapper.set_diffusemap(image)
 
-        wrapper.set_opacity(opacity)
-
         return material
 
-    def _build_from_mat_file(self, abspath, wrapper, opacity):
+    def _build_from_mat_file(self, abspath, wrapper):
         self.asset_searcher.textures.remove_extension(".mat")
 
         with open(abspath, encoding="latin-1") as matfile:
@@ -57,7 +56,7 @@ class MaterialImporter:
 
         for key, value in mapping.items():
             if key == "opacity":
-                opacity = value
+                pass # TODO: potentially set alpha threshold
 
             if key.startswith("texture"):
                 texture_object = value
@@ -75,7 +74,7 @@ class MaterialImporter:
 
         self.asset_searcher.textures.add_extension(".mat")
 
-        return opacity
+
 
 
 
