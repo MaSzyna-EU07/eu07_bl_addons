@@ -91,7 +91,7 @@ class MeshInputBuilder(SubmodelInputBuilder):
             return
 
         if map_.is_skin:
-            self.obj.t3d_properties.replacableskin_id = map_
+            self.obj.t3d_properties.replacableskin_id = str(map_.skin_index)
 
             repl_mat_name = f"replacableskin({map_})"
             if repl_mat_name in bpy.data.materials:

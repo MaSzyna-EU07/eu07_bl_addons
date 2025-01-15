@@ -153,8 +153,11 @@ class MeshOutputBuilder(SubmodelOutputBuilder):
                 self.submodel.map = diffusemap.name.replace(".", "_")
                 return
 
+        print(self.obj.name, is_replacable)
         if is_replacable and not embed_skins:
             self.submodel.map = self.obj.t3d_properties.replacableskin_id
+
+            print(self.submodel.map.type)
             return
 
         shortpath = get_shortpath_from_material(mtl)

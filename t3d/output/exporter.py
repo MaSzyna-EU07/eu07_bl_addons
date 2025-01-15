@@ -69,7 +69,7 @@ class T3DExporter:
             objects = bpy.context.collection.objects
 
         for obj in objects:
-            is_root = (obj.parent is None or obj.parent not in objects)
+            is_root = (obj.parent is None or obj.parent.name not in objects)
 
             if is_root:
                 yield obj

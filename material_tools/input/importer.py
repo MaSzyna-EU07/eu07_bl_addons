@@ -54,10 +54,8 @@ class MaterialImporter:
         with open(abspath, encoding="latin-1") as matfile:
             mapping = eu07_tools.mat.load(matfile)
 
-        for key, value in mapping.items():
-            if key == "opacity":
-                pass # TODO: potentially set alpha threshold
 
+        for key, value in mapping.items():
             if key.startswith("texture"):
                 texture_object = value
 
@@ -72,10 +70,19 @@ class MaterialImporter:
                     if key in {"texture_diffuse", "texture1"}:
                         wrapper.set_diffusemap(image)
 
+                    wrapper.set_image_has_alpha(self._image_has_alpha(image))
+
+            if key == "opacity":
+                wrapper.set_alpha_threshold(value)
+
         self.asset_searcher.textures.add_extension(".mat")
 
-
-
+    def _image_has_alpha(self, img):
+        b = 32 if img.is_float else 8
+        return (
+            img.depth == 2*b or   # Grayscale+Alpha
+            img.depth == 4*b      # RGB+Alpha
+        )
 
 
 

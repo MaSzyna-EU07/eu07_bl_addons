@@ -5,7 +5,11 @@ MATERIALOUT_INPUT = 0
 
 BSDF_TEXTURE_INPUT = 0
 BSDF_ALPHA_INPUT = 1
+BSDF_IMAGE_HAS_ALPHA_INPUT = 2
+BSDF_USE_ALPHA_THRESHOLD_INPUT = 3
+BSDF_ALPHA_THRESHOLD_INPUT = 4
 BSDF_OUTPUT = 0
+
 
 IMAGE_VECTOR_INPUT = 0
 IMAGE_COLOR_OUTPUT = 0
@@ -107,10 +111,17 @@ class MaterialWrapper:
         traits_node.inputs[1].default_value = True if "s" in traits_str else False
         traits_node.inputs[2].default_value = True if "t" in traits_str else False
 
+    def set_alpha_threshold(self, alpha_threshold, use):
+        bsdf = self._get_bsdf_node()
+        bsdf.inputs[BSDF_ALPHA_THRESHOLD_INPUT].default_value = alpha_threshold
 
-    # TODO: Deprecate
-    def set_opacity(self, opacity: float):
-        return
+    def set_use_alpha_threshold(self, use):
+        bsdf = self._get_bsdf_node()
+        bsdf.inputs[BSDF_USE_ALPHA_THRESHOLD_INPUT].default_value = use
+
+    def set_image_has_alpha(self, has_alpha):
+        bsdf = self._get_bsdf_node()
+        bsdf.inputs[BSDF_IMAGE_HAS_ALPHA_INPUT].default_value = has_alpha
 
     def _get_bsdf_node(self):
         for node in self.nodes:
