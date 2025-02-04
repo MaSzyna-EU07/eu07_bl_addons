@@ -25,7 +25,7 @@ class T3DExporter:
 
         objects_to_export = self._get_objects()
 
-        identifiers_written_includes = set()
+        already_written_includes = set()
 
         for obj in objects_to_export:
             if len(obj.material_slots) <= 1: # TODO: Get by unique materials
@@ -36,13 +36,13 @@ class T3DExporter:
                 continue
 
             if not self.aggregate_includes and (obj.eu07_include_identifier != includes.MASTER_IDENTIFIER):
-                if obj.eu07_include_identifier not in identifiers_written_includes:
+                if obj.eu07_include_identifier not in already_written_includes:
                     include = includes.get_include_by_identifier(obj.eu07_include_identifier)
                     include_element = eu07_tools.t3d.create_include(include.file_path, [])
 
                     export_manager.master_output.dump_element(include_element)
 
-                    identifiers_written_includes.add(obj.eu07_include_identifier)
+                    already_written_includes.add(obj.eu07_include_identifier)
 
             identifier = includes.MASTER_IDENTIFIER if self.aggregate_includes else obj.eu07_include_identifier
 

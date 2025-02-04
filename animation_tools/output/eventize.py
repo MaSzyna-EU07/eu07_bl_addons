@@ -31,6 +31,9 @@ class KeyframeDataStorage:
         frames_range = range(bpy.context.scene.frame_start, bpy.context.scene.frame_end + 1)
 
         for fcurve in action.fcurves:
+            if fcurve.data_path not in self._groups:
+                continue
+
             delays = [kf.co[0] / fps for kf in fcurve.keyframe_points]
 
             for kf_idx, kf in enumerate(fcurve.keyframe_points):

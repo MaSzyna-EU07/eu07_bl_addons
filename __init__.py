@@ -19,11 +19,11 @@ modules = (
     project,
     t3d,
     e3d,
-    scn,
+    #scn,
     material_tools,
     animation_tools,
     preview,
-    inc,
+    #inc,
     presets,
 )
 

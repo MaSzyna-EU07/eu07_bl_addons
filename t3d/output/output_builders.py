@@ -138,27 +138,20 @@ class MeshOutputBuilder(SubmodelOutputBuilder):
             self.submodel.map = override
             return
 
+        is_replacable = self.obj.t3d_properties.replacableskin_id != "None"
+        if is_replacable and not embed_skins:
+            self.submodel.map = self.obj.t3d_properties.replacableskin_id
+            return
+
         if slot_index is not None and len(self.obj.material_slots) > 0:
             mtl = self.obj.data.materials[slot_index]
         else:
             mtl = self.obj.active_material
 
-        is_replacable = self.obj.t3d_properties.replacableskin_id != "None"
+        if mtl is None:
+            return
 
         wrapper = MaterialWrapper(mtl)
-        if mtl and use_generated_img_name:
-            diffusemap = wrapper.get_diffusemap()
-
-            if diffusemap and diffusemap.source == 'GENERATED':
-                self.submodel.map = diffusemap.name.replace(".", "_")
-                return
-
-        print(self.obj.name, is_replacable)
-        if is_replacable and not embed_skins:
-            self.submodel.map = self.obj.t3d_properties.replacableskin_id
-
-            print(self.submodel.map.type)
-            return
 
         shortpath = get_shortpath_from_material(mtl)
         self.submodel.map.resource_path = shortpath
