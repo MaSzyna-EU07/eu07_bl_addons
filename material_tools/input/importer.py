@@ -40,11 +40,11 @@ class MaterialImporter:
         material.eu07_properties.is_imported = True
 
         if abspath.endswith(".mat"):
-            # TODO: Ugly, opacity should be muted without returning
             self._build_from_mat_file(abspath, wrapper)
         else:
             image = bpy.data.images.load(abspath, check_existing=True)
             wrapper.set_diffusemap(image)
+            wrapper.set_image_has_alpha(self._image_has_alpha(image))
 
         return material
 
@@ -78,10 +78,9 @@ class MaterialImporter:
         self.asset_searcher.textures.add_extension(".mat")
 
     def _image_has_alpha(self, img):
-        b = 32 if img.is_float else 8
         return (
-            img.depth == 2*b or   # Grayscale+Alpha
-            img.depth == 4*b      # RGB+Alpha
+            img.depth == 16 or   # Grayscale+Alpha
+            img.depth == 32     # RGB+Alpha
         )
 
 

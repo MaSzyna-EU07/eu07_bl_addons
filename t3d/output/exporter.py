@@ -60,7 +60,10 @@ class T3DExporter:
         export_manager.flush_buffers_to_files(environment_path, filepath)
 
     def _get_objects(self):
-        objects = bpy.context.scene.objects
+        # context.scene.objects is bpy_prop_collection,
+        # but all context.*_objects are sequences,
+        # hence we're using context.editable_object to simplify the root check
+        objects = bpy.context.editable_objects
         if self.objects_range == "SELECTION":
             objects = bpy.context.selected_objects
         elif self.objects_range == "VISIBLE":
@@ -69,7 +72,7 @@ class T3DExporter:
             objects = bpy.context.collection.objects
 
         for obj in objects:
-            is_root = (obj.parent is None or obj.parent.name not in objects)
+            is_root = (obj.parent not in objects)
 
             if is_root:
                 yield obj
