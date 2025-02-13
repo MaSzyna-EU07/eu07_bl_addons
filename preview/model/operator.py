@@ -126,7 +126,7 @@ def create_animation_elements():
 
     for obj in bpy.context.visible_objects:
         anim_events = eventize_object_animation(obj, NODE_MODEL_NAME)
-
+        print(anim_events)
         if anim_events:
             multiple.events_names.extend(ev.name for ev in anim_events)
             elements.extend(anim_events)

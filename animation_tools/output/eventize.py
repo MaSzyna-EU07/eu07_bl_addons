@@ -67,19 +67,19 @@ class KeyframeDataStorage:
             group[key] = kf_data
 
 
-def eventize_object_animation(object, model_name, name_prefix=""):
+def eventize_object_animation(obj, model_name, name_prefix=""):
     # Works only when:
     # There are no keyframes outside action.frame_range
     # And range is in <0;inf)
     # TODO: Fix those issues
 
-    if not object.animation_data:
+    if not obj.animation_data:
         return []
-    elif not object.animation_data.action:
+    elif not obj.animation_data.action:
         return []
 
     keyframes_storage = KeyframeDataStorage()
-    keyframes_storage.fill_from_action(object.animation_data.action)
+    keyframes_storage.fill_from_action(obj.animation_data.action)
 
     events = []
 
@@ -97,15 +97,20 @@ def eventize_object_animation(object, model_name, name_prefix=""):
                 prev_data = kf_data
                 continue
 
+            # frame reduction
+            if prev_data.vector == kf_data.vector:
+                prev_data = kf_data
+                continue
+
             event = eu07_tools.scn.create_element("event:animation")
             event.delay = prev_data.delay
             event.anim_type = "translate" if kf_data.animated_property == "location" else "rotate"
             prefix_sep = "_" if name_prefix else ""
-            event.name = f"{name_prefix}{prefix_sep}{object.animation_data.action.name}_{event.anim_type}{kf_index}"
+            event.name = f"{name_prefix}{prefix_sep}{obj.animation_data.action.name}_{event.anim_type}{kf_index}"
             event.model_name = model_name
-            event.submodel_name = object.name
-            event.speed = kf_data.vector.magnitude / prev_data.time_to_next
-            event.vector = kf_data.vector - prev_data.vector
+            event.submodel_name = obj.name
+            event.speed = (kf_data.vector - prev_data.vector).magnitude / prev_data.time_to_next
+            event.vector = kf_data.vector - obj.location
 
             prev_data = kf_data
 
