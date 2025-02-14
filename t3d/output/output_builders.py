@@ -13,19 +13,15 @@ from common.utils import remove_name_suffix
 def get_builder(obj):
     cls = None
 
-    if obj.type in ('MESH', 'CURVE', 'SURFACE', 'META', 'FONT'):
+    if obj.t3d_properties.is_mesh:
         cls = MeshOutputBuilder
-    elif obj.type == 'LIGHT' and obj.data.type == 'SPOT':
+    elif obj.t3d_properties.is_freespotlight:
         cls = FreeSpotLightOutputBuilder
-    elif obj.type == 'EMPTY':
-        for child in obj.children:
-            if child.type == 'LIGHT' and child.data.type == 'POINT':
-                cls = StarsOutputBuilder
-
-        not_stars = cls is None
-
-        if not_stars:
-            cls = BananMeshOutputBuilder
+    elif obj.t3d_properties.is_stars:
+        cls = StarsOutputBuilder
+    else:
+        # Every unsupported object should is exported as banan
+        cls = BananMeshOutputBuilder
 
     return cls(obj) if cls else None
 
@@ -65,7 +61,10 @@ class SubmodelOutputBuilder(abc.ABC):
 
     def set_anim(self, override=None):
         if override is None:
-            self.submodel.anim = self.obj.t3d_properties.anim
+            if self.obj.t3d_properties.has_action:
+                self.submodel.anim = "true"
+            else:
+                self.submodel.anim = self.obj.t3d_properties.anim
         else:
             self.submodel.anim = override
 
