@@ -16,10 +16,19 @@ def is_freespotlight(self):
 def is_stars(self):
     if self.id_data.type == 'EMPTY':
         for child in self.id_data.children:
-            if child.type == 'LIGHT' and child.data.type == 'POINT':
+            if child.t3d_properties.is_star_point:
                 return True
 
     return False
+
+def is_star_point(self):
+    return self.id_data.type == 'LIGHT' and self.id_data.data.type == 'POINT'
+
+def get_true_selfillum(self):
+    if self.is_freespotlight or self.is_stars:
+        return self.selfillum_light
+    else:
+        return self.selfillum
 
 
 class T3DSubmodelProperties(bpy.types.PropertyGroup):
@@ -37,6 +46,10 @@ class T3DSubmodelProperties(bpy.types.PropertyGroup):
 
     is_stars: BoolProperty(
         get=is_stars
+    )
+
+    is_star_point: BoolProperty(
+        get=is_star_point
     )
 
     anim: EnumProperty(
@@ -84,12 +97,15 @@ class T3DSubmodelProperties(bpy.types.PropertyGroup):
         max=2,
         step=0.01
     )
-    selfillum_spot: FloatProperty(
+    selfillum_light: FloatProperty(
         name='SelfIllum',
         default=2,
         min=-1,
         max=2,
         step=0.01
+    )
+    true_selfillum: FloatProperty(
+        get=get_true_selfillum
     )
     ambient_color: FloatVectorProperty(
         name='Ambient',
@@ -168,7 +184,7 @@ class T3DSubmodelProperties(bpy.types.PropertyGroup):
 
 class T3DSubmodelPropertiesPanel(bpy.types.Panel):
     bl_idname = "OBJECT_PT_t3d"
-    bl_label = "T3D Submodel Properties"
+    bl_label = "T3D Properties"
     bl_space_type = 'PROPERTIES'
     bl_region_type = 'WINDOW'
     bl_context = 'object'
@@ -179,6 +195,10 @@ class T3DSubmodelPropertiesPanel(bpy.types.Panel):
 
     def draw(self, context):
         self.obj = context.object
+
+        if self.obj.t3d_properties.is_star_point:
+            self.layout.prop(self.obj.data, "color", text="Point Color")
+            return
 
         np_b = self.layout.box()
 
@@ -202,7 +222,9 @@ class T3DSubmodelPropertiesPanel(bpy.types.Panel):
         selfillum_r = selfillum_b.row()
         selfillum_r.prop(
             self.obj.t3d_properties,
-            "selfillum_spot" if self.obj.t3d_properties.is_freespotlight else "selfillum"
+            "selfillum_light" if self.obj.t3d_properties.is_freespotlight
+                                or self.obj.t3d_properties.is_stars
+            else "selfillum"
         )
 
         if self.obj.t3d_properties.is_freespotlight:

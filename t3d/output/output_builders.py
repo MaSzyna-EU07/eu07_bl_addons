@@ -20,7 +20,11 @@ def get_builder(obj):
     elif obj.t3d_properties.is_stars:
         cls = StarsOutputBuilder
     else:
-        # Every unsupported object should is exported as banan
+        # Every unsupported object should is exported as banan,
+        # BUT point light i used in "Stars" submodel, so we need to exclude it
+        if obj.t3d_properties.is_star_point:
+            return None
+
         cls = BananMeshOutputBuilder
 
     return cls(obj) if cls else None
@@ -70,7 +74,7 @@ class SubmodelOutputBuilder(abc.ABC):
 
     def set_selfillum(self, override=None):
         if override is None:
-            self.submodel.selfillum = self.obj.t3d_properties.selfillum
+            self.submodel.selfillum = self.obj.t3d_properties.true_selfillum
         else:
             self.submodel.selfillum = override
 
@@ -245,12 +249,6 @@ class FreeSpotLightOutputBuilder(SubmodelOutputBuilder):
             self.submodel.diffuse_color = self.obj.data.color * 255
         else:
             self.submodel.diffuse_color = override
-
-    def set_selfillum(self, override=None):
-        if override is None:
-            self.submodel.selfillum = self.obj.t3d_properties.selfillum_spot
-        else:
-            self.submodel.selfillum = override
 
     def set_near_atten_start(self, override=None):
         if override is None:
