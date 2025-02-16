@@ -115,6 +115,9 @@ def eventize_object_animation(obj, model_name, name_prefix=""):
             event.model_name = model_name
             event.submodel_name = obj.name
             event.speed = (kf_data.vector - prev_data.vector).magnitude / prev_data.time_to_next
+
+            event.speed *= -1 if event.anim_type == "rotate" else 1
+
             event.vector = kf_data.vector - obj.location
 
             prev_data = kf_data
