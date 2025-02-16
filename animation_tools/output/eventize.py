@@ -28,13 +28,18 @@ class KeyframeDataStorage:
     def fill_from_action(self, action):
         fps = bpy.context.scene.render.fps
 
-        frames_range = range(bpy.context.scene.frame_start, bpy.context.scene.frame_end + 1)
+        frame_start = bpy.context.scene.frame_start
+        frame_end = bpy.context.scene.frame_end
+        frames_range = range(frame_start, frame_end + 1)
+
 
         for fcurve in action.fcurves:
             if fcurve.data_path not in self._groups:
                 continue
 
-            delays = [kf.co[0] / fps for kf in fcurve.keyframe_points]
+            delays = [(kf.co[0] - frame_start) / fps for kf in fcurve.keyframe_points]
+
+            print(delays)
 
             for kf_idx, kf in enumerate(fcurve.keyframe_points):
                 if kf.co[0] not in frames_range:
