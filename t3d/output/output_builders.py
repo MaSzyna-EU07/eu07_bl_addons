@@ -143,7 +143,7 @@ class MeshOutputBuilder(SubmodelOutputBuilder):
 
         is_replacable = self.obj.t3d_properties.replacableskin_id != "None"
         if is_replacable and not embed_skins:
-            self.submodel.map = self.obj.t3d_properties.replacableskin_id
+            self.submodel.map = str(self.obj.t3d_properties.replacableskin_id)
             return
 
         if slot_index is not None and len(self.obj.material_slots) > 0:

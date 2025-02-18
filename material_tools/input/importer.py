@@ -57,20 +57,20 @@ class MaterialImporter:
 
         for key, value in mapping.items():
             if key.startswith("texture"):
-                texture_object = value
+                texture_value = value
 
-                tex_relpath = texture_object.value
-                if texture_object.value_type == "TEXTURE_SET":
-                    tex_relpath = random.choice(texture_object.value)
+                tex_ref = texture_value.value
+                if texture_value.is_set:
+                    tex_ref = random.choice(texture_value.value)
 
-                image_path = self.asset_searcher.textures.find(tex_relpath)
+                image_path = self.asset_searcher.textures.find(tex_ref.resource_path)
                 if image_path:
                     image = bpy.data.images.load(image_path, check_existing=True)
 
                     if key in {"texture_diffuse", "texture1"}:
                         wrapper.set_diffusemap(image)
-
-                    wrapper.set_image_has_alpha(self._image_has_alpha(image))
+                        wrapper.set_traits_from_string(tex_ref.get_traits_str())
+                        wrapper.set_image_has_alpha(self._image_has_alpha(image))
 
             if key == "opacity":
                 wrapper.set_alpha_threshold(value)

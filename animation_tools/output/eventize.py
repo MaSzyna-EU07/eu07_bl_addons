@@ -75,7 +75,6 @@ class KeyframeDataStorage:
 def eventize_object_animation(obj, model_name, name_prefix=""):
     # Works only when:
     # There are no keyframes outside action.frame_range
-    # And range is in <0;inf)
     # TODO: Fix those issues
 
     if not obj.animation_data:
