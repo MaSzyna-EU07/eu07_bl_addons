@@ -44,7 +44,6 @@ class MaterialImporter:
         else:
             image = bpy.data.images.load(abspath, check_existing=True)
             wrapper.set_diffusemap(image)
-            wrapper.set_image_has_alpha(self._image_has_alpha(image))
 
         return material
 
