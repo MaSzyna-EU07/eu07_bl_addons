@@ -11,6 +11,11 @@ class EU07_PT_MaterialToolsPanel(bpy.types.Panel):
 
     @classmethod
     def poll(cls, context):
+        obj = context.view_layer.objects.active
+        if obj:
+            if obj.active_material is None:
+                return False
+
         for area in context.screen.areas:
             if area.ui_type == "ShaderNodeTree":
                 return True

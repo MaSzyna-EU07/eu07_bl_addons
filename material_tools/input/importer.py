@@ -70,9 +70,9 @@ class MaterialImporter:
                     if key in {"texture_diffuse", "texture1"}:
                         wrapper.set_diffusemap(image)
                         wrapper.set_traits_from_string(tex_ref.get_traits_str())
-                        wrapper.set_image_has_alpha(self._image_has_alpha(image))
 
             if key == "opacity":
+                wrapper.set_use_alpha_threshold(True)
                 wrapper.set_alpha_threshold(value)
 
         self.asset_searcher.textures.add_extension(".mat")
