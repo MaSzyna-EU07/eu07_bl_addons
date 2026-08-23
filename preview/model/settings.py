@@ -49,3 +49,4 @@ def register():
 
 def unregister():
     del bpy.types.Scene.eu07_model_preview
+    bpy.utils.unregister_class(ModelPreviewSettings)

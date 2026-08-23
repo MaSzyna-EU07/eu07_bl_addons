@@ -7,18 +7,24 @@ def join_meshes_into_one(objects):
     for obj in objects:
         bpy.context.scene.collection.objects.link(obj)
 
-    c = {}
-    c["object"] = c["active_object"] = objects[0]
-    c["selected_objects"] = c["selected_editable_objects"] = objects
+    target = objects[0]
 
-    meshes_to_remove = [o.data for o in c["selected_objects"] if o is not c["object"]]
+    override = {
+        "object": target,
+        "active_object": target,
+        "selected_objects": objects,
+        "selected_editable_objects": objects,
+    }
 
-    bpy.ops.object.transform_apply(c)
-    bpy.ops.object.join(c)
+    meshes_to_remove = [o.data for o in objects if o is not target]
+
+    with bpy.context.temp_override(**override):
+        bpy.ops.object.transform_apply()
+        bpy.ops.object.join()
 
     for m in meshes_to_remove:
         bpy.data.meshes.remove(m)
 
-    bpy.context.scene.collection.objects.unlink(c["object"])
+    bpy.context.scene.collection.objects.unlink(target)
 
-    return c["object"]
+    return target

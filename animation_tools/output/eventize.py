@@ -3,8 +3,25 @@ import math
 import bpy
 
 import mathutils
+from bpy_extras import anim_utils
 
 import eu07_tools
+
+
+def iter_fcurves(anim_data):
+    """Blender 5.0 removed ``Action.fcurves``/``Action.groups``.
+
+    F-curves now live in the channelbag of the action slot that is assigned
+    to the animated ID, so they have to be looked up through the anim data.
+    """
+    if anim_data is None:
+        return ()
+
+    channelbag = anim_utils.animdata_get_channelbag_for_assigned_slot(anim_data)
+    if channelbag is None:
+        return ()
+
+    return channelbag.fcurves
 
 
 class KeyframeData:
@@ -25,7 +42,7 @@ class KeyframeDataStorage:
     def iter_groups(self):
         return iter(d.values() for d in self._groups.values())
 
-    def fill_from_action(self, action):
+    def fill_from_anim_data(self, anim_data):
         fps = bpy.context.scene.render.fps
 
         frame_start = bpy.context.scene.frame_start
@@ -33,7 +50,7 @@ class KeyframeDataStorage:
         frames_range = range(frame_start, frame_end + 1)
 
 
-        for fcurve in action.fcurves:
+        for fcurve in iter_fcurves(anim_data):
             if fcurve.data_path not in self._groups:
                 continue
 
@@ -83,7 +100,7 @@ def eventize_object_animation(obj, model_name, name_prefix=""):
         return []
 
     keyframes_storage = KeyframeDataStorage()
-    keyframes_storage.fill_from_action(obj.animation_data.action)
+    keyframes_storage.fill_from_anim_data(obj.animation_data)
 
     events = []
 

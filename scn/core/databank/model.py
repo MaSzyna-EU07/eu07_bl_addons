@@ -110,7 +110,7 @@ def register():
     bpy.types.Mesh.eu07_scn_model_skins = bpy.props.CollectionProperty(type=ModelSkinData)
 
 def unregister():
-    for cls in classes:
+    for cls in reversed(classes):
         bpy.utils.unregister_class(cls)
 
     del bpy.types.Scene.eu07_scn_model_bank

@@ -23,10 +23,10 @@ def register():
 
 
 def unregister():
-    for c in classes:
-        bpy.utils.unregister_class(c)
-
     bpy.types.TOPBAR_MT_file_export.remove(menu_func_export)
+
+    for c in reversed(classes):
+        bpy.utils.unregister_class(c)
 
 
 

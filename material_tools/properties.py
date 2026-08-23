@@ -28,5 +28,7 @@ def register():
 
 
 def unregister():
-    for cls in classes:
+    del bpy.types.Material.eu07_properties
+
+    for cls in reversed(classes):
         bpy.utils.unregister_class(cls)

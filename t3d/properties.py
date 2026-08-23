@@ -5,7 +5,8 @@ import icons
 
 
 def has_action(self):
-    return self.id_data.animation_data.action is not None
+    anim_data = self.id_data.animation_data
+    return anim_data is not None and anim_data.action is not None
 
 def is_mesh(self):
     return self.id_data.type in ('MESH', 'CURVE', 'SURFACE', 'META', 'FONT')
@@ -142,6 +143,15 @@ class T3DSubmodelProperties(bpy.types.PropertyGroup):
         min=0,
         max=1,
         default=1
+    )
+    opacity_source: EnumProperty(
+        name='Opacity Source',
+        description="Where the opacity value used on export comes from",
+        default='OBJECT',
+        items=[
+            ('OBJECT', 'Object', 'Opacity is taken from this object'),
+            ('MATERIAL', 'Material', 'Opacity comes from the imported material'),
+        ]
     )
     replacableskin_id: EnumProperty(
         name='Map',

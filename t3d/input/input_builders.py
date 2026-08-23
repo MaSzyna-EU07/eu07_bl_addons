@@ -98,7 +98,6 @@ class MeshInputBuilder(SubmodelInputBuilder):
                 self.obj.active_material = bpy.data.materials[repl_mat_name]
             else:
                 self.obj.active_material = bpy.data.materials.new(repl_mat_name)
-                self.obj.active_material.use_nodes = True
 
         else:
             abspath = asset_searcher.textures.find(map_.resource_path)

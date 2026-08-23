@@ -28,4 +28,5 @@ def register():
 
 
 def unregister():
+    del bpy.types.Scene.eu07_project_properties
     bpy.utils.unregister_class(EU07ProjectProperties)

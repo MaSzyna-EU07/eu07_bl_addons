@@ -43,11 +43,13 @@ def register():
 
 
 def unregister():
-    for c in classes:
-        bpy.utils.unregister_class(c)
-
     bpy.types.TOPBAR_MT_file_import.remove(menu_func_import)
     bpy.types.TOPBAR_MT_file_export.remove(menu_func_export)
+
+    del bpy.types.Object.t3d_properties
+
+    for c in reversed(classes):
+        bpy.utils.unregister_class(c)
 
 
 
