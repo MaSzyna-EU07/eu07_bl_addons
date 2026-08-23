@@ -2,13 +2,13 @@ import math
 import pathlib
 
 import bpy
-import eu07_tools
+from ... import eu07_tools
 
-from t3d.input import input_builders
+from ...t3d.input import input_builders
 
 import mathutils
 
-from t3d.utils import join_meshes_into_one
+from ...t3d.utils import join_meshes_into_one
 
 
 class E3DImporter:

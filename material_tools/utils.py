@@ -1,8 +1,8 @@
 import pathlib
 import bpy
 
-import common
-import eu07_tools
+from .. import common
+from .. import eu07_tools
 
 from .wrapper import MaterialWrapper
 

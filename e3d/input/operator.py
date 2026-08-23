@@ -2,9 +2,9 @@ import io
 from pathlib import Path
 
 import bpy
-from common.utils import get_environment_path
-import eu07_tools
-from e3d.input.importer import E3DImporter
+from ...common.utils import get_environment_path
+from ... import eu07_tools
+from ...e3d.input.importer import E3DImporter
 from bpy_extras.io_utils import ImportHelper
 
 import cProfile, pstats

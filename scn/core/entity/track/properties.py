@@ -1,9 +1,9 @@
 import bpy
 
-from scn.core.entity.node import NodeProperties
+from .....scn.core.entity.node import NodeProperties
 from . import callbacks
 
-import material_tools
+from ..... import material_tools
 
 
 class TrackProperties(NodeProperties):

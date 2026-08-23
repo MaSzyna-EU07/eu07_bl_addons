@@ -1,5 +1,5 @@
 import bpy
-import presets
+from .. import presets
 
 MATERIALOUT_INPUT = 0
 

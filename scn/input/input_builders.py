@@ -2,8 +2,8 @@ import math
 import pathlib
 
 import bpy
-import eu07_tools
-from scn.core import factory
+from ... import eu07_tools
+from ...scn.core import factory
 
 
 class SceneryImporter:

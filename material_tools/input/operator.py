@@ -3,8 +3,8 @@ from pathlib import Path
 import bpy
 from bpy_extras.io_utils import ImportHelper
 
-import eu07_tools
-from common import get_environment_path
+from ... import eu07_tools
+from ...common import get_environment_path
 from .importer import MaterialImporter
 
 class EU07_OT_MaterialImport(bpy.types.Operator, ImportHelper):

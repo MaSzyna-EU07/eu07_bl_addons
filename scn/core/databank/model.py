@@ -2,11 +2,11 @@ import pathlib
 
 import bpy
 
-from common.utils import get_environment_path
-import eu07_tools
+from ....common.utils import get_environment_path
+from .... import eu07_tools
 
-from e3d.input import E3DImporter
-from t3d.input import T3DImporter
+from ....e3d.input import E3DImporter
+from ....t3d.input import T3DImporter
 
 
 class ModelSkinData(bpy.types.PropertyGroup):

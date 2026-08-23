@@ -1,7 +1,7 @@
 import mathutils
 
-from scn.core.entity.track import validate
-from scn.core.geometry.track import create_track_geometry_manager
+from .....scn.core.entity.track import validate
+from .....scn.core.geometry.track import create_track_geometry_manager
 
 
 def update_geometry(self, context):

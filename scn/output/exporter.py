@@ -4,18 +4,18 @@ import pathlib
 import bpy
 from bpy.props import StringProperty, BoolProperty
 from bpy_extras.io_utils import ExportHelper
-import eu07_tools
-import icons
+from ... import eu07_tools
+from ... import icons
 
-from common.export_manager import ExportManager
-from common import utils
+from ...common.export_manager import ExportManager
+from ...common import utils
 
 import bpy
 import bmesh
 
 from collections.abc import Iterable
 
-from material_tools.utils import get_shortpath_from_material
+from ...material_tools.utils import get_shortpath_from_material
 
 
 class SCNExporter(bpy.types.Operator, ExportHelper):

@@ -1,6 +1,6 @@
 import bpy
 
-import icons
+from .. import icons
 from .input import INCImportOperator
 
 classes = (

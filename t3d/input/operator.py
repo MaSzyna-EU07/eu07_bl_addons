@@ -4,10 +4,10 @@ import bpy
 from bpy.props import StringProperty, BoolProperty
 from bpy_extras.io_utils import ImportHelper
 
-import eu07_tools
-from common.utils import get_environment_path
+from ... import eu07_tools
+from ...common.utils import get_environment_path
 
-from t3d.input.importer import T3DImporter
+from ...t3d.input.importer import T3DImporter
 
 
 class EU07_OT_ImportT3D(bpy.types.Operator, ImportHelper):

@@ -1,7 +1,7 @@
 import bpy
 
-import icons
-from e3d.input.operator import EU07_OT_ImportE3D, EU07_FH_e3d_import
+from .. import icons
+from ..e3d.input.operator import EU07_OT_ImportE3D, EU07_FH_e3d_import
 
 
 classes = (

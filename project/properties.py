@@ -1,6 +1,6 @@
 import bpy
 
-from common import preferences
+from ..common import preferences
 
 
 class EU07ProjectProperties(bpy.types.PropertyGroup):

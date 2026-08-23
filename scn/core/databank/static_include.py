@@ -1,7 +1,7 @@
-import eu07_tools
-from common import get_environment_path
-from eu07_tools.utils import AssetSearcher
-from inc.input import INCImporter
+from .... import eu07_tools
+from ....common import get_environment_path
+from ....eu07_tools.utils import AssetSearcher
+from ....inc.input import INCImporter
 
 
 class StaticIncludeBankRecord(bpy.types.PropertyGroup):

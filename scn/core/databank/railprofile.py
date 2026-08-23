@@ -2,7 +2,7 @@ import pathlib
 
 import bpy
 
-import eu07_tools
+from .... import eu07_tools
 
 
 class RailProfilePoint(bpy.types.PropertyGroup):

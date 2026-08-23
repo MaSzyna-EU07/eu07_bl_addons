@@ -4,10 +4,10 @@ import bpy
 from bpy.props import StringProperty, BoolProperty
 from bpy_extras.io_utils import ImportHelper
 
-import eu07_tools
-from common.utils import get_environment_path
+from ... import eu07_tools
+from ...common.utils import get_environment_path
 
-from inc.input.importer import INCImporter
+from ...inc.input.importer import INCImporter
 
 
 

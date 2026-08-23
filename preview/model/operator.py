@@ -4,10 +4,10 @@ import pathlib
 
 import bpy
 
-import eu07_tools
-from animation_tools.output.eventize import eventize_object_animation
-from common import get_environment_path
-from preview.common import SCENERY_FILENAME, MODEL_FILENAME, SUBDIR_NAME, transfer_external_textures, \
+from ... import eu07_tools
+from ...animation_tools.output.eventize import eventize_object_animation
+from ...common import get_environment_path
+from ...preview.common import SCENERY_FILENAME, MODEL_FILENAME, SUBDIR_NAME, transfer_external_textures, \
     create_camera_from_viewport, run_preview_command, NODE_MODEL_NAME
 
 

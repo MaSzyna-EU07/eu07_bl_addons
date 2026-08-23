@@ -1,13 +1,13 @@
 import pathlib
 
-import eu07_tools
+from ... import eu07_tools
 
-from common import includes
+from ...common import includes
 from . import input_builders
 
 import bpy
 
-from t3d.utils import join_meshes_into_one
+from ...t3d.utils import join_meshes_into_one
 
 
 class T3DImporter:

@@ -1,7 +1,7 @@
 import bpy
 from bpy.props import EnumProperty, FloatProperty, IntProperty, FloatVectorProperty, BoolProperty, StringProperty
 
-import icons
+from .. import icons
 
 
 def has_action(self):

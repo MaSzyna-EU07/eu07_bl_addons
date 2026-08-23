@@ -1,6 +1,6 @@
 import bpy
 
-import icons
+from .. import icons
 
 
 class EU07_PT_MaterialToolsPanel(bpy.types.Panel):

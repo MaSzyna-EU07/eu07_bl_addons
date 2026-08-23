@@ -4,10 +4,10 @@ import math
 import bmesh
 import bpy
 
-import eu07_tools
-from material_tools.utils import get_shortpath_from_material
-from material_tools.wrapper import MaterialWrapper
-from common.utils import remove_name_suffix
+from ... import eu07_tools
+from ...material_tools.utils import get_shortpath_from_material
+from ...material_tools.wrapper import MaterialWrapper
+from ...common.utils import remove_name_suffix
 
 
 def get_builder(obj):

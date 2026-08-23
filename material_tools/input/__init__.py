@@ -1,6 +1,6 @@
 import bpy
 
-import icons
+from ... import icons
 from .operator import EU07_OT_MaterialImport, EU07_FH_material_import
 from .importer import MaterialImporter
 

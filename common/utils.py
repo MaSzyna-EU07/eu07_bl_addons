@@ -5,7 +5,7 @@ from bpy_extras import view3d_utils
 import bpy
 import mathutils
 
-import eu07_tools
+from .. import eu07_tools
 
 
 def get_environment_path(fallback_path=""):

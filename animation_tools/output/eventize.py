@@ -5,7 +5,7 @@ import bpy
 import mathutils
 from bpy_extras import anim_utils
 
-import eu07_tools
+from ... import eu07_tools
 
 
 def iter_fcurves(anim_data):

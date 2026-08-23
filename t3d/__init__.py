@@ -4,7 +4,7 @@ from bpy.props import PointerProperty
 from .input import EU07_OT_ImportT3D, EU07_FH_t3d_import
 from .output import EU07_OT_ExportT3D, EU07_FH_t3d_export
 from .properties import T3DSubmodelProperties, T3DSubmodelPropertiesPanel
-import icons
+from .. import icons
 
 classes = (
     EU07_OT_ImportT3D,

@@ -1,6 +1,6 @@
 import bpy
 
-import icons
+from .. import icons
 from .output import EU07_OT_ExportAnimation
 
 classes = (

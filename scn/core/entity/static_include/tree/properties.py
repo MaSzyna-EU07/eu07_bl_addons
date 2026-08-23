@@ -1,7 +1,7 @@
 import bpy
 
-import eu07_tools
-from material_tools.utils import get_shortpath_from_material
+from ...... import eu07_tools
+from ......material_tools.utils import get_shortpath_from_material
 
 from . import callbacks
 

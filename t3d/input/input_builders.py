@@ -2,14 +2,14 @@ import abc
 import math
 import mathutils
 import collections
-import eu07_tools
+from ... import eu07_tools
 
 import bmesh
 import bpy
 
-from common.geometry_builder import GeometryBuilder
-from material_tools.input import MaterialImporter
-from material_tools.utils import get_qualified_material_name
+from ...common.geometry_builder import GeometryBuilder
+from ...material_tools.input import MaterialImporter
+from ...material_tools.utils import get_qualified_material_name
 
 
 def get_builder(element, banan_as_mesh=False):

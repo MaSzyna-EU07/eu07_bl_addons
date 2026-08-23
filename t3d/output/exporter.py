@@ -2,10 +2,10 @@ import pathlib
 
 import bpy
 
-import eu07_tools
-from common.utils import get_environment_path
-from common import includes
-from common.export_manager import ExportManager
+from ... import eu07_tools
+from ...common.utils import get_environment_path
+from ...common import includes
+from ...common.export_manager import ExportManager
 from . import output_builders
 
 
