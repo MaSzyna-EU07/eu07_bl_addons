@@ -107,6 +107,7 @@ class E3DImporter:
             builder.set_far_decay_radius(submodel.far_decay_radius)
             builder.set_falloff_angle(submodel.cos_falloff_angle)
             builder.set_hotspot_angle(submodel.cos_hotspot_angle)
+            builder.set_hotspot_power(submodel.hotspot_power * 100)
 
         elif submodel.type == 'Stars':
             builder.set_points(submodel.stars)

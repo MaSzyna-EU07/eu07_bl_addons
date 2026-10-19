@@ -111,6 +111,7 @@ class T3DExporter:
             builder.set_far_decay_radius()
             builder.set_falloff_angle()
             builder.set_hotspot_angle()
+            builder.set_hotspot_power()
         elif submodel_type == "Stars":
             builder.set_points()
 

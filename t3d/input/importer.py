@@ -100,6 +100,7 @@ class T3DImporter:
             builder.set_far_decay_radius(element.far_decay_radius)
             builder.set_falloff_angle(element.falloff_angle)
             builder.set_hotspot_angle(element.hotspot_angle)
+            builder.set_hotspot_power(element.hotspot_power)
 
         elif element.type == 'Stars':
             builder.set_points(element.stars)
