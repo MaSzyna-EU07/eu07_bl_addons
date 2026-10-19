@@ -1,6 +1,6 @@
 import bpy
 
-import icons
+from .. import icons
 
 
 class EU07_PT_MaterialToolsPanel(bpy.types.Panel):
@@ -63,5 +63,5 @@ def register():
 
 
 def unregister():
-    for cls in classes:
+    for cls in reversed(classes):
         bpy.utils.unregister_class(cls)

@@ -5,9 +5,9 @@ import subprocess
 
 import bpy
 
-from common import get_environment_path
-from preview.common import SCENERY_FILENAME, create_camera_from_viewport, run_preview_command, SUBDIR_NAME
-import eu07_tools
+from ...common import get_environment_path
+from ...preview.common import SCENERY_FILENAME, create_camera_from_viewport, run_preview_command, SUBDIR_NAME
+from ... import eu07_tools
 
 
 class EU07_OT_GameEnginePreviewScenery(bpy.types.Operator):

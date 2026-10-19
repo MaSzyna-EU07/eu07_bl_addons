@@ -1,6 +1,6 @@
 import bpy
 
-import icons
+from ... import icons
 from .operator import EU07_OT_MaterialImport, EU07_FH_material_import
 from .importer import MaterialImporter
 
@@ -26,7 +26,7 @@ def register():
 
 
 def unregister():
-    for cls in classes:
+    for cls in reversed(classes):
         bpy.utils.unregister_class(cls)
 
     bpy.types.TOPBAR_MT_file_import.remove(menu_func_import)

@@ -2,14 +2,15 @@ import abc
 import math
 import mathutils
 import collections
-import eu07_tools
+from ... import eu07_tools
 
 import bmesh
 import bpy
 
-from common.geometry_builder import GeometryBuilder
-from material_tools.input import MaterialImporter
-from material_tools.utils import get_qualified_material_name
+from ...common.geometry_builder import GeometryBuilder
+from ...material_tools.input import MaterialImporter
+from ...material_tools.utils import get_qualified_material_name
+from .. import sim_light
 
 
 def get_builder(element, banan_as_mesh=False):
@@ -98,7 +99,6 @@ class MeshInputBuilder(SubmodelInputBuilder):
                 self.obj.active_material = bpy.data.materials[repl_mat_name]
             else:
                 self.obj.active_material = bpy.data.materials.new(repl_mat_name)
-                self.obj.active_material.use_nodes = True
 
         else:
             abspath = asset_searcher.textures.find(map_.resource_path)
@@ -133,9 +133,17 @@ class FreeSpotLightInputBuilder(SubmodelInputBuilder):
     def create_submodel(self, name: str):
         data = bpy.data.lights.new(name, type='SPOT')
         self.obj = bpy.data.objects.new(name, data)
+        self._cos_falloff = 0.0
+        sim_light.make_simulator_light(data)
 
     def set_diffuse_color(self, diffuse):
-        self.obj.data.color = [value / 255 for value in diffuse]
+        self.obj.data.color = sim_light.diffuse_to_color(diffuse)
+
+    def set_hotspot_power(self, hotspot_power):
+        # the simulator takes 100 for a missing or a non-positive one
+        if hotspot_power is None or hotspot_power <= 0:
+            hotspot_power = 100.0
+        self.obj.data.energy = sim_light.power_to_energy(hotspot_power)
 
     def set_selfillum(self, selfillum):
         self.obj.t3d_properties.selfillum_spot = selfillum
@@ -156,23 +164,12 @@ class FreeSpotLightInputBuilder(SubmodelInputBuilder):
         self.obj.t3d_properties.far_decay_radius = far_decay_radius
 
     def set_falloff_angle(self, falloff_angle):
-        if self._is_cosinus(falloff_angle):
-            self.obj.data.spot_size = math.acos(falloff_angle) * 2
-        else:
-            self.obj.data.spot_size = math.radians(falloff_angle)
+        self._cos_falloff = sim_light.angle_to_cos(falloff_angle)
+        sim_light.set_cones(self.obj.data, self._cos_falloff, self._cos_falloff)
 
     # NOTE: This should be called only after set_falloff_angle
     def set_hotspot_angle(self, hotspot_angle):
-        if self._is_cosinus(hotspot_angle):
-            hotspot_angle = math.acos(hotspot_angle) * 2
-            falloff_angle = self.obj.data.spot_size
-        else:
-            falloff_angle = math.degrees(self.obj.data.spot_size)
-
-        self.obj.data.spot_blend = 1 - hotspot_angle / falloff_angle
-
-    def _is_cosinus(self, spot_angle):
-        return spot_angle <= 1
+        sim_light.set_cones(self.obj.data, self._cos_falloff, sim_light.angle_to_cos(hotspot_angle))
 
 class StarsInputBuilder(SubmodelInputBuilder):
     def create_submodel(self, name: str):

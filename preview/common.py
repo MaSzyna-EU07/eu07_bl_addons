@@ -6,10 +6,10 @@ import subprocess
 
 import bpy
 
-import eu07_tools
-from common import get_viewport_camera_location, get_viewport_camera_rotation
+from .. import eu07_tools
+from ..common import get_viewport_camera_location, get_viewport_camera_rotation
 
-from material_tools.wrapper import MaterialWrapper
+from ..material_tools.wrapper import MaterialWrapper
 
 SCENERY_FILENAME = "_blender_preview.scn"
 MODEL_FILENAME = "_blender_preview.t3d"

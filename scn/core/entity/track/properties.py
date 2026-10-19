@@ -1,9 +1,9 @@
 import bpy
 
-from scn.core.entity.node import NodeProperties
+from .....scn.core.entity.node import NodeProperties
 from . import callbacks
 
-import material_tools
+from ..... import material_tools
 
 
 class TrackProperties(NodeProperties):
@@ -356,5 +356,5 @@ def register():
 
 
 def unregister():
-    for cls in classes:
-        bpy.utils.register_class(cls)
+    for cls in reversed(classes):
+        bpy.utils.unregister_class(cls)

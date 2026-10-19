@@ -1,4 +1,4 @@
-from material_tools.wrapper import MaterialWrapper
+from .....material_tools.wrapper import MaterialWrapper
 
 
 def get_thickness(self):

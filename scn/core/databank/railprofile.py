@@ -2,7 +2,7 @@ import pathlib
 
 import bpy
 
-import eu07_tools
+from .... import eu07_tools
 
 
 class RailProfilePoint(bpy.types.PropertyGroup):
@@ -102,6 +102,6 @@ def register():
     bpy.types.Scene.eu07_rail_profile_bank = bpy.props.PointerProperty(type=RailProfileBank)
 
 def unregister():
-    for cls in classes:
+    for cls in reversed(classes):
         bpy.utils.unregister_class(cls)
     

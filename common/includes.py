@@ -1,5 +1,5 @@
 import bpy
-from common.utils import uilist_safe_index_after_delete
+from ..common.utils import uilist_safe_index_after_delete
 
 #TODO: Nested includes
 
@@ -97,12 +97,7 @@ class EU07_UL_Includes(bpy.types.UIList):
     def draw_item(self, context, layout, data, item, icon, active_data, active_propname, index):
         custom_icon = 'FILE_TICK'
 
-        if self.layout_type in {'DEFAULT', 'COMPACT'}:
-            layout.label(text=f"{item.name}", icon=custom_icon)
-
-        elif self.layout_type in {'GRID'}:
-            layout.alignment = 'CENTER'
-            layout.label(text="", icon=custom_icon)
+        layout.label(text=f"{item.name}", icon=custom_icon)
 
 
 class EU07_PT_Includes(bpy.types.Panel):
@@ -232,12 +227,17 @@ def register():
     for cls in classes:
         bpy.utils.register_class(cls)
 
-        bpy.types.Scene.eu07_includes = bpy.props.CollectionProperty(type=EU07Include)
-        bpy.types.Scene.eu07_active_include_index = bpy.props.IntProperty(min=0)
-        bpy.types.Scene.eu07_include_identifier_counter = bpy.props.IntProperty(min=0)
-        bpy.types.Object.eu07_include_identifier = bpy.props.IntProperty(min=-1, default=-1)
+    bpy.types.Scene.eu07_includes = bpy.props.CollectionProperty(type=EU07Include)
+    bpy.types.Scene.eu07_active_include_index = bpy.props.IntProperty(min=0)
+    bpy.types.Scene.eu07_include_identifier_counter = bpy.props.IntProperty(min=0)
+    bpy.types.Object.eu07_include_identifier = bpy.props.IntProperty(min=-1, default=-1)
 
 
 def unregister():
-    for cls in classes:
+    del bpy.types.Object.eu07_include_identifier
+    del bpy.types.Scene.eu07_include_identifier_counter
+    del bpy.types.Scene.eu07_active_include_index
+    del bpy.types.Scene.eu07_includes
+
+    for cls in reversed(classes):
         bpy.utils.unregister_class(cls)

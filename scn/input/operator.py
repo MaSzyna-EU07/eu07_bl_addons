@@ -4,10 +4,10 @@ import bpy
 from bpy.props import StringProperty, BoolProperty, IntProperty
 from bpy_extras.io_utils import ImportHelper
 
-import eu07_tools
-from common import get_environment_path
-from scn.input.input_builders import SceneryBuilder
-from scn.sectorizer import Sectorizer
+from ... import eu07_tools
+from ...common import get_environment_path
+from ...scn.input.input_builders import SceneryBuilder
+from ...scn.sectorizer import Sectorizer
 
 
 class SCNImportOperator(bpy.types.Operator, ImportHelper):

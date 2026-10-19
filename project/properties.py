@@ -1,6 +1,6 @@
 import bpy
 
-from common import preferences
+from ..common import preferences
 
 
 class EU07ProjectProperties(bpy.types.PropertyGroup):
@@ -28,4 +28,5 @@ def register():
 
 
 def unregister():
+    del bpy.types.Scene.eu07_project_properties
     bpy.utils.unregister_class(EU07ProjectProperties)

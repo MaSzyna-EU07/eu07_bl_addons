@@ -2,13 +2,13 @@ import math
 import pathlib
 
 import bpy
-import eu07_tools
+from ... import eu07_tools
 
-from t3d.input import input_builders
+from ...t3d.input import input_builders
 
 import mathutils
 
-from t3d.utils import join_meshes_into_one
+from ...t3d.utils import join_meshes_into_one
 
 
 class E3DImporter:
@@ -107,6 +107,7 @@ class E3DImporter:
             builder.set_far_decay_radius(submodel.far_decay_radius)
             builder.set_falloff_angle(submodel.cos_falloff_angle)
             builder.set_hotspot_angle(submodel.cos_hotspot_angle)
+            builder.set_hotspot_power(submodel.hotspot_power * 100)
 
         elif submodel.type == 'Stars':
             builder.set_points(submodel.stars)

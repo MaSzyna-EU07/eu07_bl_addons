@@ -1,6 +1,6 @@
 import bpy
 
-import icons
+from .. import icons
 from .input import INCImportOperator
 
 classes = (
@@ -22,7 +22,7 @@ def register():
     bpy.types.TOPBAR_MT_file_import.append(menu_func_import)
 
 def unregister():
-    for c in classes:
+    for c in reversed(classes):
         bpy.utils.unregister_class(c)
 
     bpy.types.TOPBAR_MT_file_import.remove(menu_func_import)

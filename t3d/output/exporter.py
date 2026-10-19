@@ -2,10 +2,10 @@ import pathlib
 
 import bpy
 
-import eu07_tools
-from common.utils import get_environment_path
-from common import includes
-from common.export_manager import ExportManager
+from ... import eu07_tools
+from ...common.utils import get_environment_path
+from ...common import includes
+from ...common.export_manager import ExportManager
 from . import output_builders
 
 
@@ -111,6 +111,7 @@ class T3DExporter:
             builder.set_far_decay_radius()
             builder.set_falloff_angle()
             builder.set_hotspot_angle()
+            builder.set_hotspot_power()
         elif submodel_type == "Stars":
             builder.set_points()
 

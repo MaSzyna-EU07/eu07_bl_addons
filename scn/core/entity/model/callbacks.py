@@ -5,7 +5,7 @@ import mathutils
 
 import bpy
 
-import eu07_tools
+from ..... import eu07_tools
 
 
 def update_geometry(self, context):

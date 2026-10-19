@@ -1,7 +1,7 @@
 import bpy
 
-import icons
-from e3d.input.operator import EU07_OT_ImportE3D, EU07_FH_e3d_import
+from .. import icons
+from ..e3d.input.operator import EU07_OT_ImportE3D, EU07_FH_e3d_import
 
 
 classes = (
@@ -31,8 +31,8 @@ def register():
 
 
 def unregister():
-    for c in classes:
-        bpy.utils.unregister_class(c)
-
     bpy.types.TOPBAR_MT_file_import.remove(menu_func_import)
     bpy.types.TOPBAR_MT_file_export.remove(menu_func_export)
+
+    for c in reversed(classes):
+        bpy.utils.unregister_class(c)

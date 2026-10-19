@@ -2,11 +2,11 @@ import random
 
 import bpy
 
-import eu07_tools
+from ... import eu07_tools
 
-import common
-from material_tools import utils
-from material_tools.wrapper import MaterialWrapper
+from ... import common
+from ...material_tools import utils
+from ...material_tools.wrapper import MaterialWrapper
 
 
 class MaterialImporter:

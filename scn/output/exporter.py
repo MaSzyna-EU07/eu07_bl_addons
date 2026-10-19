@@ -4,18 +4,18 @@ import pathlib
 import bpy
 from bpy.props import StringProperty, BoolProperty
 from bpy_extras.io_utils import ExportHelper
-import eu07_tools
-import icons
+from ... import eu07_tools
+from ... import icons
 
-from common.export_manager import ExportManager
-from common import utils
+from ...common.export_manager import ExportManager
+from ...common import utils
 
 import bpy
 import bmesh
 
 from collections.abc import Iterable
 
-from material_tools.utils import get_shortpath_from_material
+from ...material_tools.utils import get_shortpath_from_material
 
 
 class SCNExporter(bpy.types.Operator, ExportHelper):
@@ -108,7 +108,6 @@ class SCNExporter(bpy.types.Operator, ExportHelper):
             uv_data = uv_layer.data[:]
 
         mesh.validate_material_indices()
-        mesh.calc_normals_split()
         for poly_index, polygon in enumerate(mesh.polygons):
             node = eu07_tools.scn.create_element("node:triangles")
             node.name = f"{terrain_object.name}{poly_index}"
@@ -325,7 +324,7 @@ def register():
 
 
 def unregister():
-    for c in classes:
+    for c in reversed(classes):
         bpy.utils.unregister_class(c)
 
     bpy.types.TOPBAR_MT_file_export.remove(menu_func_export)

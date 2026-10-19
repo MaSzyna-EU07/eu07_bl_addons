@@ -14,3 +14,4 @@ def register():
 
 def unregister():
     del bpy.types.Scene.eu07_scenery_preview
+    bpy.utils.unregister_class(SceneryPreviewSettings)

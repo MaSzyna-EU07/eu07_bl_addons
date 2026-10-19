@@ -1,11 +1,15 @@
 import bpy
 from bpy.props import EnumProperty, FloatProperty, IntProperty, FloatVectorProperty, BoolProperty, StringProperty
 
-import icons
+import math
+
+from .. import icons
+from . import sim_light
 
 
 def has_action(self):
-    return self.id_data.animation_data.action is not None
+    anim_data = self.id_data.animation_data
+    return anim_data is not None and anim_data.action is not None
 
 def is_mesh(self):
     return self.id_data.type in ('MESH', 'CURVE', 'SURFACE', 'META', 'FONT')
@@ -29,6 +33,50 @@ def get_true_selfillum(self):
         return self.selfillum_light
     else:
         return self.selfillum
+
+
+# the values of FreeSpotLight in the units of the simulator, held by the blender light itself
+def _spot(self):
+    return self.id_data.data if self.is_freespotlight else None
+
+def get_hotspot_power(self):
+    light = _spot(self)
+    return sim_light.energy_to_power(light.energy) if light else 100.0
+
+def set_hotspot_power(self, value):
+    light = _spot(self)
+    if light:
+        light.energy = sim_light.power_to_energy(value)
+
+def get_light_diffuse(self):
+    light = _spot(self)
+    return sim_light.color_to_diffuse(light.color) if light else (255.0, 255.0, 255.0)
+
+def set_light_diffuse(self, value):
+    light = _spot(self)
+    if light:
+        light.color = sim_light.diffuse_to_color(value)
+
+def get_hotspot_angle(self):
+    light = _spot(self)
+    return sim_light.cos_to_angle(sim_light.blender_cones(light)[1]) if light else 0.0
+
+def set_hotspot_angle(self, value):
+    light = _spot(self)
+    if light:
+        cos_outer, _ = sim_light.blender_cones(light)
+        sim_light.set_cones(light, cos_outer, math.cos(0.5 * value))
+
+
+def get_freespot_intensity(self):
+    return self.get("_eu07_freespot_intensity", sim_light.FREESPOT_INTENSITY_DEFAULT)
+
+def set_freespot_intensity(self, value):
+    # the lights keep their HotspotPower
+    previous = get_freespot_intensity(self)
+    if value > 0 and previous > 0:
+        sim_light.rescale_simulator_lights(value / previous)
+    self["_eu07_freespot_intensity"] = value
 
 
 class T3DSubmodelProperties(bpy.types.PropertyGroup):
@@ -143,6 +191,15 @@ class T3DSubmodelProperties(bpy.types.PropertyGroup):
         max=1,
         default=1
     )
+    opacity_source: EnumProperty(
+        name='Opacity Source',
+        description="Where the opacity value used on export comes from",
+        default='OBJECT',
+        items=[
+            ('OBJECT', 'Object', 'Opacity is taken from this object'),
+            ('MATERIAL', 'Material', 'Opacity comes from the imported material'),
+        ]
+    )
     replacableskin_id: EnumProperty(
         name='Map',
         default='None',
@@ -180,6 +237,65 @@ class T3DSubmodelProperties(bpy.types.PropertyGroup):
         default=100,
         min=0,
     )
+    hotspot_power: FloatProperty(
+        name='HotspotPower',
+        description="Intensity of the light in percent: the energy of the light, in the units of the simulator",
+        min=0.001,
+        soft_max=1000,
+        precision=1,
+        get=get_hotspot_power,
+        set=set_hotspot_power,
+    )
+    light_diffuse: FloatVectorProperty(
+        name='Diffuse',
+        description="Diffuse of the model, 0-255: the colour of the light is Diffuse^2.2, as the simulator takes it",
+        size=3,
+        min=0,
+        max=255,
+        precision=1,
+        get=get_light_diffuse,
+        set=set_light_diffuse,
+    )
+    hotspot_angle: FloatProperty(
+        name='HotspotAngle',
+        description="Cone the light is full within: the blend of the spot light",
+        subtype='ANGLE',
+        min=0,
+        max=math.pi,
+        get=get_hotspot_angle,
+        set=set_hotspot_angle,
+    )
+
+
+class EU07_OT_FreeSpotLightToSimulator(bpy.types.Operator):
+    bl_idname = "eu07.freespotlight_to_simulator"
+    bl_label = "Use Simulator Light Units"
+    bl_description = (
+        "Make the selected spot lights light the scene as the simulator does: the colour becomes Diffuse^2.2, the "
+        "energy follows HotspotPower and the light fades out at its range. The model gets the same Diffuse, "
+        "FalloffAngle and HotspotAngle as before"
+    )
+    bl_options = {'REGISTER', 'UNDO'}
+
+    @classmethod
+    def poll(cls, context):
+        return any(
+            obj.type == 'LIGHT' and obj.data.type == 'SPOT' and not obj.data.eu07_simulator_light
+            for obj in context.selected_objects
+        ) or (context.object is not None and context.object.t3d_properties.is_freespotlight)
+
+    def execute(self, context):
+        objects = set(context.selected_objects)
+        if context.object is not None:
+            objects.add(context.object)
+        lights = {
+            obj.data for obj in objects
+            if obj.type == 'LIGHT' and obj.data.type == 'SPOT' and not obj.data.eu07_simulator_light
+        }
+        for light in lights:
+            sim_light.convert_legacy_light(light)
+        self.report({'INFO'}, f"{len(lights)} light(s) converted")
+        return {'FINISHED'}
 
 
 class T3DSubmodelPropertiesPanel(bpy.types.Panel):
@@ -228,9 +344,37 @@ class T3DSubmodelPropertiesPanel(bpy.types.Panel):
         )
 
         if self.obj.t3d_properties.is_freespotlight:
+            light = self.obj.data
             colors_b = self.layout.box()
-            diffuse_r = colors_b.row()
-            diffuse_r.prop(self.obj.data, "color", text="Diffuse")
+            if sim_light.is_simulator_light(light):
+                diffuse_r = colors_b.row()
+                diffuse_r.prop(self.obj.t3d_properties, "light_diffuse")
+                diffuse_r.prop(light, "color", text="")
+                colors_b.row().prop(self.obj.t3d_properties, "hotspot_power")
+                colors_b.row().prop(context.scene, "eu07_freespot_intensity")
+
+                cones_b = self.layout.box()
+                cones_b.row().prop(light, "spot_size", text="FalloffAngle")
+                cones_b.row().prop(self.obj.t3d_properties, "hotspot_angle")
+                cos_outer, cos_inner = sim_light.blender_cones(light)
+                if sim_light.COS_FALLOFF_KEY in light and light.spot_size >= math.pi - 1e-4:
+                    cones_b.row().label(
+                        text=f"FalloffAngle {math.degrees(sim_light.cos_to_angle(light[sim_light.COS_FALLOFF_KEY])):.1f}° "
+                             f"of the model is kept, Blender shows 180°",
+                        icon='INFO'
+                    )
+                elif sim_light.simulator_cones(cos_outer, cos_inner)[1] > cos_inner + 1e-5:
+                    effective = sim_light.cos_to_angle(sim_light.simulator_cones(cos_outer, cos_inner)[1])
+                    cones_b.row().label(
+                        text=f"The simulator narrows HotspotAngle to {math.degrees(effective):.1f}°",
+                        icon='ERROR'
+                    )
+                colors_b.row().label(text=f"Range: {sim_light.light_range(light):.1f} m")
+            else:
+                diffuse_r = colors_b.row()
+                diffuse_r.prop(light, "color", text="Diffuse")
+                colors_b.row().label(text="The light is not in the units of the simulator", icon='INFO')
+                colors_b.row().operator(EU07_OT_FreeSpotLightToSimulator.bl_idname)
 
             near_atten_b = self.layout.box()
 

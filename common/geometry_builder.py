@@ -1,7 +1,7 @@
 import bmesh
 import bpy
 
-from eu07_tools.utils.geometry import VertexStorageSectored
+from ..eu07_tools.utils.geometry import VertexStorageSectored
 
 # TODO: Optimize...
 class GeometryBuilder:

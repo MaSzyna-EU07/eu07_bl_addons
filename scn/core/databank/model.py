@@ -2,11 +2,11 @@ import pathlib
 
 import bpy
 
-from common.utils import get_environment_path
-import eu07_tools
+from ....common.utils import get_environment_path
+from .... import eu07_tools
 
-from e3d.input import E3DImporter
-from t3d.input import T3DImporter
+from ....e3d.input import E3DImporter
+from ....t3d.input import T3DImporter
 
 
 class ModelSkinData(bpy.types.PropertyGroup):
@@ -110,7 +110,7 @@ def register():
     bpy.types.Mesh.eu07_scn_model_skins = bpy.props.CollectionProperty(type=ModelSkinData)
 
 def unregister():
-    for cls in classes:
+    for cls in reversed(classes):
         bpy.utils.unregister_class(cls)
 
     del bpy.types.Scene.eu07_scn_model_bank

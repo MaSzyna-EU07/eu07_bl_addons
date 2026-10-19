@@ -4,10 +4,11 @@ import math
 import bmesh
 import bpy
 
-import eu07_tools
-from material_tools.utils import get_shortpath_from_material
-from material_tools.wrapper import MaterialWrapper
-from common.utils import remove_name_suffix
+from ... import eu07_tools
+from ...material_tools.utils import get_shortpath_from_material
+from ...material_tools.wrapper import MaterialWrapper
+from ...common.utils import remove_name_suffix
+from .. import sim_light
 
 
 def get_builder(obj):
@@ -246,9 +247,21 @@ class FreeSpotLightOutputBuilder(SubmodelOutputBuilder):
 
     def set_diffuse_color(self, override=None):
         if override is None:
-            self.submodel.diffuse_color = self.obj.data.color * 255
+            if sim_light.is_simulator_light(self.obj.data):
+                self.submodel.diffuse_color = sim_light.color_to_diffuse(self.obj.data.color)
+            else:
+                self.submodel.diffuse_color = self.obj.data.color * 255
         else:
             self.submodel.diffuse_color = override
+
+    def set_hotspot_power(self, override=None):
+        if override is None:
+            if not sim_light.is_simulator_light(self.obj.data):
+                # lights made before the simulator units have no intensity of their own
+                return
+            override = sim_light.energy_to_power(self.obj.data.energy)
+        # 100 is what the simulator takes without the entry
+        self.submodel.hotspot_power = None if abs(override - 100.0) < 1e-4 else override
 
     def set_near_atten_start(self, override=None):
         if override is None:
@@ -282,13 +295,21 @@ class FreeSpotLightOutputBuilder(SubmodelOutputBuilder):
 
     def set_falloff_angle(self, override=None):
         if override is None:
-            self.submodel.falloff_angle = math.degrees(self.obj.data.spot_size)
+            if sim_light.is_simulator_light(self.obj.data):
+                cos_falloff, _ = sim_light.model_cones(self.obj.data)
+                self.submodel.falloff_angle = math.degrees(sim_light.cos_to_angle(cos_falloff))
+            else:
+                self.submodel.falloff_angle = math.degrees(self.obj.data.spot_size)
         else:
             self.submodel.falloff_angle = override
 
     def set_hotspot_angle(self, override=None):
         if override is None:
-            self.submodel.hotspot_angle = math.degrees(self.obj.data.spot_size * (1 - self.obj.data.spot_blend))
+            if sim_light.is_simulator_light(self.obj.data):
+                _, cos_hotspot = sim_light.model_cones(self.obj.data)
+                self.submodel.hotspot_angle = math.degrees(sim_light.cos_to_angle(cos_hotspot))
+            else:
+                self.submodel.hotspot_angle = math.degrees(self.obj.data.spot_size * (1 - self.obj.data.spot_blend))
         else:
             self.submodel.hotspot_angle = override
 

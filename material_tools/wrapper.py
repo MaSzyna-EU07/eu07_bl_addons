@@ -1,5 +1,5 @@
 import bpy
-import presets
+from .. import presets
 
 MATERIALOUT_INPUT = 0
 
@@ -25,7 +25,8 @@ TEXTURETRAITS_NODE_NAME = "[EU07] Texture Traits"
 class MaterialWrapper:
     def __init__(self, material):
         self.material = material
-        self.material.use_nodes = True
+        # Blender 5.x: materials always own a node tree, `use_nodes` is
+        # deprecated and scheduled for removal in 6.0.
         self.nodes = material.node_tree.nodes
         self.links = material.node_tree.links
 
@@ -117,10 +118,6 @@ class MaterialWrapper:
     def set_use_alpha_threshold(self, use):
         bsdf = self._get_bsdf_node()
         bsdf.inputs[BSDF_USE_ALPHA_THRESHOLD_INPUT].default_value = use
-
-    def set_image_has_alpha(self, has_alpha):
-        bsdf = self._get_bsdf_node()
-        bsdf.inputs[BSDF_IMAGE_HAS_ALPHA_INPUT].default_value = has_alpha
 
     def _get_bsdf_node(self):
         for node in self.nodes:

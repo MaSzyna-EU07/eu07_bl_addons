@@ -1,16 +1,16 @@
 import pathlib
 
-import eu07_tools
+from ... import eu07_tools
 
 import bpy
 import mathutils
 
-from common.geometry_builder import GeometryBuilder
-from material_tools.input import MaterialImporter
+from ...common.geometry_builder import GeometryBuilder
+from ...material_tools.input import MaterialImporter
 
-from e3d.input import E3DImporter
-from t3d.input import T3DImporter
-from t3d.utils import join_meshes_into_one
+from ...e3d.input import E3DImporter
+from ...t3d.input import T3DImporter
+from ...t3d.utils import join_meshes_into_one
 
 
 class INCImporter:

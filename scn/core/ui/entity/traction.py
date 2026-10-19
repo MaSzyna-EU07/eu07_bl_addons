@@ -1,4 +1,4 @@
-from scn.core.entity.track.validate import is_track_junction
+from .....scn.core.entity.track.validate import is_track_junction
 
 from .common import draw_node_ui
 
