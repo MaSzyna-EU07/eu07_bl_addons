@@ -262,8 +262,8 @@ class FreeSpotLightOutputBuilder(SubmodelOutputBuilder):
                 return
             # the energy Blender lights with, its exposure and normalization included
             override = sim_light.model_values(self.obj.data)[1]
-        # 100 is what the simulator takes without the entry
-        self.submodel.hotspot_power = None if abs(override - 100.0) < 1e-4 else override
+        # written also when it's 100, which the simulator takes without the entry: the model shows the power of the light
+        self.submodel.hotspot_power = override
 
     # the optional parameters of the lights in the units of the simulator, the light of Blender as it is; the lights made
     # before go to the model as they did. the entries with the values the simulator takes without them are left out

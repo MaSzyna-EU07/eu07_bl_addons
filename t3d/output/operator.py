@@ -61,6 +61,14 @@ class EU07_OT_ExportT3D(bpy.types.Operator, ExportHelper):
 
         exporter.export_to_file(self.filepath)
 
+        if exporter.legacy_lights:
+            self.report(
+                {'WARNING'},
+                f"{len(exporter.legacy_lights)} light(s) exported without HotspotPower, radius and shadows, not being in "
+                f"the units of the simulator (T3D Properties > Use Simulator Light Units): "
+                + ", ".join(exporter.legacy_lights[:10]) + (" ..." if len(exporter.legacy_lights) > 10 else "")
+            )
+
         return {'FINISHED'}
 
 class EU07_FH_t3d_export(bpy.types.FileHandler):

@@ -7,6 +7,7 @@ from ...common.utils import get_environment_path
 from ...common import includes
 from ...common.export_manager import ExportManager
 from . import output_builders
+from .. import sim_light
 
 
 class T3DExporter:
@@ -18,6 +19,9 @@ class T3DExporter:
         self.remove_name_suffixes = False
         self.use_generated_img_name = False
         self._model_objects = []
+        # names of the exported lights which aren't in the units of the simulator: they go to the model as they did before
+        # them, without their power (HotspotPower), radius and shadows
+        self.legacy_lights = []
 
     def export_to_file(self, filepath):
         export_manager = ExportManager(bpy.context.scene.eu07_includes, self.aggregate_includes)
@@ -107,6 +111,8 @@ class T3DExporter:
             builder.set_map(embed_skins=self.embed_skins, use_generated_img_name=self.use_generated_img_name)
             builder.set_geometry(apply_modifiers=self.apply_modifiers)
         elif submodel_type == "FreeSpotLight":
+            if not sim_light.is_simulator_light(obj.data):
+                self.legacy_lights.append(obj.name)
             builder.set_near_atten_start()
             builder.set_near_atten_end()
             builder.set_use_near_atten()
