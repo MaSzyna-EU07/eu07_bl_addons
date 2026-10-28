@@ -133,6 +133,7 @@ class T3DExporter:
             builder.set_soft_falloff()
             builder.set_cast_shadows()
             builder.set_shade_self(self._model_objects)
+            builder.set_light_only()
         elif submodel_type == "Stars":
             builder.set_points()
 

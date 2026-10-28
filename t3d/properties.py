@@ -244,6 +244,14 @@ class T3DSubmodelProperties(bpy.types.PropertyGroup):
         default=100,
         min=0,
     )
+    light_only: BoolProperty(
+        name='LightOnly',
+        description=(
+            "Only the light: in the simulator it lights its surroundings, but its glowing point and its glare, seen from "
+            "afar, aren't drawn (lights hidden in fittings, the backlight of a desk)"
+        ),
+        default=False,
+    )
     transform_params: StringProperty(
         name="Transform Parameters",
         description=(
@@ -453,6 +461,8 @@ class T3DSubmodelPropertiesPanel(bpy.types.Panel):
                 diffuse_r.prop(light, "color", text="Diffuse")
                 colors_b.row().label(text="The light is not in the units of the simulator", icon='INFO')
                 colors_b.row().operator(EU07_OT_FreeSpotLightToSimulator.bl_idname)
+
+            self.layout.box().row().prop(self.obj.t3d_properties, "light_only")
 
             near_atten_b = self.layout.box()
 

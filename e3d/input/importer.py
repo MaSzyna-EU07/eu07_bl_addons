@@ -116,6 +116,7 @@ class E3DImporter:
             builder.set_cast_shadows(submodel.cast_shadows)
             builder.set_soft_falloff(submodel.soft_falloff)
             builder.set_shade_self(submodel.shade_self)
+            builder.set_light_only(submodel.light_only)
             if submodel.cast_shadows and not builder.shade_self:
                 self._unshaded_lights.append(builder.obj)
 

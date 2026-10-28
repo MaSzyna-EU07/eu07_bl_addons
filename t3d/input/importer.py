@@ -119,6 +119,7 @@ class T3DImporter:
             builder.set_cast_shadows(element.cast_shadows)
             builder.set_soft_falloff(element.soft_falloff)
             builder.set_shade_self(element.shade_self)
+            builder.set_light_only(element.light_only)
             if element.cast_shadows is not False and not builder.shade_self:
                 self._unshaded_lights.append(builder.obj)
 

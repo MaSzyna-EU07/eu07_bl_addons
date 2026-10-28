@@ -195,6 +195,9 @@ class FreeSpotLightInputBuilder(SubmodelInputBuilder):
         # the Shadow Linking is made once the whole model is there, see shade_self_pending()
         self.shade_self = bool(shade_self)
 
+    def set_light_only(self, light_only):
+        self.obj.t3d_properties.light_only = bool(light_only)
+
 def shade_self_pending(lights, objects):
     """ The lights of an imported model which its objects don't shadow in the simulator (no ShadeSelf) get the Shadow
     Linking which leaves the objects out """

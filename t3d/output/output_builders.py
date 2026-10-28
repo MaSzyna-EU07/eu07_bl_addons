@@ -303,6 +303,12 @@ class FreeSpotLightOutputBuilder(SubmodelOutputBuilder):
             override = sim_light.shade_self(self.obj, model_objects)
         self.submodel.shade_self = True if override else None
 
+    def set_light_only(self, override=None):
+        # written always, true or false, also for the lights made before the simulator units
+        if override is None:
+            override = self.obj.t3d_properties.light_only
+        self.submodel.light_only = bool(override)
+
     def set_near_atten_start(self, override=None):
         if override is None:
             self.submodel.near_atten_start = self.obj.t3d_properties.near_atten_start
