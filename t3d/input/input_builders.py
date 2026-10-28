@@ -165,11 +165,37 @@ class FreeSpotLightInputBuilder(SubmodelInputBuilder):
 
     def set_falloff_angle(self, falloff_angle):
         self._cos_falloff = sim_light.angle_to_cos(falloff_angle)
+        if sim_light.is_point_cone(self._cos_falloff):
+            # the whole sphere: a point light
+            self.obj.data.type = 'POINT'
+            return
         sim_light.set_cones(self.obj.data, self._cos_falloff, self._cos_falloff)
 
     # NOTE: This should be called only after set_falloff_angle
     def set_hotspot_angle(self, hotspot_angle):
         sim_light.set_cones(self.obj.data, self._cos_falloff, sim_light.angle_to_cos(hotspot_angle))
+
+    def set_radius(self, radius):
+        # the simulator takes a point for a missing one
+        self.obj.data.shadow_soft_size = max(radius or 0.0, 0.0)
+        sim_light.update_range(self.obj.data)
+
+    def set_cast_shadows(self, cast_shadows):
+        self.obj.data.use_shadow = cast_shadows is not False
+
+    def set_soft_falloff(self, soft_falloff):
+        self.obj.data.use_soft_falloff = bool(soft_falloff)
+
+    def set_shade_self(self, shade_self):
+        # the Shadow Linking is made once the whole model is there, see shade_self_pending()
+        self.shade_self = bool(shade_self)
+
+def shade_self_pending(lights, objects):
+    """ The lights of an imported model which its objects don't shadow in the simulator (no ShadeSelf) get the Shadow
+    Linking which leaves the objects out """
+    for light_obj in lights:
+        sim_light.set_shade_self(light_obj, objects, False)
+
 
 class StarsInputBuilder(SubmodelInputBuilder):
     def create_submodel(self, name: str):

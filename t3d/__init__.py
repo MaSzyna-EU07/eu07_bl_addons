@@ -4,7 +4,7 @@ from bpy.props import PointerProperty, BoolProperty, FloatProperty
 from .input import EU07_OT_ImportT3D, EU07_FH_t3d_import
 from .output import EU07_OT_ExportT3D, EU07_FH_t3d_export
 from .properties import (
-    T3DSubmodelProperties, T3DSubmodelPropertiesPanel, EU07_OT_FreeSpotLightToSimulator,
+    T3DSubmodelProperties, T3DSubmodelPropertiesPanel, EU07_OT_FreeSpotLightToSimulator, EU07_OT_FreeSpotLightShadeSelf,
     get_freespot_intensity, set_freespot_intensity
 )
 from . import sim_light
@@ -17,6 +17,7 @@ classes = (
     EU07_FH_t3d_export,
     T3DSubmodelProperties,
     EU07_OT_FreeSpotLightToSimulator,
+    EU07_OT_FreeSpotLightShadeSelf,
     T3DSubmodelPropertiesPanel
 )
 
@@ -46,7 +47,9 @@ def register():
         name="Simulator Light Units",
         description=(
             "The colour, the energy and the blend of the spot light are in the units of the simulator "
-            "(Diffuse^2.2, HotspotPower, the cosines of the cones). Lights made before go to the model as they are"
+            "(Diffuse^2.2, HotspotPower, the cosines of the cones), and its radius, falloff and shadows go to the model. "
+            "A point light in the units is a point light of the simulator (FalloffAngle 360), not a point of stars. "
+            "Lights made before go to the model as they are"
         ),
         default=False,
     )

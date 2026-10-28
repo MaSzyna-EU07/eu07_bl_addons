@@ -248,7 +248,8 @@ class FreeSpotLightOutputBuilder(SubmodelOutputBuilder):
     def set_diffuse_color(self, override=None):
         if override is None:
             if sim_light.is_simulator_light(self.obj.data):
-                self.submodel.diffuse_color = sim_light.color_to_diffuse(self.obj.data.color)
+                # the colour Blender lights with, its temperature included
+                self.submodel.diffuse_color = sim_light.model_values(self.obj.data)[0]
             else:
                 self.submodel.diffuse_color = self.obj.data.color * 255
         else:
@@ -259,9 +260,45 @@ class FreeSpotLightOutputBuilder(SubmodelOutputBuilder):
             if not sim_light.is_simulator_light(self.obj.data):
                 # lights made before the simulator units have no intensity of their own
                 return
-            override = sim_light.energy_to_power(self.obj.data.energy)
+            # the energy Blender lights with, its exposure and normalization included
+            override = sim_light.model_values(self.obj.data)[1]
         # 100 is what the simulator takes without the entry
         self.submodel.hotspot_power = None if abs(override - 100.0) < 1e-4 else override
+
+    # the optional parameters of the lights in the units of the simulator, the light of Blender as it is; the lights made
+    # before go to the model as they did. the entries with the values the simulator takes without them are left out
+
+    def set_radius(self, override=None):
+        if override is None:
+            if not sim_light.is_simulator_light(self.obj.data):
+                return
+            override = self.obj.data.shadow_soft_size
+        self.submodel.radius = override if override > 0.0 else None
+
+    def set_soft_falloff(self, override=None):
+        if override is None:
+            light = self.obj.data
+            if not sim_light.is_simulator_light(light):
+                return
+            # a point falls off the same way with it or without
+            override = light.use_soft_falloff and light.shadow_soft_size > 0.0
+        self.submodel.soft_falloff = True if override else None
+
+    def set_cast_shadows(self, override=None):
+        if override is None:
+            if not sim_light.is_simulator_light(self.obj.data):
+                return
+            override = self.obj.data.use_shadow
+        self.submodel.cast_shadows = None if override else False
+
+    def set_shade_self(self, model_objects=(), override=None):
+        """ Model_objects: the objects which go to the model with the light, whether they shadow it in Blender """
+        if override is None:
+            light = self.obj.data
+            if not sim_light.is_simulator_light(light) or not light.use_shadow:
+                return
+            override = sim_light.shade_self(self.obj, model_objects)
+        self.submodel.shade_self = True if override else None
 
     def set_near_atten_start(self, override=None):
         if override is None:

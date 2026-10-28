@@ -20,6 +20,8 @@ class E3DImporter:
         self.join_into_one = False
         self.import_lod = True
         self.name_prefix = ""
+        # lights of the model which its objects don't shadow, see input_builders.shade_self_pending()
+        self._unshaded_lights = []
 
     def import_from_filepath(self, filepath):
         original_basedir = self.asset_searcher.basedir
@@ -38,6 +40,7 @@ class E3DImporter:
 
     def import_from_model(self, model):
         objects = []
+        self._unshaded_lights = []
 
         if self.join_into_one:
             self.import_spots = False
@@ -58,6 +61,7 @@ class E3DImporter:
 
             return [combined]
 
+        input_builders.shade_self_pending(self._unshaded_lights, objects)
         return objects
 
     def import_from_submodel_element(self, submodel):
@@ -108,6 +112,12 @@ class E3DImporter:
             builder.set_falloff_angle(submodel.cos_falloff_angle)
             builder.set_hotspot_angle(submodel.cos_hotspot_angle)
             builder.set_hotspot_power(submodel.hotspot_power * 100)
+            builder.set_radius(submodel.radius)
+            builder.set_cast_shadows(submodel.cast_shadows)
+            builder.set_soft_falloff(submodel.soft_falloff)
+            builder.set_shade_self(submodel.shade_self)
+            if submodel.cast_shadows and not builder.shade_self:
+                self._unshaded_lights.append(builder.obj)
 
         elif submodel.type == 'Stars':
             builder.set_points(submodel.stars)

@@ -17,13 +17,16 @@ class T3DExporter:
         self.embed_skins = False
         self.remove_name_suffixes = False
         self.use_generated_img_name = False
+        self._model_objects = []
 
     def export_to_file(self, filepath):
         export_manager = ExportManager(bpy.context.scene.eu07_includes, self.aggregate_includes)
         export_manager.create_buffers()
         export_manager.create_outputs(eu07_tools.t3d.T3DOutput)
 
-        objects_to_export = self._get_objects()
+        objects_to_export = list(self._get_objects())
+        # the geometry of the model, which shadows its lights or not (ShadeSelf)
+        self._model_objects = [obj for obj in objects_to_export if obj.t3d_properties.is_mesh]
 
         already_written_includes = set()
 
@@ -112,6 +115,10 @@ class T3DExporter:
             builder.set_falloff_angle()
             builder.set_hotspot_angle()
             builder.set_hotspot_power()
+            builder.set_radius()
+            builder.set_soft_falloff()
+            builder.set_cast_shadows()
+            builder.set_shade_self(self._model_objects)
         elif submodel_type == "Stars":
             builder.set_points()
 

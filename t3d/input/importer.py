@@ -21,15 +21,26 @@ class T3DImporter:
         self.join_into_one = False
         self.import_lod = True
         self.name_prefix = ""
+        # included files are imported by the same importer: the model is whole once the outermost file is
+        self._depth = 0
+        self._unshaded_lights = []
 
     def import_from_filepath(self, filepath):
         original_basedir = self.asset_searcher.basedir
         self.asset_searcher.basedir = pathlib.Path(filepath).parent
 
-        with open(filepath, "r", encoding="latin-1") as file:
-            imported = self.import_from_file(file)
+        self._depth += 1
+        try:
+            with open(filepath, "r", encoding="latin-1") as file:
+                imported = self.import_from_file(file)
+        finally:
+            self._depth -= 1
 
         self.asset_searcher.basedir = original_basedir
+
+        if self._depth == 0:
+            input_builders.shade_self_pending(self._unshaded_lights, imported)
+            self._unshaded_lights = []
 
         return imported
 
@@ -101,6 +112,12 @@ class T3DImporter:
             builder.set_falloff_angle(element.falloff_angle)
             builder.set_hotspot_angle(element.hotspot_angle)
             builder.set_hotspot_power(element.hotspot_power)
+            builder.set_radius(element.radius)
+            builder.set_cast_shadows(element.cast_shadows)
+            builder.set_soft_falloff(element.soft_falloff)
+            builder.set_shade_self(element.shade_self)
+            if element.cast_shadows is not False and not builder.shade_self:
+                self._unshaded_lights.append(builder.obj)
 
         elif element.type == 'Stars':
             builder.set_points(element.stars)

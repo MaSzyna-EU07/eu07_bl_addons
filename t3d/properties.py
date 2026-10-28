@@ -15,7 +15,12 @@ def is_mesh(self):
     return self.id_data.type in ('MESH', 'CURVE', 'SURFACE', 'META', 'FONT')
 
 def is_freespotlight(self):
-    return self.id_data.type == 'LIGHT' and self.id_data.data.type == 'SPOT'
+    # a spot light, or a point light in the units of the simulator (FalloffAngle 360): the other point lights are the points
+    # of stars
+    obj = self.id_data
+    return obj.type == 'LIGHT' and (
+        obj.data.type == 'SPOT' or (obj.data.type == 'POINT' and obj.data.eu07_simulator_light)
+    )
 
 def is_stars(self):
     if self.id_data.type == 'EMPTY':
@@ -26,7 +31,8 @@ def is_stars(self):
     return False
 
 def is_star_point(self):
-    return self.id_data.type == 'LIGHT' and self.id_data.data.type == 'POINT'
+    obj = self.id_data
+    return obj.type == 'LIGHT' and obj.data.type == 'POINT' and not obj.data.eu07_simulator_light
 
 def get_true_selfillum(self):
     if self.is_freespotlight or self.is_stars:
@@ -40,13 +46,14 @@ def _spot(self):
     return self.id_data.data if self.is_freespotlight else None
 
 def get_hotspot_power(self):
+    # with the exposure and the normalization of the light, which go to the model with it
     light = _spot(self)
-    return sim_light.energy_to_power(light.energy) if light else 100.0
+    return sim_light.energy_to_power(light.energy * sim_light.energy_factor(light)) if light else 100.0
 
 def set_hotspot_power(self, value):
     light = _spot(self)
     if light:
-        light.energy = sim_light.power_to_energy(value)
+        light.energy = sim_light.power_to_energy(value) / sim_light.energy_factor(light)
 
 def get_light_diffuse(self):
     light = _spot(self)
@@ -63,7 +70,7 @@ def get_hotspot_angle(self):
 
 def set_hotspot_angle(self, value):
     light = _spot(self)
-    if light:
+    if light and light.type == 'SPOT':
         cos_outer, _ = sim_light.blender_cones(light)
         sim_light.set_cones(light, cos_outer, math.cos(0.5 * value))
 
@@ -273,28 +280,54 @@ class EU07_OT_FreeSpotLightToSimulator(bpy.types.Operator):
     bl_description = (
         "Make the selected spot lights light the scene as the simulator does: the colour becomes Diffuse^2.2, the "
         "energy follows HotspotPower and the light fades out at its range. The model gets the same Diffuse, "
-        "FalloffAngle and HotspotAngle as before"
+        "FalloffAngle and HotspotAngle as before. A point light becomes a point light of the simulator (FalloffAngle "
+        "360) instead of a point of stars"
     )
     bl_options = {'REGISTER', 'UNDO'}
 
+    @staticmethod
+    def _convertible(obj):
+        return obj.type == 'LIGHT' and obj.data.type in ('SPOT', 'POINT') and not obj.data.eu07_simulator_light
+
     @classmethod
     def poll(cls, context):
-        return any(
-            obj.type == 'LIGHT' and obj.data.type == 'SPOT' and not obj.data.eu07_simulator_light
-            for obj in context.selected_objects
-        ) or (context.object is not None and context.object.t3d_properties.is_freespotlight)
+        return any(cls._convertible(obj) for obj in context.selected_objects) or (
+            context.object is not None and cls._convertible(context.object)
+        )
 
     def execute(self, context):
         objects = set(context.selected_objects)
         if context.object is not None:
             objects.add(context.object)
-        lights = {
-            obj.data for obj in objects
-            if obj.type == 'LIGHT' and obj.data.type == 'SPOT' and not obj.data.eu07_simulator_light
-        }
+        lights = {obj.data for obj in objects if self._convertible(obj)}
         for light in lights:
             sim_light.convert_legacy_light(light)
         self.report({'INFO'}, f"{len(lights)} light(s) converted")
+        return {'FINISHED'}
+
+
+def model_objects(context):
+    """ The objects which go to the model with the light, for its ShadeSelf: the geometry of the scene """
+    return [obj for obj in context.scene.objects if obj.type in sim_light.GEOMETRY_TYPES]
+
+
+class EU07_OT_FreeSpotLightShadeSelf(bpy.types.Operator):
+    bl_idname = "eu07.freespotlight_shade_self"
+    bl_label = "ShadeSelf"
+    bl_description = (
+        "Whether the model shadows the light (ShadeSelf of the simulator). Off, the light gets a Shadow Linking "
+        "collection which leaves the geometry of the scene out, so Blender doesn't shadow it by the model either"
+    )
+    bl_options = {'REGISTER', 'UNDO'}
+
+    shade_self: BoolProperty(name="ShadeSelf")
+
+    @classmethod
+    def poll(cls, context):
+        return context.object is not None and context.object.t3d_properties.is_freespotlight
+
+    def execute(self, context):
+        sim_light.set_shade_self(context.object, model_objects(context), self.shade_self)
         return {'FINISHED'}
 
 
@@ -314,6 +347,7 @@ class T3DSubmodelPropertiesPanel(bpy.types.Panel):
 
         if self.obj.t3d_properties.is_star_point:
             self.layout.prop(self.obj.data, "color", text="Point Color")
+            self.layout.operator(EU07_OT_FreeSpotLightToSimulator.bl_idname, text="Make a Point Light of the Simulator")
             return
 
         np_b = self.layout.box()
@@ -353,11 +387,44 @@ class T3DSubmodelPropertiesPanel(bpy.types.Panel):
                 colors_b.row().prop(self.obj.t3d_properties, "hotspot_power")
                 colors_b.row().prop(context.scene, "eu07_freespot_intensity")
 
+                diffuse, power = sim_light.model_values(light)
+                if (abs(power - self.obj.t3d_properties.hotspot_power) > 0.05
+                        or any(abs(a - b) > 0.05 for a, b in zip(diffuse, self.obj.t3d_properties.light_diffuse))):
+                    # the colour of the temperature
+                    colors_b.row().label(
+                        text=f"The model gets Diffuse {diffuse[0]:.0f} {diffuse[1]:.0f} {diffuse[2]:.0f}, "
+                             f"HotspotPower {power:.1f}",
+                        icon='INFO'
+                    )
+                if any(abs(getattr(light, factor) - 1.0) > 1e-4
+                       for factor in ("diffuse_factor", "specular_factor", "volume_factor")):
+                    colors_b.row().label(text="The simulator doesn't take the Influence of the light", icon='ERROR')
+
+                shape_b = self.layout.box()
+                shape_b.row().prop(light, "shadow_soft_size", text="Radius")
+                soft_r = shape_b.row()
+                soft_r.prop(light, "use_soft_falloff", text="SoftFalloff")
+                soft_r.enabled = light.shadow_soft_size > 0.0
+                shape_b.row().prop(light, "use_shadow", text="CastShadows")
+                shade_r = shape_b.row()
+                shade_self = sim_light.shade_self(self.obj, model_objects(context))
+                shade_r.label(text=f"ShadeSelf: {'true' if shade_self else 'false'}")
+                operator = shade_r.operator(
+                    EU07_OT_FreeSpotLightShadeSelf.bl_idname, text="Shadow by the Model" if not shade_self else "Not by the Model"
+                )
+                operator.shade_self = not shade_self
+                shade_r.enabled = light.use_shadow
+
                 cones_b = self.layout.box()
-                cones_b.row().prop(light, "spot_size", text="FalloffAngle")
-                cones_b.row().prop(self.obj.t3d_properties, "hotspot_angle")
+                if light.type == 'POINT':
+                    cones_b.row().label(text="FalloffAngle, HotspotAngle 360°: a point light")
+                else:
+                    cones_b.row().prop(light, "spot_size", text="FalloffAngle")
+                    cones_b.row().prop(self.obj.t3d_properties, "hotspot_angle")
                 cos_outer, cos_inner = sim_light.blender_cones(light)
-                if sim_light.COS_FALLOFF_KEY in light and light.spot_size >= math.pi - 1e-4:
+                if light.type == 'POINT':
+                    pass
+                elif sim_light.COS_FALLOFF_KEY in light and light.spot_size >= math.pi - 1e-4:
                     cones_b.row().label(
                         text=f"FalloffAngle {math.degrees(sim_light.cos_to_angle(light[sim_light.COS_FALLOFF_KEY])):.1f}° "
                              f"of the model is kept, Blender shows 180°",
