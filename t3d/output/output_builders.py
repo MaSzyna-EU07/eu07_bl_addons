@@ -9,6 +9,7 @@ from ...material_tools.utils import get_shortpath_from_material
 from ...material_tools.wrapper import MaterialWrapper
 from ...common.utils import remove_name_suffix
 from .. import sim_light
+from .. import parameters
 
 
 def get_builder(obj):
@@ -98,6 +99,8 @@ class SubmodelOutputBuilder(abc.ABC):
             self.submodel.transform = [
                 *mat[0], *mat[1], *mat[2], *mat[3]
             ]
+            # the elements which are parameters of an included file
+            self.submodel.transform_params = parameters.parse_transform_params(self.obj.t3d_properties.transform_params)
         else:
             self.submodel.transform = override
 

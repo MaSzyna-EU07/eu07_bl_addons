@@ -244,6 +244,15 @@ class T3DSubmodelProperties(bpy.types.PropertyGroup):
         default=100,
         min=0,
     )
+    transform_params: StringProperty(
+        name="Transform Parameters",
+        description=(
+            "Elements of the Transform which are parameters of an included file, (p1), (p2) ...: index=token pairs, "
+            "the index in the order of the Transform (0-15) or x, y, z for the translation, e.g. x=(p2) y=(p3) z=(p4). "
+            "They go to the model in place of the values of the matrix. Parameters in names stay in the names"
+        ),
+        default="",
+    )
     hotspot_power: FloatProperty(
         name='HotspotPower',
         description="Intensity of the light in percent: the energy of the light, in the units of the simulator",
@@ -357,6 +366,8 @@ class T3DSubmodelPropertiesPanel(bpy.types.Panel):
 
         parent_r = np_b.row()
         parent_r.prop(self.obj, "parent")
+
+        np_b.row().prop(self.obj.t3d_properties, "transform_params", text="Params")
 
         anim_b = self.layout.box()
         anim_r = anim_b.row()

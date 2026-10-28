@@ -8,6 +8,7 @@ from ...common import includes
 from ...common.export_manager import ExportManager
 from . import output_builders
 from .. import sim_light
+from .. import parameters
 
 
 class T3DExporter:
@@ -45,13 +46,20 @@ class T3DExporter:
             if not self.aggregate_includes and (obj.eu07_include_identifier != includes.MASTER_IDENTIFIER):
                 if obj.eu07_include_identifier not in already_written_includes:
                     include = includes.get_include_by_identifier(obj.eu07_include_identifier)
-                    include_element = eu07_tools.t3d.create_include(include.file_path, [])
+                    include_element = eu07_tools.t3d.create_include(include.file_path, include.parameters.split())
 
                     export_manager.master_output.dump_element(include_element)
 
                     already_written_includes.add(obj.eu07_include_identifier)
 
             identifier = includes.MASTER_IDENTIFIER if self.aggregate_includes else obj.eu07_include_identifier
+
+            if self.aggregate_includes and obj.eu07_include_identifier != includes.MASTER_IDENTIFIER:
+                # written into the main file: the parameters of the included one get the values of its include
+                include = includes.get_include_by_identifier(obj.eu07_include_identifier)
+                if include is not None:
+                    for submodel in submodels:
+                        parameters.resolve_submodel(submodel, include.parameters.split())
 
             output = export_manager.get_output(identifier)
 

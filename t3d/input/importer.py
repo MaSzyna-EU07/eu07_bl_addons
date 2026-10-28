@@ -24,6 +24,8 @@ class T3DImporter:
         # included files are imported by the same importer: the model is whole once the outermost file is
         self._depth = 0
         self._unshaded_lights = []
+        # the values the include of the file being imported gives its parameters (p1), (p2) ...
+        self._parameters = []
 
     def import_from_filepath(self, filepath):
         original_basedir = self.asset_searcher.basedir
@@ -45,7 +47,7 @@ class T3DImporter:
         return imported
 
     def import_from_file(self, file):
-        elements = eu07_tools.t3d.load(file)
+        elements = eu07_tools.t3d.load(file, self._parameters)
         return self.import_from_elements(elements)
 
     def import_from_elements(self, elements):
@@ -93,6 +95,7 @@ class T3DImporter:
         builder.set_max_distance(element.max_distance)
         builder.set_min_distance(element.min_distance)
         builder.set_transform(element.transform)
+        builder.set_transform_params(element.transform_params)
 
         if element.type == 'Mesh':
             builder.set_ambient_color(element.ambient_color)
@@ -135,11 +138,18 @@ class T3DImporter:
             full_path = pathlib.Path(inc_path)
             include.file_path = str(full_path.relative_to(self.asset_searcher.root))
             include.name = str(pathlib.Path(include.file_path).with_suffix("").stem)
+            include.parameters = " ".join(element.parameters)
 
             prev_inc_identifier = self.include_identifier
             self.include_identifier = include.identifier
+            # the parameters of the included file get the values of the include, which may be parameters of this file
+            prev_parameters = self._parameters
+            self._parameters = [eu07_tools.utils.substitute_parameters(p, prev_parameters) for p in element.parameters]
 
-            objects = self.import_from_filepath(inc_path) if self.load_included_objects else []
+            try:
+                objects = self.import_from_filepath(inc_path) if self.load_included_objects else []
+            finally:
+                self._parameters = prev_parameters
 
             self.include_identifier = prev_inc_identifier
 

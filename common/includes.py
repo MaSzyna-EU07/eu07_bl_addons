@@ -92,6 +92,14 @@ class EU07Include(bpy.types.PropertyGroup):
 
     identifier: bpy.props.IntProperty(min=0)
 
+    parameters: bpy.props.StringProperty(
+        name="Parameters",
+        description=(
+            "Values the include gives the parameters (p1), (p2) ... of the included file, separated by spaces, "
+            "written after its path"
+        ),
+    )
+
 
 class EU07_UL_Includes(bpy.types.UIList):
     def draw_item(self, context, layout, data, item, icon, active_data, active_propname, index):
@@ -132,6 +140,8 @@ class EU07_PT_Includes(bpy.types.Panel):
 
             path_row = self.layout.row()
             path_row.prop(item, "file_path")
+
+            self.layout.row().prop(item, "parameters")
 
             exportable_row = self.layout.row()
             exportable_row.prop(item, "is_exportable")
