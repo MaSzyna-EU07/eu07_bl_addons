@@ -100,6 +100,13 @@ class EU07Include(bpy.types.PropertyGroup):
         ),
     )
 
+    # the values the parameters had on the import (the parameters of the main file passed on among them given their values),
+    # which the names of the imported objects were made with
+    resolved_parameters: bpy.props.StringProperty(
+        name="Resolved Parameters",
+        options={'HIDDEN'},
+    )
+
 
 class EU07_UL_Includes(bpy.types.UIList):
     def draw_item(self, context, layout, data, item, icon, active_data, active_propname, index):

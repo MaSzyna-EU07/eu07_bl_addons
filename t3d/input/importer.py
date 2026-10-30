@@ -26,6 +26,9 @@ class T3DImporter:
         self._unshaded_lights = []
         # the values the include of the file being imported gives its parameters (p1), (p2) ...
         self._parameters = []
+        # includes within included files being imported: their objects go to the include of the main file, which the
+        # export writes, as they are, without the parameters of the files they come from
+        self._nested = 0
 
     def import_from_filepath(self, filepath):
         original_basedir = self.asset_searcher.basedir
@@ -95,7 +98,9 @@ class T3DImporter:
         builder.set_max_distance(element.max_distance)
         builder.set_min_distance(element.min_distance)
         builder.set_transform(element.transform)
-        builder.set_transform_params(element.transform_params)
+        if not self._nested:
+            builder.set_transform_params(element.transform_params)
+            builder.set_name_template(element.name_template)
 
         if element.type == 'Mesh':
             builder.set_ambient_color(element.ambient_color)
@@ -133,19 +138,33 @@ class T3DImporter:
 
     def import_from_include_element(self, element):
         inc_path = self.asset_searcher.models.find(element.path)
+        if inc_path and self._depth > 1:
+            # an include of an included file: written by its file, which the include of the main file stands for
+            prev_parameters = self._parameters
+            self._parameters = list(element.parameters)
+            self._nested += 1
+            try:
+                return self.import_from_filepath(inc_path) if self.load_included_objects else []
+            finally:
+                self._nested -= 1
+                self._parameters = prev_parameters
+
         if inc_path:
             include = includes.add_include()
 
             full_path = pathlib.Path(inc_path)
             include.file_path = str(full_path.relative_to(self.asset_searcher.root))
             include.name = str(pathlib.Path(include.file_path).with_suffix("").stem)
-            include.parameters = " ".join(element.parameters)
+            # as written in the file, the parameters of this file passed on among them
+            include.parameters = " ".join(getattr(element, "raw_parameters", element.parameters))
+            include.resolved_parameters = " ".join(element.parameters)
 
             prev_inc_identifier = self.include_identifier
             self.include_identifier = include.identifier
-            # the parameters of the included file get the values of the include, which may be parameters of this file
+            # the parameters of the included file get the values of the include (already with the values of the parameters
+            # of this file passed on)
             prev_parameters = self._parameters
-            self._parameters = [eu07_tools.utils.substitute_parameters(p, prev_parameters) for p in element.parameters]
+            self._parameters = list(element.parameters)
 
             try:
                 objects = self.import_from_filepath(inc_path) if self.load_included_objects else []

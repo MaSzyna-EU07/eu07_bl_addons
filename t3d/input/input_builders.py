@@ -68,6 +68,10 @@ class SubmodelInputBuilder(abc.ABC):
         if initialrotate_matrix is not None and self.obj.parent is None:
             self.obj.matrix_basis = initialrotate_matrix @ self.obj.matrix_basis
 
+    def set_name_template(self, name_template):
+        """ The name as written in an included file, with its parameters """
+        self.obj.t3d_properties.name_template = name_template or ""
+
     def set_transform_params(self, transform_params):
         """ The elements of the transform which are parameters of an included file """
         self.obj.t3d_properties.transform_params = parameters.format_transform_params(transform_params)

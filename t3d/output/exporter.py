@@ -54,7 +54,10 @@ class T3DExporter:
 
             identifier = includes.MASTER_IDENTIFIER if self.aggregate_includes else obj.eu07_include_identifier
 
-            if self.aggregate_includes and obj.eu07_include_identifier != includes.MASTER_IDENTIFIER:
+            if not self.aggregate_includes:
+                # the names as written in the file of the object, with its parameters
+                parameters.apply_name_templates(submodels, obj)
+            elif obj.eu07_include_identifier != includes.MASTER_IDENTIFIER:
                 # written into the main file: the parameters of the included one get the values of its include
                 include = includes.get_include_by_identifier(obj.eu07_include_identifier)
                 if include is not None:

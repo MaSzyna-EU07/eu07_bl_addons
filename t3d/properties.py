@@ -252,6 +252,14 @@ class T3DSubmodelProperties(bpy.types.PropertyGroup):
         ),
         default=False,
     )
+    name_template: StringProperty(
+        name="Name Template",
+        description=(
+            "The name as written in the included file, with its parameters (p1), (p2) ...: it goes to the file in place of "
+            "the name while the object has the name the parameters of its include give it"
+        ),
+        default="",
+    )
     transform_params: StringProperty(
         name="Transform Parameters",
         description=(
@@ -375,6 +383,8 @@ class T3DSubmodelPropertiesPanel(bpy.types.Panel):
         parent_r = np_b.row()
         parent_r.prop(self.obj, "parent")
 
+        if self.obj.t3d_properties.name_template:
+            np_b.row().prop(self.obj.t3d_properties, "name_template", text="Template")
         np_b.row().prop(self.obj.t3d_properties, "transform_params", text="Params")
 
         anim_b = self.layout.box()
